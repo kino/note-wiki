@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>常用Android命令行工具</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">常用Android命令行工具</h1>
+<p>
+参考整理自： <a href="http://huangqinqin.iteye.com/blog/770017">http://huangqinqin.iteye.com/blog/770017</a>
+日期: 2012-07-10 16:07
+<div class="toc">
+<ul>
+<li><a href="#toc_1">常用Android命令行工具</a>
+<ul>
+<li><a href="#toc_1.1">1.启动和关闭ADB服务</a>
+<li><a href="#toc_1.2">2.查询当前模拟器/设备的实例</a>
+<li><a href="#toc_1.3">3.安装、卸载和运行程序</a>
+</ul>
+</ul>
+</div>
+</p>
+
+<h2 id="toc_1.1">1.启动和关闭ADB服务</h2>
+
+<ul>
+<li>
+关闭adb服务 
+<pre  class="brush:bash">
+      adb kill-server 
+</pre>
+
+<li>
+启动adb服务 
+<pre  class="brush:bash">
+      adb start-server 
+</pre>
+
+</ul>
+	
+<h2 id="toc_1.2">2.查询当前模拟器/设备的实例</h2>
+<pre  class="brush:bash">
+      adb devices 
+</pre>
+
+
+<h2 id="toc_1.3">3.安装、卸载和运行程序</h2>
+
+<ul>
+<li>
+安装一个apk
+<pre  class="brush:bash">
+      adb install ebook.apk 
+</pre>
+
+<li>
+通过adb卸载一个程序，参数为程序的package
+<pre  class="brush:bash">
+      adb uninstall net.blogjava.mobile.ebook 
+</pre>
+
+<li>
+如果程序已经安装，需要先卸载再安装
+<pre  class="brush:bash">
+      adb install -r ebook.apk 
+</pre>
+
+<li>
+卸载时保留数据和缓冲目录
+<pre  class="brush:bash">
+      adb uninstall -k net.blogjava.mobile.ebook 
+</pre>
+
+<li>
+通过<code>-s</code>指定特定的模拟器或真机
+<pre  class="brush:bash">
+      adb -s emulator-5554 install ebook.apk 
+      adb -s HT9BYL904399 install ebook.apk 
+      adb -s emulator-5554 install -r ebook.apk 
+      adb -s HT9BYL904399 install -r ebook.apk 
+      adb -s emulator-5554 uninstall net.blogjava.mobile.ebook 
+      adb -s HT9BYL904399 uninstall -k net.blogjava.mobile.ebook 
+</pre>
+
+<li>
+通过<code>-d</code>指定连接的唯一usb设备，如果超过一个，会报一个错
+
+<li>
+通过<code>-e</code>指定连接的唯一模拟器，如果超过一个，会报一个错
+
+<li>
+通过adb运行设备上的指定程序
+<pre  class="brush:bash">
+      adb -s emulator-5554 shell am start -n net.blogjava.mobile.ebook/net.blogjava.mobile.ebook.Main 
+      adb -s HT9BYL904399 shell am start -n net.blogjava.mobile.ebook/net.blogjava.mobile.ebook.Main 
+      #其中Main是ebook.apk的主Activity。相当于Windows应用程序的主窗体或Web应用程序的主页面。am是shell命令。关于shell命令将在后成的部分 
+</pre>
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

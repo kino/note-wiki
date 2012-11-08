@@ -1,0 +1,253 @@
+%title 选择器 
+
+=选择器 =
+
+%toc
+
+选择器提供 *选择执行* `已就绪任务 ` 的能力
+
+==选择器基础 ==
+* 传统的java io,为每一个Socket建立一个线程，并等待其就绪，所以read()是阻塞的。
+* 这极大的浪费资源
+* 真正的就绪选择必须由操作系统来做。
+* 选择器实现了这种抽象
+
+===选择器、可选择通道、选择键 ===
+====选择器Selector ====
+* 管理一个 *被注册 * 的通道集合和他们的就绪状态
+* 选择器更新通道的就绪状态
+* 管理选择键
+* 选择器才是提供管理功能的对象，而不是可选择通道
+ 
+====可选择通道SelectableChannel ====
+* 所有支持 *就绪检查 * 通道类的父类
+* FileChannel 是不可选择的
+* 所有的SocketChannel是可选择的，包括从Piple获得的
+* 一个通道可以被注册到多个Selector上，但一个Selector上只能被注册一次
+* 它不需要知道它被注册了哪个Selector上
+* 通道被注册到一个Selector上之前，必须设置为阻塞
+* 如果注册阻塞式通道会抛异常
+* 一个通道一旦被注册就不能被设置为阻塞
+* 注册一个已关闭的通道也会抛异常
+ 
+====选择键SelectionKey ====
+* 封装了特定的通道与选定的Selector之间的注册关系 
+
+====SelectableChannel API ====
+{{{ class="brush:java"
+
+public abstract class SelectableChannel extends AbstractChannel implements Channel { 
+    // This is a partial API listing 
+    public abstract SelectionKey register (Selector sel, int ops) throws ClosedChannelException; 
+    public abstract SelectionKey register (Selector sel, int ops, Object att) throws ClosedChannelException; 
+    public abstract boolean isRegistered( );
+
+    public abstract SelectionKey keyFor (Selector sel); 
+    public abstract int validOps( ); 
+    public abstract void configureBlocking (boolean block) throws IOException; 
+    public abstract boolean isBlocking( ); 
+    public abstract Object blockingLock( ); 
+}
+  }}}
+
+====Selector API ====
+{{{ class="brush:java"
+public abstract class Selector { 
+    public static Selector open( ) throws IOException 
+    public abstract boolean isOpen( ); 
+    public abstract void close( ) throws IOException; 
+    public abstract SelectionProvider provider( ); 
+    public abstract int select( ) throws IOException; 
+    public abstract int select (long timeout) throws IOException; 
+    public abstract int selectNow( ) throws IOException; 
+    public abstract void wakeup( ); 
+    public abstract Set keys( ); 
+    public abstract Set selectedKeys( ); 
+}
+  }}}
+
+====SelectionKey API ====
+{{{ class="brush:java"
+public abstract class SelectionKey { 
+    public static final int OP_READ 
+    public static final int OP_WRITE 
+    public static final int OP_CONNECT 
+    public static final int OP_ACCEPT 
+    public abstract SelectableChannel channel( ); 
+    public abstract Selector selector( ); 
+    public abstract void cancel( ); 
+    public abstract boolean isValid( ); 
+    public abstract int interestOps( ); 
+    public abstract void interestOps (int ops); 
+    public abstract int readyOps( ); 
+    public final boolean isReadable( ) 
+    public final boolean isWritable( ) 
+    public final boolean isConnectable( ) 
+    public final boolean isAcceptable( ) 
+    public final Object attach (Object ob) 
+    public final Object attachment( ) 
+}
+  }}}
+
+===创建一个选择器 ===
+* 通过静态方法调用open()
+* 不再使用时调用close()释放资源
+* 注册通道时可以指定所关心的操作：read write connect accept
+* 并不是所有的通道支持所有的操作(比如SocketChannel不支持accept)
+* 注册不支持的操作时会抛异常
+* 通过方法validOps()可以获得通道上支持的所有操作
+* 一个键被取消，直到相应通道真正被注销，可能有时间延迟（等下一次操作才执行）
+* isRegistered()指明通道是否在某个selector上注册过，并不确定哪一个selector
+* keyFor()返回指定通道和指定selector相关的key
+
+===使用SelectionKey ===
+* 一个键表示了一个特定的通道对象和一个特定的选择器对象之间的注册关系。
+* channel( )方法返回与该键相关的SelectableChannel对象，selector( )则返回相关的Selector对象。
+* 终结这种关系时，调用cancel( )方法。
+* isValid( )检查是否表示一种有效关系。
+* 当键被取消时
+  * 它将被放在选择器的已取消的键的集合里。
+  * 注册不会立即被取消，但键会立即失效。
+  * 再次调用select( )方法时（或者一个正在进行的select()调用结束时），已取消键的集合中的键将被清理掉，并且相应的注销也将完成。通道会被注销，而新的SelectionKey将被返回。
+  * 通道关闭时，所有相关的键会自动取消（一个通道可以被注册到多个选择器上）。
+  * 选择器关闭时，所有被注册到该选择器的通道都将被注销，并且相关的键将立即被无效化（取消）。
+  * 一旦键被无效化，调用它的与选择相关的方法就将抛出CancelledKeyException。
+  * 一个SelectionKey对象包含两个以整数形式进行编码的比特掩码：
+    * 一个用于指示那些通道/选择器组合体所关心的操作(instrest集合)，
+    * 另一个表示通道准备好要执行的操作（ready集合）。
+  * 当前的interest集合通过调用键对象的interestOps( )方法来获取。
+    * 应该是通道被注册时传进来的值。这个interset集合永远不会被选择器改变，
+    * 但可以通过调用interestOps( )方法并传入一个新的比特掩码参数来改变它。
+    * interest集合也可以通过将通道注册到选择器上来改变（实际上使用一种迂回的方式调用interestOps( )），
+    * 相关的Selector上的select( )操作正在进行时, 改变键的interest集合，不会影响那个正在进行的选择操作。
+    * 所有更改将会在select( )的下一个调用中体现出来。
+  * 可以通过调用键的readyOps( )方法来获取相关的通道的已经就绪的操作。
+    * ready集合是interest集合的子集
+    * 并且表示了interest集合中从上次调用select( )以来已经就绪的那些操作。
+* 有四个通道操作可以被用于测试就绪状态。
+  * isReadable( )，isWritable( )，isConnectable( )， 和isAcceptable( )。
+  * 每一个方法都与使用特定掩码来测试readyOps( )方法的结果的效果相同。
+  * 调用一个不支持的操作将总是返回false，因为这种操作在该通道上永远不会准备好。
+  * 通过相关的选择键的readyOps( )方法返回的就绪状态指示只是一个提示，
+  * 不是保证。底层的通道在任何时候都会不断改变。其他线程可能在通道上执行操作并影响它的就绪状态。
+  * 同时，操作系统的特点也总是需要考虑的。
+* 附件
+  * attach( )方法将在键对象中保存所提供的对象的引用。
+  * SelectionKey类除了保存它之外，不会将它用于任何其他用途。
+  * 可以使用null值来清除附件。
+  * 可以通过调用attachment( )方法来获取与键关联的附件句柄。
+  * 如果选择键的存续时间很长，但附加的对象不应该存在那么长时间，
+  * 完成后清理附件。否则，您附加的对象将不能被垃圾回收，您将会面临内存泄漏问题。
+* SelectionKey对象是线程安全的，
+* 修改interest集合的操作是通过Selector对象进行同步的。
+* 这可能会导致interestOps( )方法的调用会阻塞不确定长的一段时间
+
+===使用Selector ===
+====每个selector维护三种键的集合 ====
+* 已注册的键的集合(Registered key set) 
+  # 与选择器关联的已经注册的键的集合。
+  # 并不是所有注册过的键都仍然有效。
+  # 这个集合通过keys( )方法返回，并且可能是空的。
+  # 这个集合不是可以直接修改的；试图这么做的话将引java.lang.UnsupportedOperationException。
+* 已选择的键的集合(Selected key set) 
+  # 已注册的键的集合的子集。
+  # 这个集合的每个成员都是相关的通道被选择器（在前一个选择操作中）判断为已经准备好的, 并且包含于键的interest集合中的操作。
+  # 这个集合通过selectedKeys( )方法返回（并有可能是空的）。
+  # 不要将已选择的键的集合与ready集合弄混了。
+    # 这是一个键的集合，每个键都关联一个已经准备好至少一种操作的通道。
+    # 每个键都有一个内嵌的ready集合，指示了所关联的通道已经准备好的操作。
+    # 键可以直接从这个集合中移除，但不能添加。试图向已选择的键的集合中添加元素将抛出java.lang.UnsupportedOperationException。
+* 已取消的键的集合(Cancelled key set) 
+  # 已注册的键的集合的子集，
+  # 这个集合包含了cancel( )方法被调用过的键（这个键已经被无效化），但它们还没有被注销。
+  # 这个集合是选择器对象的私有成员，因而无法直接访问
+_*在一个刚初始化的Selector对象中，这三个集合都是空的。 *_
+
+====选择操作 ====
+* Selector类的核心是选择过程。
+* 基本上来说，选择器是对select( )、poll( )等本地调用(native call)或者类似的操作系统特定的系统调用的一个包装。
+* 当三种select(),任何一种被调用时，执行下步骤：
+  # 已取消的键的集合将会被检查。
+    # 如果它是非空的，每个其中的键将从另外两个集合中移除，并且相关的通道将被注销。
+    # 这个步骤结束后，已取消的键的集合将是空的。
+  # 已注册的键的集合中的键的interest集合将被检查。
+    # 这个步骤后，对interest集合的改动不会影响剩余的检查过程。
+    # 一旦就绪条件被定下来，底层操作系统将会进行查询，以确定每个通道所关心的操作的真实就绪状态。
+    # 依赖于特定的select( )方法调用，如果没有通道已经准备好，线程可能会在这时阻塞，通常会有一个超时值。
+    # 直到系统调用完成为止，这个过程可能会使得调用线程睡眠一段时间，直到每个通道的就绪状态将确定下来。
+    # 对于还没准备好的通道不会执行任何操作。
+    # 对于至少准备好interest集合中一种操作的通道，将执行以下操作中的一种： 
+      # 如果通道的键还没有处于已选择的键的集合中
+        # 键的ready集合将被清空，
+        # 表示操作系统发现的当前通道已经准备好的操作的比特掩码将被设置。
+        # 加入已选择键的集合
+      # 否则，也就是键在已选择的键的集合中。
+        # 键的ready集合将被表示操作系统发现的当前已经准备好的操作的比特掩码更新。
+        # 所有之前的已经不再是就绪状态的操作不会被清除。
+        # 事实上，所有的比特位都不会被清理。
+        # 由操作系统决定的ready集合是与之前的ready集合按位分离的，
+        # 一旦键被放置于选择器的已选择的键的集合中，它的ready集合将是累积的。
+        # 比特位只会被设置，不会被清理。
+  # 步骤2可能会花费很长时间，特别是所激发的线程处于休眠状态时。
+    # 与该选择器相关的键可能会同时被取消。
+    # 当步骤2结束时，步骤1将重新执行，
+    # 以完成任意一个在选择进行的过程中，键已经被取消的通道的注销。
+  # select操作返回的值是ready集合在步骤2中被修改的键的数量
+    # 而不是已选择的键的集合中的通道的总数。
+    # 返回值不是已准备好的通道的总数，而是从上一个select( )调用之后进入就绪状态的通道的数量。
+    # 之前的调用中就绪的，并且在本次调用中仍然就绪的通道不会被计入，
+    # 而那些在前一次调用中已经就绪但已经不再处于就绪状态的通道也不会被计入。
+    # 这些通道可能仍然在已选择的键的集合中，但不会被计入返回值中。返回值可能是0。
+* 使用内部的已取消的键的集合来延迟注销，是一种防止线程在取消键时阻塞，并防止与正在进行的选择操作冲突的优化。
+  * 注销通道是一个潜在的代价很高的操作，这可能需要重新分配资源（请记住，键是与通道相关的，并且可能与它们相关的通道对象之间有复杂的交互）。
+  * 清理已取消的键，并在选择操作之前和之后立即注销通道，可以消除它们可能正好在选择的过程中执行的潜在棘手问题。这是另一个兼顾健壮性的折中方案。
+* select()方法的三种形式
+  * 唯一的不同：在没有任何通道就绪时，是否阻塞。
+  * 都返回：就绪的通道数目。
+  # 无参 select()
+    * 无限阻塞
+    * 直到至少一个通道就绪，返回
+  # 指定超时 select(timeout)
+    * 若有通道就结绪，立即返回
+    * 等到timeout返回
+  # selectNow()
+    * 立即返回
+    * 返回就绪通道数目
+
+====停止选择操作====
+* wakeup()
+* 从被阻塞的select()方法中退出
+* 三种叫唤醒select()方法睡眠的线程的方法：
+  # 调用 wakeup()
+    # 第一个还未执行完的选择操作立即返回
+    # 如果当前不存在这样的选择操作
+    # 下一次选择操作将立即返回
+    # 后绪正常
+  # 调用 close()
+    # 在选择操作中阻塞的操作都被唤醒
+    # 与选择器相关的通道被注销
+    # 与选择器相关的键被取消
+  # 调用 interrupt()
+   
+====管理选择键====
+* 一旦一个键添加到选择器 *已选择的集合中 *，就不会去除
+* 同时的这个键的ready集合只会被设置，不会被清理
+* 这就把维护状态信息不会过时的任务交给了程序员
+* 清理一个选择键 ready集合的方式，就是把它从选择器中 已选择的集合 中移出
+* 只有在 已选择集合 中的键才被认为包含合法的就绪信息
+* 而且这些信息将会长久存在
+* 直到该键从 已选择集合 中移出。
+* 通用做法
+  # select操作
+  # selectKeys(), 获取已选择的键
+  # 检查每个键，根据 ready集合 处理通道
+  # 把键从 已选择的集合 中移出，通过iterator.remove()
+  
+===选择的可扩展性 ===
+* 一个线程处理所有请求
+  * 单cpu可能是个好主意
+  * 同一时刻，只能有一个线程运行
+  * 免除了线程上下文切换的开销
+* 线程池处理
+  * 多cpu
+  * 或，有些通道要求比较高的即时响应，单线程就不行了。

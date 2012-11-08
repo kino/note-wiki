@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>命令:使用bc进行数学计算</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">命令:使用bc进行数学计算</h1>
+
+<ul>
+<li>
+如果需要bc不输出提示信息，可以加上-q参数：
+
+</ul>
+<blockquote>
+<code>bc -q</code>
+</blockquote>
+      
+<ul>
+<li>
+如果要使用强大的数学库，比如计算三角函数，需要加上-l参数：
+
+</ul>
+<blockquote>
+<code>bc -l</code>
+</blockquote>
+      
+<ul>
+<li>
+因为bc本身是一个命令解释器，要退出它只要直接输入quit回车或者按Ctrl+D终止。
+
+<li>
+指定精度，保留小数点精度,只对除法、取余、乘幂有效
+<pre  class="brush:bash">
+	scale=2;3/4      # 保留小数点精度只对除法、取余、乘幂有效
+	.75
+	3/4
+	.75
+	3%4
+	0
+	scale=0
+	3%4
+	3
+	3^4
+	81
+	Ctrl+D
+</pre>
+
+</ul>
+  
+<ul>
+<li>
+使用管道
+<pre  class="brush:bash">
+ [root@localhost centos39]# echo "scale=7; 355/113" | bc
+ 3.1415929
+</pre>
+
+</ul>
+  
+<ul>
+<li>
+我们用到bc的ibase和obase方法。
+
+</ul>
+ 
+<p>
+ibase是输入数字的进制，而obase就是输出数字的进制了。很好记，i是input，o是output。
+如果用一条命令来转数字，可以用echo命令和管道结合bc。如下：
+</p>
+    
+<p>
+10进制转2进制：
+</p>
+<blockquote>
+<code>$ echo "obase=2;ibase=10;100" | bc1100100</code>
+</blockquote>
+        
+<p>
+10进制转16进制：
+</p>
+<blockquote>
+<code>$ echo "obase=16;ibase=10;100" | bc64</code>
+</blockquote>
+        
+<p>
+16进制转10进制：
+</p>
+<blockquote>
+<code>$ echo "ibase=16;obase=2;F1" | bc11110001</code>
+</blockquote>
+<blockquote>
+<b>注意</b>，16进制数字的F要大写，如果小写结果是不对的。像最上面没有指定的时候，默认是10进制。
+</blockquote>
+    
+<ul>
+<li>
+使用文件计算
+<pre  class="brush:bash">
+	[root@rhel55 ~]# cat test.bc
+	123*321
+	123/321
+	scale=4;123/321
+	 
+	[root@rhel55 ~]# bc test.bc
+	bc 1.06
+	Copyright 1991-1994, 1997, 1998, 2000 Free Software Foundation, Inc.
+	This is free software with ABSOLUTELY NO WARRANTY.
+	For details type `warranty'.
+	39483
+	0
+	.3831
+	Ctrl+D
+	[root@rhel55 ~]#
+	[root@rhel55 ~]# cat test.bc | bc
+	39483
+	0
+	.3831
+	[root@rhel55 ~]#
+</pre>
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

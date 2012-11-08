@@ -1,0 +1,226 @@
+%title Buffer
+
+=简介=
+日期: 2012-10-22 19:07
+
+%toc
+
+==类层次结构 ==
+{{nio_buffer_hierarchy.png}}
+
+==Buffer==
+* 缓冲区是包在一个对象内的基本数据元素数组。
+* Buffer类相比一个简单数组的优点是它将关于数据的数据内容和信息包含在一个单一的对象中。
+* Buffer类以及它专有的子类定义了一个用于处理数据缓冲区的API。
+ 
+==Buffer 属性 ==
+* 所有的缓冲区都具有四个属性来提供关于其所包含的数据元素的信息。它们是： 
+
+====容量（Capacity） ====
+* 缓冲区能够容纳的数据元素的最大数量。这一容量在缓冲区创建时被设定，并且永远不能被改变。
+===上界（Limit） ===
+* 缓冲区的第一个不能被读或写的元素。或者说，缓冲区中现存元素的计数。
+=== 位置（Position） ===
+* 下一个要被读或写的元素的索引。位置会自动由相应的get( )和put( )函数更新。
+===标记（Mark） ===
+* 一个备忘位置。调用mark( )来设定mark = postion。调用reset( )设定position = mark。标记在设定前是未定义的(undefined)。
+
+这四个属性之间总是遵循以下关系： 
+* 0 <= mark <= position <= limit <= capacity
+* 一个新建的Buffer:
+{{nio_buffer_properties.png}}
+
+==Buffer Api ==
+* 下面一些方法返回Buffer本身，可以实现级联调用
+* 所有缓冲区都是可读的，但不一定可写
+* 通过`isReadOnly`来判定是否可写
+{{{ class="brush:java"
+package java.nio; 
+public abstract class Buffer { 
+    public final int capacity( ) 
+    public final int position( ) 
+    public final Buffer position (int newPositio 
+
+    public final int limit( ) 
+    public final Buffer limit (int newLimit) 
+
+    public final Buffer mark( ) 
+    public final Buffer reset( ) 
+
+    public final Buffer clear( ) 
+    public final Buffer flip( ) 
+
+    public final Buffer rewind( ) 
+    public final int remaining( ) 
+
+    public final boolean hasRemaining( ) 
+    public abstract boolean isReadOnly( ); 
+}
+  }}}
+===get 读取 ===
+* 从缓冲区读取
+* 相对调用`get()`
+    # 每次返回，position前进1
+    # position不能大于limit,否则抛异常
+* 绝对调用，指定位置：`get(index)`
+    # 不会影响position 
+    # 位置不能大于limit,否则抛异常
+  
+===put 填充 ===
+* 向缓冲区填充
+* 相对调用`put(x)`
+    # 每次position前进1
+    # position不能大于limit,否则抛异常
+* 绝对调用，指定位置：`put(index, x)`
+    # 不会影响position
+    # 位置不能大于limit,否则抛异常
+* 填充完
+{{nio_buffer_put.png}}
+
+===flip 翻转 ===
+* position 置0
+* limit 指向原先postion的位置上
+* 通常将一个填充状态的buffer转换为可读状态
+* 连着两次flip调用，postion和limit都会指向0
+* flip后
+{{nio_buffer_flip.png}}
+
+===draining 释放(hasRemaining() remaining() clear() ) ===
+* `hasRemaining()` 检查`postion` 就否到达`limit` 
+* `remaining()` 返回`postion`到达`limit`距离
+* `clear()` 重置buffer, `postion`设为0, `limit`设为`capacity`
+ 
+===compact 压缩 ===
+# 一个buffer读了部分数据后
+# 将剩余数据压到前端 
+# `position`指向剩余数据的长度
+# `limit`指向`compacity`
+# 可以继续写
+# 例子
+  * 一个被读了部分数据的buffer
+  
+    {{nio_buffer_before_compact.png}}
+    
+  * 执行`compact`后
+   
+    {{nio_buffer_after_compact.png}}
+    
+  * 它只是移动数据，并没有清空4 5 的数据，因为他们在postion之后，所以已经是死的了
+  
+===mark 标记（mark(), reset()) ===
+* `mark()`为当前`postion`指定一个标记
+* `reset()`可以使`position`回到标记的地方
+* 初始标记是未定义的
+* 调用`reset()`, 若标记未定义，抛异常
+* 一些操作为清掉设的标记：
+  * `rewind()`
+  * `clear()`
+  * `flip()`
+  * `limit(index)`, 如果index小于标记
+  * `position(index`, 如果index小于标记
+   
+===比较 （equals(), compareTo()) ===
+* `equals()` :
+  * 比较两个缓冲区剩余的数据是否相同，相同返回true，反之false
+  * 实际上比较的是position到limit之间的数据
+  * 哪怕缓冲区类型不一样
+* `compareTo()` :
+  * 也是比较的position到limit之间的数据, 如果到达limit还没比较完，短的小
+  * 但类型一定一样
+ 
+===批量移动 ===
+{{{ class="brush:java"
+public abstract class CharBuffer extends Buffer implements CharSequence, Comparable { 
+
+    // This is a partial API listing 
+    public CharBuffer get (char [] dst) 
+    public CharBuffer get (char [] dst, int offset, int length) 
+
+    public final CharBuffer put (char[] src) 
+    public CharBuffer put (char [] src, int offset, int length) 
+    public CharBuffer put (CharBuffer src) 
+
+    public final CharBuffer put (String src) 
+    public CharBuffer put (String src, int start, int end) 
+}
+  }}}
+  
+* get填充数组，如果缓冲区中的数据不够(position到limit之间，也是remaining()的返回值），则会报异常。
+* put从数组取数据填充buffer，如果缓冲区中的空间不够(position到limit之间，也是remaining()的返回值），则会报异常。
+
+=== 创建 ===
+* 七类Buffer: `ByteBuffer, CharBuffer, IntBuffer, ShortBuffer, LongBuffer, FloatBuffer, DoubleBuffer`
+* 以`CharBuffer` 示例，其他类似
+{{{ class="brush:java"
+public abstract class CharBuffer extends Buffer implements CharSequence, Comparable{ 
+    // This is a partial API listing 
+    public static CharBuffer allocate (int capacity) 
+    public static CharBuffer wrap (char [] array) 
+    public static CharBuffer wrap (char [] array, int offset, int length) 
+    public final boolean hasArray( ) 
+    public final char [] array( ) 
+    public final int arrayOffset( ) 
+    }
+  }}}
+* wrap操作会直接使用数组，所以对buffer的操作，会影响原数组
+* 
+{{{ class="brush:java"
+ CharBuffer charbuffer = CharBuffer.wrap (myArray, 12, 42);
+  }}}
+    * 创建了一个position值为12，limit值为54，容量为myArray.length的缓冲区。
+    * 并不是创建了一个只占用了一个数组子集的缓冲区。
+    * 这个缓冲区可以存取这个数组的全部范围；offset和length参数只是设置了初始的状态。
+* 上面创建的都间接buffer,使用备份数组
+*  `hasArray()`返回buffer是否有一一个备份数组
+
+===复制缓冲区 ===
+{{{ class="brush:java"
+public abstract class CharBuffer extends Buffer implements CharSequence, Comparable { 
+    // This is a partial API listing 
+    public abstract CharBuffer duplicate( ); 
+    public abstract CharBuffer asReadOnlyBuffer( ); 
+    public abstract CharBuffer slice( ); 
+}
+  }}}
+* 不创建新的buffer
+* 不复制数据
+* 操纵同样的数据元素
+
+===字节顺序===
+{{{ class="brush:java"
+package java.nio; 
+public final class ByteOrder { 
+    public static final ByteOrder BIG_ENDIAN 
+    public static final ByteOrder LITTLE_ENDIAN 
+    public static ByteOrder nativeOrder( ) //返回硬件平台的字节顺序
+    public String toString( ) 
+}
+  }}}
+===直接缓冲区 ===
+{{{ class="brush:java"
+public abstract class ByteBuffer extends Buffer implements Comparable { 
+    // This is a partial API listing 
+    public static ByteBuffer allocate (int capacity) 
+    public static ByteBuffer allocateDirect (int capacity) 
+    public abstract boolean isDirect( ); }
+  }}}
+* 用于I/O channel
+* 如果使用间接buffer进行本地i/o, 会隐含的创建临时直接buffer
+
+===缓冲区视图 ===
+{{{ class="brush:java"
+ 
+public abstract class ByteBuffer extends Buffer implements Comparable { 
+    // This is a partial API listing 
+    public abstract CharBuffer asCharBuffer( ); 
+    public abstract ShortBuffer asShortBuffer( ); 
+    public abstract IntBuffer asIntBuffer( ); 
+    public abstract LongBuffer asLongBuffer( ); 
+    public abstract FloatBuffer asFloatBuffer( ); 
+    public abstract DoubleBuffer asDoubleBuffer( ); 
+}
+  }}}
+  
+=== 映射缓冲区 ===
+* MappedByteBuffer
+* 只能通过 FileChannel创建

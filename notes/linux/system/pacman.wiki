@@ -1,0 +1,5 @@
+%title pacman 
+
+=pacman=
+
+[https://wiki.archlinux.org/index.php/Pacman]

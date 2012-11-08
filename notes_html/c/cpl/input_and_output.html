@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>输入与输出</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">输入与输出</h1>
+
+<p>
+日期: 2012-05-28 10:05
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">输入与输出</a>
+<ul>
+<li><a href="#toc_1.1">标准输入输出</a>
+<li><a href="#toc_1.2">格式化输出：printf</a>
+<li><a href="#toc_1.3">变长参数</a>
+<li><a href="#toc_1.4">格式化输入scanf函数</a>
+<li><a href="#toc_1.5">文件访问</a>
+<ul>
+<li><a href="#toc_1.5.1">系统负责打开的三个文件：stdin stdout stderr</a>
+<li><a href="#toc_1.5.2">fscanf与fprintf</a>
+</ul>
+<li><a href="#toc_1.6">stderr与exit</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">标准输入输出</h2>
+<ol>
+<li>
+函数：<code>getchar, putchar, printf</code>
+
+<li>
+需要引入：<code>#include &lt;stdio.h&gt;</code>
+
+</ol>
+
+<h2 id="toc_1.2">格式化输出：printf</h2>
+<ol>
+<li>
+<code>printf</code>函数描述, 返回输出的字符数： 
+<pre  class="brush:c">
+   int printf(char *format, argv1, argv2, ...);
+</pre>
+
+<li>
+<code>sprintf</code>同<code>printf</code>一样，只是将输出保存到一个字符串中
+<pre  class="brush:c">
+   int sprintf(char *string, char *format, argv1, argv2, ...);
+</pre>
+
+</ol>
+	
+<h2 id="toc_1.3">变长参数</h2>
+<ol>
+<li>
+<code>printf</code>的正确声明方式：
+<pre  class="brush:c">
+   int printf(char *fmt,  ...);
+</pre>
+
+<ul>
+<li>
+三个点代表参数量的参数和类型是可变的
+
+<li>
+三个点只能出现在参数列表的尾部
+
+</ul>
+<li>
+解析可变参数
+
+<ul>
+<li>
+引入头文件：<code>#include &lt;stdarg.h&gt;</code>
+
+<li>
+<strong>va_list</strong>:一种变量类型，依次引用各参数。比如我们声明变量名为 <em><strong>ap</strong></em>
+
+<li>
+<strong>va_star</strong>:函数，初始化工作，将 <em><strong>ap</strong></em> 指向第一个无名参数。但必须有一个有名参数，因为<code>va_start</code>以最后一个有名参数为起点
+
+<li>
+<strong>va_arg</strong>:函数，返回一个参数，且将 <em><strong>ap</strong></em> 指向下一个参数。
+
+<li>
+<strong>va_end</strong>:函数，执行清理工作。
+<pre  class="brush:c">
+   #include &lt;stdarg.h&gt;
+   void onefunc(int first_arg, ...){
+       va_list ap;
+       int a1,a2;
+       char c1,c2;
+       
+       va_start(first_arg, ap);
+       
+       a1 = va_arg(ap, int);
+       a2 = va_arg(ap, int);
+       c1 = va_arg(ap, char);
+       c2 = va_arg(ap, char);
+       
+       va_end(ap);
+   }
+</pre>
+
+</ul>
+</ol>
+	
+<h2 id="toc_1.4">格式化输入scanf函数</h2>
+<pre  class="brush:c">
+   int scanf(char *format, ...)
+</pre>
+<ul>
+<li>
+从标准输入中读取字符序列，按照format中的格式说明对字符序列进行解释，
+  并把结果保存到其余参数中。
+
+<li>
+其他参数必须是指针
+
+<li>
+碰到某些输入无法与格式控制说明匹配的情况时，函数中止。
+
+<li>
+成功匹配并赋值的输入项的个数作为返回值
+
+<li>
+但如果到达文件末尾返回EOF
+
+<li>
+<code>sccanf</code>用于从一个字符串读取字符：
+<pre  class="brush:c">
+   int scanf(char *string, char *format, ...)
+</pre>
+
+</ul>
+
+
+<h2 id="toc_1.5">文件访问</h2>
+<p>
+<code>FILE fopen getc putc fclose</code>
+</p>
+
+<ul>
+<li>
+<em><strong>FILE</strong></em>: 通过<code>typedef</code>定义，文件信息结构，包括：
+
+<ul>
+<li>
+缓冲区位置
+
+<li>
+缓冲区当前字符的位置
+
+<li>
+文件读或写的状态
+
+<li>
+是否出错或已到达文件末尾等
+
+</ul>
+<li>
+<em><strong>fopen</strong></em>: 
+
+<ul>
+<li>
+<code>FILE *fopen(char *name, char *mode)</code>
+
+<li>
+返回一个<code>FILE</code>结构的指针
+
+<li>
+第一个参数文件名
+
+<li>
+第二个参数访问模式：读<code>r</code>、写<code>w</code>、追加<code>a</code>
+
+<ol>
+<li>
+有些系统还区别文本文件和二进制文件，后者访问加<code>b</code>:<code>rb</code>、<code>wb</code>、<code>ab</code> 
+
+<li>
+如果以<code>w</code>或<code>a</code>打开一个不存在的文件，该文件将被创建(如果可能)
+
+<li>
+如果以<code>w</code>打开一个文件，内容被覆盖
+
+<li>
+如果以<code>a</code>打开一个文件，文件原来的内容保持不变
+
+<li>
+读一个不存在的文件，会报一个错误
+
+</ol>
+<li>
+如果发生错误，返回<code>NULL</code>
+
+</ul>
+<li>
+<em><strong>getc</strong></em>: 
+
+<ul>
+<li>
+<code>int getc(FILE *fp)</code>
+
+<li>
+<code>fp</code>指向输入流中的下一个字符
+
+<li>
+如果到达末尾或发生错误，返回<code>EOF</code>
+
+</ul>
+<li>
+<em><strong>putc</strong></em>: 
+
+<ul>
+<li>
+<code>int putc(int c, FILE *fp)</code>
+
+<li>
+将字符<code>c</code>写入<code>fp</code>指向的文件中
+
+<li>
+返回写入的字符
+
+<li>
+发生错误，返回<code>EOF</code>
+
+</ul>
+<li>
+<em><strong>fclose</strong></em>: 
+
+<ul>
+<li>
+<code>int fclose(FILE *fp)</code>
+
+<li>
+与<code>fopen</code>相反的操作
+
+<li>
+断开由<code>fopen</code>建立的文件指针与外部之间的连接
+
+<li>
+释放文件指针供其他文件使用
+
+<li>
+将缓冲区中由<code>putc</code>正在收集的输出写入文件中
+
+<li>
+程序正常终止时，程序会自动为每个打开的文件调用<code>fclose</code>
+
+</ul>
+<li>
+<em><strong>ferror</strong></em>: 
+
+<ul>
+<li>
+<code>int ferror(FILE *fp)</code>
+
+<li>
+如果<code>fp</code>中出现错误，返回一个非0值
+
+</ul>
+<li>
+<em><strong>feof</strong></em>: 
+
+<ul>
+<li>
+<code>int feof(FILE *fp)</code>
+
+<li>
+与<code>ferror</code>类似，如果<code>fp</code>指定的文件到达文件末尾，返回一个非0值
+
+</ul>
+<li>
+<em><strong>fgets</strong></em>: 
+
+<ul>
+<li>
+<code>char *fgets(char *line, int maxline, FILE *fp)</code>
+
+<li>
+行输入，从<code>fp</code>指向的文件中读取一下输入行,存到<code>line</code>中
+
+<li>
+最多读取<code>maxline-1</code>个字符
+
+<li>
+一般情况下返回<code>line</code>
+
+<li>
+遇到文件末尾或发生错误，返回<code>NULL</code>
+
+</ul>
+<li>
+<em><strong>fputs</strong></em>: 
+
+<ul>
+<li>
+<code>int fputs(char *line, FILE *fp)</code>
+
+<li>
+行输出，将字符串<code>line</code>写入由<code>fp</code>指向的文件中
+
+<li>
+出错返回<code>EOF</code>,否则返回一个非负值
+
+</ul>
+</ul>
+  
+<h3 id="toc_1.5.1">系统负责打开的三个文件：stdin stdout stderr</h3>
+<ul>
+<li>
+c程序启动进，会打开这三个文件
+
+<li>
+这时三个文件指针，在<code>&lt;stdio.h&gt;</code>中声明
+
+<li>
+通常<code>stdin</code>指向键盘，<code>stdout stderr</code>指向屏幕
+
+<li>
+<code>getchar()</code>与<code>putchar()</code>的定义：
+<pre  class="brush:c">
+    #define getchar()  getc(stdin)
+    #define putchar(c) putc((c), stdin)
+</pre>
+
+</ul>
+	
+<h3 id="toc_1.5.2">fscanf与fprintf</h3>
+<pre  class="brush:c">
+    int fscanf(FILE *fp, char *format, ...)
+    int fprintf(FILE *fp, char *format, ...)
+</pre>
+	
+<h2 id="toc_1.6">stderr与exit</h2>
+<ul>
+<li>
+<em><strong>stderr</strong></em>
+
+<ul>
+<li>
+建议错误信息输出到这
+
+<li>
+在标准输出被重定向时(比如使用管道)，屏幕上也可以看到错误消息
+
+</ul>
+<li>
+<em><strong>exit(n)</strong></em>
+
+<ul>
+<li>
+终止调用程序的执行
+
+<li>
+任何调用该程序的进程都可以获得<code>exit</code>的参数值
+
+<li>
+<code>0</code>表示一切正常
+
+<li>
+<code>非0</code>往往表示出现了异常
+
+<li>
+在main中:<code>return expr;</code>等价于<code>exit(expr);</code>
+
+<li>
+但<code>exit(expr);</code> 可以在 <em><strong>其他</strong></em> 函数中调用
+
+</ul>
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

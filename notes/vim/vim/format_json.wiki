@@ -1,0 +1,9 @@
+%title 格式化json
+=格式化json=
+
+日期: 2012-05-14 10:05
+
+==格式化json==
+  {{{ class="brush:c"
+  :%!python -m json.tool
+	}}}

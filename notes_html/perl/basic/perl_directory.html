@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>perl目录操作</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">perl目录操作</h1>
+<p>
+日期: 2012-06-04 16:06
+<div class="toc">
+<ul>
+<li><a href="#toc_1">perl目录操作</a>
+</ul>
+</div>
+</p>
+
+<ol>
+<li>
+改变工作目录chdir
+
+<ul>
+<li>
+如果省略参数，将尝试将主目录设为工作目录。
+
+<li>
+这是少数几种在忽略掉参数而不使用变量$_的情形之一。
+
+</ul>
+<li>
+使用glob
+<pre  class="brush:perl">
+    my @file_names = glob "*";
+</pre>
+
+<li>
+用&lt;&gt;替换glob
+<pre  class="brush:perl">
+   my @all_files = &lt;*&gt;; ##基本上同@all_files = glob “*”一样；
+   #或：
+   my $dir = “/etc”;
+   my @dir_files = &lt;$dir/* $dir/.*&gt;;
+</pre>
+
+<li>
+尖括号的含义可以指从文件句柄读入或globbing
+
+<ul>
+<li>
+Perl 怎么判断使用哪一个操作呢？
+
+<li>
+如果尖括号之间是一个严格意义上的标识符，则其为文件句柄读入操作
+
+<li>
+否则，为globbing 操作。如下例：
+<pre  class="brush:perl">
+   my @files = &lt;FRED/*&gt;; ##glob
+   my @lines = &lt;FRED&gt;; ##文件句柄读入
+   my $name = “FRED”;
+   my @files = &lt;$name/*&gt; ##glob
+</pre>
+
+<li>
+一个例外情况是，如果尖括号中是一个简单的标量变量（不是hash 或数组中的一个元素）
+
+<li>
+它就是一个间接的文件句柄读入操作（indirect filehandle read），变量的内容给出了要读入的文件句柄的名字
+
+</ul>
+<li>
+可以使用readline使用间接句柄读入：
+<pre  class="brush:perl">
+    my $name = “FRED”;
+    my @lines = readline FRED; #从FRED 读入
+    my @lines = readline $name; #从FRED 读入
+</pre>
+
+<li>
+目录句柄
+
+<ul>
+<li>
+从给定目录得到其文件名列表的方法还可以使用目录句柄（directory handle）。
+
+<li>
+目录句柄外形及其行为都很像文件句柄。
+
+<li>
+打开（使用opendir 而非open）
+
+<li>
+从中读入（使用readdir 而非readline），
+
+<li>
+关闭（使用closedir 而非close）。
+
+<li>
+不是读入文件的内容，而是将一个目录中的文件名（以及一些其它东西）读入
+
+</ul>
+<li>
+删除文件，unlink，返回删除文件的个数。
+<pre  class="brush:perl">
+    foreach my $file (qw(slate bedrock lava)) {
+        unlink $file or warn “failed on $file: $!\n”;
+    }
+</pre>
+
+<ul>
+<li>
+不能使用unlink删除目录。删除目录使用rmdir
+
+<li>
+unlink 一个文件的权限同文件本身的权限是没有关系的；它和目录所包含的文件权限有关。
+
+</ul>
+<li>
+文件重命名，rename
+<pre  class="brush:perl">
+    rename “old”, “new”;
+    
+    #重命名一批文件：
+    foreach my $file (glob “*.old”){
+        my $newfile = $file;
+        $newfile =~ s/\ .old$/.new/;
+        if (-e $newfile){
+            warn“can’t rename $file to $newfile: $newfile exists\n”;
+        }elsif(rename $file, $newfile){
+        ##成功，什么也不做
+        } else {
+            warn “rename $file to $newfile failed: $!\n”;
+        }
+    }
+</pre>
+
+<li>
+连接相关：link symlink readlink
+
+<li>
+创建目录mkdir
+<pre  class="brush:perl">
+    mkdir “fred”, 0755 or warn “Cannot make fred directory: $!”;
+</pre>
+
+<ul>
+<li>
+注意第二个参数为八进制
+
+</ul>
+<li>
+oct函数，将字符串转化为八进制
+
+<li>
+删除目录rmdir，保能删除空目录。
+
+<li>
+修改权限chmod
+<pre  class="brush:perl">
+    chmod 0755, “fred”, “barney”
+</pre>
+
+<li>
+修改所有者：chown
+<pre  class="brush:perl">
+    my $user = 1004;
+    my $group = 100;
+    chown $user, $group, glob “*.o”;
+    
+    #通过用户名取id：getpwnam
+    defined(my $user = getpwnam “merlyn”) or die “bad user”;
+    defined(my $group = getpwnam “users”) or die “bad group”;
+    chown $user, $group, glob “/home/Merlyn/*”
+</pre>
+
+<li>
+修改文件最近修改的时间，以及被访问的时间。utime
+<pre  class="brush:perl">
+    my $now = time;
+    my $ago = $now -24*60*60; #一天的秒数
+    utime $now, $ago, glob “*”; #设成当前访问的，一天之前修改的
+</pre>
+
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>子例程</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">子例程</h1>
+<p>
+日期: 2012-07-03 21:07
+<div class="toc">
+<ul>
+<li><a href="#toc_1">子例程</a>
+</ul>
+</div>
+</p>
+
+<ul>
+<li>
+调用子例程如果使用了&amp;并省略了参数，则使用当前的@_作为参数
+<pre  class="brush:perl">
+      &amp;foo(1,2,3)   #传递三个参数
+      foo(1,2,3)    #和上面一样
+      foo();        #传递一个空列表
+      &amp;foo();       #和上面一样
+      &amp;foo;         #foo() 获取当前的参数,和 foo(@_) 一样,但更快!
+      foo;          #如果预定义了子过程 foo,那么和 foo() 一样,否则
+                    #就是光字 "foo"
+</pre>
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

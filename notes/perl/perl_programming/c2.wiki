@@ -1,0 +1,468 @@
+%title 集腋成裘
+=集腋成裘=
+日期: 2012-06-06 10:06
+%toc
+
+==变量==
+
+===标量===
+| 构造              | 含义                                     |
+|-------------------|------------------------------------------|
+| ${days}           | 和 $days 一样,不过在字母数字前面不易混淆 |
+| $Dog::days        | 在 Dog 包里面的不同的 $days 变量         |
+| $#days            | 数组 @days 的最后一个索引                |
+| $days->[28]       | $days 一个引用指向的数组的第二十九个元素 |
+| $days[0][2]       | 多维数组                                 |
+| $days{200}{'Feb'} | 多维散列                                 |
+| $days{2000,'Feb'} | 多维散列枚举                             |
+
+
+===数组===
+| 构造               | 含义                                           |
+|--------------------|------------------------------------------------|
+| @days              | 包含($days[0],$days[1],...$days[n])的数组      |
+| @days[3,4,5]       | 包含($days[3],$days[4],$days[5])数组片段的数组 |
+| @days[3..5]        | 包含($days[3],$days[4],$days[5])数组片段的数组 |
+| @days{'Jan','Feb'} | 包含($days{'Jan'},$days{'Feb'})片段的散列      |
+
+===散列===
+| 构造  | 含义                           |
+|-------|--------------------------------|
+| %days | (Jan=>31,Feb=>$leap?29:28,...) |
+
+===注意===
+* _*上面所有的这些构造都可以当值使用，也就是可以赋值的位置。*_
+* 对于数组，散列的片段而言，则提供了多个赋值位置。当然也可以全部赋值。
+
+
+==名字==
+* 变量的名字存储在符号表(symbol table)中或记法作用域(lexical scope)中。
+* 你可以拥有任意数量的符号表和词法作用域
+* 你定义的任何一个名字都存储中其中的某一个中
+* 符号表是全局散列，用于存储全局变量和符号表的记录（包括用于其他符号表的记录）
+* 词法作用域只是未命名的中间结果暂存器，不会存储任何符号表，只是附着在程序的一块代码后面
+  * 它们包含只能被该块所见的变量
+* 在任何名字空间里，变量类型都有自己的子名字空间，所以不同类型的变量可以重名
+
+==名字的查找==
+.....to do
+
+==标量值==
+* 合法的标量值
+  * 数字
+  * 字符串
+  * 另一片数据的引用
+  * undefined
+* 字符串对长度和内容没有限制
+* 数字保存为有符号整数或本机格式的双精度浮点数
+  * 但浮点数值是有限精度的
+    {{{ class="brush:perl"
+      (10/3==1/3*10);#很可能失败
+      }}}
+* 数字和字符串在几乎所有的场合都可以互相转换。 
+* 引用却有些不同。
+  * 引用是标量
+  * 引用不能转换为数组或散列
+  * 引用可以转换为一个唯一的字符串或数值，但无法转换回去。
+
+===数字直接量===
+{{{ class="brush:perl"
+    $x = 12345;         #整数
+    $x = 12345.67;      #浮点
+    $x = 6.02e23;       #科学记数
+    $x = 4_294_967_296; #提高可读性的下划线
+    $x = 03777;         #八进制
+    $x = 0xffff;        #十六进制
+    $x = 0b1100_0000;   #二进制
+  }}}                 
+* 下划线分隔，在字符串转换成数字的时候并不能使用
+
+===字符串直接量===
+
+====字符转义====
+
+| 代码     | 含义            |
+|----------|-----------------|
+| \n       | 换行符(常作 LF) |
+| \r       | 回车(常作 CR)   |
+| \t       | 水平制表符      |
+| \f       | 进纸            |
+| \b       | 退格            |
+| \a       | 警报(响铃)      |
+| \e       | ESC 字符        |
+| \033     | 八进制的 ESC    |
+| \x7f     | 十六进制 DEL    |
+| \cC      | Control-C       |
+| \x{263a} | Unicode(笑脸)   |
+| \N{NAME} | 命名字符        |
+
+* 注意\N{NAME}
+
+====字符变换====
+
+| 代码 | 含义                                     |
+|------|------------------------------------------|
+| \u   | 强迫下一个字符为大写(Unicode 里的“标题”) |
+| \l   | 强制下一个字符小写                       |
+| \U   | 强制后面所有字符大写                     |
+| \L   | 强制后面所有字符小写                     |
+| \Q   | 所有后面的非字母数字字符加反斜杠         |
+| \E   | 结束\U,\L,或\Q。                         |
+
+* 放在大括号里的标识符强制为字符串，有时可以省略字符串
+{{{ class="brush:perl"
+    $days{'Feb'}
+    #可以写做:
+    $days{Feb}
+    
+    $days{'February 29th'} #正确
+    $days{"February 29th"} #也正确""不必代换
+    $days{February 29th}   #错,产生一个编译错误
+    
+    @days{'Jan','Feb'}     #Ok.
+    @days{"Jan","Feb"}     #Also ok.
+    @days{ Jan, Feb }      #Kinda wrong (breaks under use strict)
+  }}}
+  
+====引起构造====
+
+| 常用 | 通用  | 含义       | 替换 |
+|------|-------|------------|------|
+| ''   | q//   | 文本字串   | 否   |
+| " "  | qq//  | 文本字串   | 是   |
+| ``   | qx//  | 执行命令   | 是   |
+| ()   | qw//  | 单词数组   | 否   |
+| //   | m//   | 模式匹配   | 是   |
+| s/// | s///  | 模式替换   | 是   |
+| y/// | tr/// | 字符转换   | 否   |
+| " "  | qr//  | 正则表达式 | 是   |
+
+* _*注意：通用中的/可以用任何非字母数字、非空白界定符的字符代替*_
+* 但如果定界符选用小括号、大括号、中括号，则终止定界符要选用相应的终止符。
+  {{{ class="brush:perl"
+        $single = q!I said, "You said, 'she sad it.'"!;
+        
+        $double =qq(can't we get some "good" $variable?);
+        
+        $chunk_of_code = q {
+			if ($condition) {
+				print "Gotcha!";
+			}
+        };
+        #最后一个例子可以使用空白
+    }}}
+* s///与tr///两元素的，第一部分和第二部分可以不同，而且允许有空白字符。
+  {{{ class="brush:perl"
+      s<fool>(bar);
+      
+      tr (a-f)
+      [A-F];
+      
+      s{foo}  #把 foo
+      {bar};  #换为 bar。
+        
+      tr [a-f] #把小写十六进制
+      [A-F];   #换为大写
+    }}}
+* 但当用#作为引起字符时，就不允许有空格，容易被当成注释。
+  {{{ class="brush:perl"
+    #下面这个是对的，可以正常工作
+    $msg1 = q#hello world#;
+    
+    #下面两个不行，因有空格存在，被当成注释了
+    $msg2 = q #hello world#;
+    
+    $msg3 = q 
+    #hello world#;
+    }}}
+    
+====裸字符====
+在语法没有其他解释的名字被当成字条串看告待
+{{{ class="brush:perl"
+  print " ",hello," ", world; #打印hell world
+  }}}
+  
+===="此处"文档====
+* 行引起
+* <<与结束字符串之间不能有空格
+* 但如果结束字符串被引号括起来，就可以有空格
+* 不要忘记后面写分号
+{{{ class="brush:perl"
+	print <<EOF;            #和前面的例子一样
+	The price is $Price.
+	EOF
+
+	print <<"EOF";          #和上面一样,显式的引起
+	The price is $Price.
+	EOF
+
+	print <<'EOF';          #单引号引起
+	All things (e.g. a camel's journey through 
+	A needle's eye) are possible, it's true.
+	But picture how the calmel feels, squeezed out
+	In one long bloody thread, from tail to snout.
+                                    -- C.S. Lewis
+	EOF
+
+	print << x 10;          #打印下面行 10 次
+	The Camels are coming! Hurrah! Hurrah!
+
+	print <<"" x 10;        #实现上面内容的比较好的方法
+	The Camels are coming! Hurrah! Hurrah!
+
+	print <<`EOC`;          #执行命令
+	echo hi there
+	echo lo there
+	EOC
+
+	print <<"dromedary", <<"camelid";     #你可以堆叠
+	I said bactrian.
+	dromedary
+	She said llama.
+	camelid
+
+	funkshun(<<"THIS",23,<<'THAT');       #在不在圆括弧里无所谓
+	Here's a line
+	ro two.
+	THIS
+	And here's another.
+	THAT
+
+    #如果你的此处文档在你的其他代码里是缩进的,你就得手工从每行删除开头的空白:
+	($quote = <<'QUOTE') =~ s/^\s+//gm; 
+	    The Road goes ever on and on, down
+	    from the door where it began. 
+	QUOTE
+
+    #你甚至还可以用类似下面的方法用一个此处文档的行填充一个数组:
+	@sauces = <<End_Lines =~ m/(\S.*\S)/g;
+	    normal tomato
+		spicy tomato
+		green chile
+		pesto
+		white wine
+	End_Lines
+  }}}
+  
+====V-字符串直接量====
+* 一个以v开头，后面跟着一个或多个用句点分隔的整数的直接量，会被当作一个字符串直接量
+* 该字符串是由v直接量指定的值组成。
+{{{ class="brush:perl"
+    $crlf = v13.10; #ASCII码回车，换行
+  }}}
+* 每一个整数是一个字符
+* 有两个或更多句点时，可以省略v
+{{{ class="brush:perl"
+    print v9786;            #打印 UTF-8 编码的笑脸“\x{263a}"
+    print v120.111.111;     #打印"foo"
+    print 120.111.111;      #同上
+    use 5.6.0;              #要求特定 Perl 版本(或更新)
+    $ipaddr = 204.148.40.9; #oreilly.com 的 IPV4 地址
+  }}}
+* 存在v字符串的东西是不可读的，如果要获取可读的，printf时可以使用`%vd`
+
+====其他符号直接量====
+* 以双下划线开头和结束的标识符看作perl保留为特殊语法处理的记号。
+* ___LINE___和___FILE___当前行号和文件名
+* ___PACKAGE___当前代码编译进入的包的名字。没有的话，就是未定义值
+* ___END___(Control-D或Control_Z) 
+  * 可用于真正的文件结束符之前，表示脚本的结束。
+  * 任何后面的文件都被忽略，但保能通过DATA文件句柄读取
+* ___DATA___在当前包的名字空间打开DATA文件句柄
+
+===环境===
+* 标量环境
+* 列表环境
+* 布尔环境
+* 空环境
+
+===列表值与数组===
+* 列表直接量并没有提供列表环境
+* 列表直接量一系列临时值的堆栈，当操作符需要时再从堆栈里弹出来，所以：
+  {{{ class="brush:perl"
+      $stuff = ("one", "two", "three");#$stuff的值为three
+    }}}
+* 数组和列表直接量是不同的，它只在堆栈里放了一个值：数组的长度
+  {{{ class="brush:perl"
+      @stuff = ("one", "two", "three");
+      $stuff = @stuff;#$stuff的值为3,是数组的长度
+    }}}
+* 列表值可以使用列表内插
+  {{{ class="brush:perl"
+      (@stuff, @nonsense, funkshun())
+    }}}
+* 列表值可以使用脚标,*实际是抓取了列表的一个片段*
+  {{{ class="brush:perl"
+      #Stat 返回列表值
+      $modification_time = (stat($file))[9];
+      
+      #语法错误
+      $modification_time = stat($file)[9]; #忘记括弧了。
+      
+      #找一个十六进制位
+      $hexdigit = ('a','b','c','d','e','f')[$digit-10];
+      
+      #一个“反转的逗号操作符”。
+      return (pop(@foo),pop(@foo))[0];
+      
+      # 把多个值当作一个片段
+      ($day, $month, $year) = (localtime)[3,4,5];
+    }}}
+
+====列表赋值====
+* 只有给列表赋值的每一个元素都合法时,才能给整个列表赋值:
+  {{{ class="brush:perl"
+      ($a, $b, $c) = (1, 2, 3); 
+      ($map{red}, $map{green}, $map{blue}) = (0xff0000, 0x00ff00, 0x0000ff);
+    }}}
+* 你可以给一个列表里的 undef 赋值。这一招可以很有效地把一个函数的某些返回值抛弃:
+  {{{ class="brush:perl"
+      ($dev, $ino, undef, undef, $uid, $gid) = stat($file);
+    }}}
+* 最后一个列表元素可以是一个数组或散列:
+  {{{ class="brush:perl"
+      ($a, $b, @rest) = split;
+      my ($a, $b, %rest) = @arg_list;
+    }}}
+  * 实际上你可以在赋值的列表里的任何地方放一个数组或散列, 只是第一个数组或散列会吸收 所有剩余的数值, 而且任何在它们后面的东西都会被设置为未定义值。
+* 你甚至可以给空列表赋值:
+  {{{ class="brush:perl"
+    () = funkshun();
+  }}}
+  * 这样会导致在列表环境里调用你的函数,但是把返回值丢弃。如果你在没有赋值(语句)的情况下调用了此函数,
+    那它就会在一个空环境里被调用,而空环境是标量环境,因此可能令此函数的行为完全不同。
+* 在标量环境里的列表赋值返回赋值表达式右边生成的元素的个数:
+  {{{ class="brush:perl"
+      $x = (($a,$b)=(7,7,7));    #把 $x 设为 3,不是 2
+      $x = ( ($a, $b) = funk()); #把 $x 设为 funk() 的返回数
+      $x = ( () = funk() );      #同样把$x 设为 funk() 的返回数
+    }}}
+  * 这样你在一个布尔环境里做列表赋值就很有用了, 因为大多数列表函数在结束的时候返回一
+    个空(null)列表,空列表在赋值时生成一个 0,也就是假。下面就是你可能在一个 while语句里使用的情景:
+    {{{ class="brush:perl"
+    	while (($login, $password) = getpwent) {
+    		if (crypt($login, $password) eq $password) {
+    			print "$login has an insecure password!\n";
+    		}
+    	}
+      }}}
+      
+====数组长度====
+* 获得数组元素个数
+  {{{ class="brush:perl"
+      @days + 0; #隐含地把 @days 处于标量环境 
+      scalar(@days) #明确强制@days处于标量环境
+    }}}
+  * 只对数组有效，对列表值无效
+* `$#days`返回数组的最后一个下标
+* 给`$#days`赋值，会修改数组长度.若缩短数组会删除插入的值
+* 给超出长度之外的元素赋值会扩展数组
+* 截断数组
+  {{{ class="brush:perl"
+      @whatever = ();
+	  $#whatever = -1;
+	  
+      ＃而且下面问题为真
+	  scalar(@whatever)==$#whatever+1;
+    }}}
+* 截断数组并不释放内存
+  {{{ class="brush:perl"
+      undef(@whatever);#释放内存
+    }}}
+   
+===散列===
+
+===型团(typeglob)和文件句柄===
+* 有咱特殊的类型叫做typeglob,用以保留整个符号表记录
+  * *foo包括$foo, @foo, %foo, &foo和其他几个foo的简单解释
+  * 前缀是一个*, 因为它代表所有的类型
+* 可用于存储和传递文件句柄
+  {{{ class="brush:perl"
+		$fh = *STDOUT;
+
+        #或者作为一个真的引用,象这样:
+		$fh = \*STDOUT;
+
+		sub newopen {
+			my $path = shift;
+			local *FH;     #不是 my() 或 our ()
+			open(FH,$path ) or return undef;
+			return *FH:    #不是\*FH!
+		}
+		$fh = newopen('/etc/passwd');
+    }}}
+* 可以给变量起别名
+  {{{ class="brush:perl"
+      *foo = *bar;
+
+      #只给某个变量起别名
+      *foo = \$bar;
+    }}}
+
+==输入操作符==
+
+===命令输入操作符或叫反引号操作符===
+  {{{ class="brush:perl"
+      $info = `finger $user`;
+    }}}
+  * 标量环境返回一个包含所有输出的字符串
+  * 列表环境返回一列表值，每行输出是一个值
+  * 可能通过`$/`设置不同的行结束符
+  * 命令的状态值保存在`$?`中
+  * 一般形式qx//
+  {{{ class="brush:perl"
+    $perl_info = qx(ps $$); #这里 $$ 是 Perl 的处理对象, 进行变量内插 
+	$perl_info = qx'ps $$'; #这里 $$ 是 shell 的处理对象, 因为选用了单引号，不会进行变量内插
+    }}}
+  
+===行输入（尖角）操作符===
+* 也叫readline函数
+* 在while中使用,*其行输入符是唯一一个条件时，值自动赋给特殊变量$_*
+  {{{ class="brush:perl"
+      while (defined($_ = <STDIN>)) {print $_; }    #最长的方法
+      while ($_ = <STDIN) { pirnt; }                #明确使用 $_
+      while (<STDIN>) { PRINT ;}                    #短形式
+      for (;<STDIN>;) { print;}                     #不喜欢用 while 循环
+      print $_ while defined( $_ = <STDIN>);        #长的语句修改
+      print while $_ = <STDIN>;                     #明确$_
+      print while <STDIN>;                          #短的语句修改
+    }}}
+* 在其他地方使用时，要明确地把结果赋给变量以保留其值
+  {{{ class="brush:perl"
+      while(<FH1>&& <fh2>) { ... }        #错误:两个输入都丢弃
+      if (<STDIN>) { print; }             #错误:打印$_原先的值
+      if ($_=<STDIN>) {PRINT; }           #有小问题:没有测试是否定义
+      if (defined($_=<STDIN>)) { print;}  #最好
+    }}}
+* 使用省略文件句柄`<>`时：
+  # 先检查@ARGV, 如果为空则将$ARGV[0]设置为“-”, 标准输入
+  # 将@ARGV当作文件名列表处理
+* `<>`是一个标量变量时，该变量包含一个间接的文件句柄
+  * 是文件句柄的名字
+  * 或文件句柄的引用
+    {{{ class="brush:perl"
+        $fh = \*STDIN; 
+        $line = <$fh>;
+        #或:
+        open($fh, "<data.txt"); 
+        $line = <$fh>;
+      }}}
+
+===文件名glob操作符===
+* 如果`<>`中不是文件句柄或标量变量（甚至只多了一个空格),它会被解释成一个"glob"的文件名模式。
+* 会和当前目录里的文件名进行匹配，匹配的文件名被返回
+  * 标量环境每次返回一个名字
+  * 列表环境一起返回
+    {{{ class="brush:perl"
+        @files = <*.xml>;
+        #同下
+        @files = glob(*.xml);
+      }}}
+* *可以进行变量内插*
+    {{{ class="brush:perl"
+        @lines = <$foo>;    #被解释成文件句柄,读取对应的文件内容
+        @files = <${foo}>;  #强制解释成fileglob,返回匹配的文件名
+      }}}
+  
+  
+  

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>找回已删除的文件 </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">找回已删除的文件</h1>
+<p>
+日期: 2012-07-30 16:07
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">找回已删除的文件</a>
+<ul>
+<li><a href="#toc_1.1">如果已知具体的文件路径和名称</a>
+<li><a href="#toc_1.2">如果知道文件所在文件夹但忘记了具体的文件名</a>
+<li><a href="#toc_1.3">对所要恢复的文件没记住什么确定的信息</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">如果已知具体的文件路径和名称</h2>
+<pre  class="brush:bash">
+      #得出删除指定文件的commit
+      #rev-list 用于列出符合条件commits, HEAD代表从指定的commit列起
+      # -n 1只列出一个commit, -- &lt;filepath&gt;代表对&lt;filepath&gt;进行修改的commit
+      # 从HEAD起，所有对&lt;filepath&gt;修改过的commit, 列出第一个，也就是最近的一个，不加-n 1就会列出所有
+      git rev-list -n 1 HEAD -- &lt;filepath&gt; 
+      
+      #从删除文件commit的父commit中可以恢复文件
+      git checkout &lt;deletingcommit&gt;^ -- &lt;filepath&gt; 
+</pre>
+    
+<h2 id="toc_1.2">如果知道文件所在文件夹但忘记了具体的文件名</h2>
+<pre  class="brush:bash">
+      #列出所有对&lt;dirpath&gt;进行修改过的且这种修改包含删除文件的commit
+      git log --diff-filter=D --summary -- &lt;dirpath&gt;
+      
+      #浏览日志找到想要的已删除文件，记住所在commit&lt;deletingcommit&gt;
+      
+      #从删除文件commit的父commit中可以恢复文件
+      git checkout &lt;deletingcommit&gt;^ -- &lt;filepath&gt; 
+</pre>
+
+    
+<h2 id="toc_1.3">对所要恢复的文件没记住什么确定的信息</h2>
+<pre  class="brush:bash">
+      #列出所有包含删除文件的commit
+      git log --diff-filter=D --summary 
+      
+      #浏览日志找到想要的已删除文件，记住所在commit&lt;deletingcommit&gt;
+      
+      #从删除文件commit的父commit中可以恢复文件
+      git checkout &lt;deletingcommit&gt;^ -- &lt;filepath&gt; 
+</pre>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

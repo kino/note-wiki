@@ -1,0 +1,58 @@
+%title     /ab/logs POST 增加一条日志记录  
+
+=/ab/logs POST=
+
+==功能 ==
+新增一条日志记录
+
+==URL==
+/ab/logs
+
+==HTTP请求方式==
+POST
+
+==请求类型==
+JSON XML FROM
+
+==请求参数==
+* Form 类型
+| 参数名        | 值     | 描述                       |
+|---------------|--------|----------------------------|
+| experimentId  | String | 关于哪个 `Experiment` 日志 |
+| alternativeId | String | 与哪个 `Alternative` 相关  |
+| guid          | String | 关联的用户                 |
+| content       | String | 日志内容                   |
+
+* XML 类型
+{{{ class="brush:xml"
+ <log>
+    <experimentId>1</experimentId>
+    <alternativeId>2</alternativeId>
+    <guid>xxxxxxxxxxxxxxxxxx</guid>
+    <content>xxxxxxxxxxxxxxxxxx</content>
+</log>
+  }}}
+  
+* JSON 类型
+{{{ class="brush:js"
+{
+    "experimentId": 1,
+    "alternativeId": 2,
+    "guid": "xxxxxxxxxxxxxxx",
+    "content": "xxxxx"
+}
+  }}}
+
+==返回结果==
+| 状态 | 结果                                        |
+|------|---------------------------------------------|
+| 201  | 添加成功 |
+
+==测试==
+{{{ class="brush:bash"
+curl -F experimentId=1 -F alternativeId=2 -F content=""  https://baseurl/logs
+curl -v -X post -HContent-type:application/xml --data "<xml data>" https://baseurl/logs
+curl -v -X post -HContent-type:application/json --data "<json data>" https://baseurl/logs
+  }}}
+  
+

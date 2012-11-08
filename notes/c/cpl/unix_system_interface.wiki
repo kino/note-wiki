@@ -1,0 +1,102 @@
+%title UNIX系统接口
+=UNIX系统接口=
+
+日期: 2012-05-30 22:05
+
+%toc
+
+* 上一章说的输入／输出，是标准库函数，对任何操作系统都一样。
+* 但标准库函数的实现要通过宿主系统提供的功能来实现。
+* 下面是UNIX系统中用于输入输出的系统调用。
+
+==文件描述符==
+* unix中所有外围设备被看作文件系统中的文件
+* 所有的输入／输出是通过读文件或写文件完成。
+* 读写文件前需要通知系统，该过程叫 _*打开文件*_ 。
+* 如果成功，系统返回一个非负的整数，称为 _*文件描述符*_
+* 任何输入／输出都是通过 _*文件描述符*_ 标识文件的，而不是通过文件名。
+* 系统负责维护文件信息， _*用户程序只能通过文件描述符引用文件*_
+* _*三个文件:*_
+  * 当命令解释程序（shell）运行程序时会打开三个文件
+  * 文件描述符为：0，1，2
+  * 分别代表标准输入 标准输出 标准错误
+  
+==低级I/O==
+输入／输出是通过系统调用read和write实现的。
+C语言中通过函数`read`和`write`访问两个系统调用。
+{{{ class="brush:c"
+   int n_read = read(int fd, char *buf, int n);
+   int n_write = write(int fd, char *buf, int n);
+  }}}
+
+* _*read*_
+  * 返回实际传输的字节数
+  * 返回`0`, 文件已到末尾
+  * 返回`-1`, 发生错误
+* _*write*_
+  * 返回实际写入的字节数
+  * 如果返回值与请求写入的字节数不等, 发生错误
+ 
+系统调用的函数原型集放在头文件`syscalls.h`中，但文件名字不是标准的。
+ 
+==open、creat、close、unlink==
+* _*open*_
+  * `int open(char *name, int flags, int perms)`
+  * 与`fopen`类似
+  * 返回一个文件描述符
+  * 参数
+    * `name`包含文件名的字符串
+	* `flags`一个int型值
+	  * `O_RDONLY` 只读
+	  * `O_WRONLY` 只写
+	  * `O_RDWR` 读写
+  * 打开不存在的文件报错
+* _*create*_
+  * `int create(char *name, int perms)`
+  * 创建文件
+  * 成功创建，返回一个文件描述符,否则返回-1
+  * 若要创建的文件已存在，将该文件截断为0,丢弃文件原先的内容
+  * 所以创建已存在的文件不会报错
+  * 要创建的文件不存在，使用`perms`指定的权限创建文件
+* _*close*_
+  * `close(int fd)`
+  * 断开文件描述符与已打开文件之间的链接
+  * 同一程序打开的文件数有限制，释放文件描述符，供其他文件使用
+  * 与`fclose`不同的地方， 它不清洗（flush）缓冲区
+* _*unlink*_
+  * `unlink(char *name)`
+  * 删除文件
+  * 对应标准函数库`remove`
+* _*lseek*_
+  * `long lseek(int fd, long offset, int origin)`
+  * 将文件描述符为`fd`的文件的当前位置设置为`offset`,其中`offset`是相对于`origin`而言的。
+  * `origin` 的三个值
+    * `0`:文件开始
+    * `1`:文件当前置
+    * `2`:文件结尾
+  * 返回一个long值，表示文件的新位置
+  * 发生错误，返回-1
+  * 对应标准库中的`fseek`, 但后者发生错误时返回一个非0值
+  
+===error函数===
+* 输出错误信息
+* 与`printf`类似，可带变长参数
+  {{{ class="brush:c"
+      error("cp: write error on file %s", argv[2]);
+	}}}
+	
+===将变长参数再次传递===
+* `vprintf vfprintf vsprintf`
+  {{{ class="brush:c"
+		void error(char *fmt, ...) {
+			va_list args;
+			va_start(args, fmt);
+			fprintf(stderr, "error: ");
+			vprintf(stderr, fmt, args);
+			fprintf(stderr, "\n");
+			va_end(args);
+			exit(1);
+		}
+	}}}
+	
+  

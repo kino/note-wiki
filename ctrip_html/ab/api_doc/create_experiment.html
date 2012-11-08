@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>/ab/experiment/{exprimentId} 获取指定的测试测试</title>
+<meta http-equiv="Content-Type" content="text/html; charset=cp936">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">/ab/experiment/{exprimentId}</h1>
+
+<h2 id="toc_1.1">功能</h2>
+<p>
+查询指定的experiment信息
+</p>
+
+<h2 id="toc_1.2">URL</h2>
+<p>
+/ab/experiment/{exprimentId}
+</p>
+
+<h2 id="toc_1.3">支持格式</h2>
+<p>
+JSON XML
+</p>
+
+<h2 id="toc_1.4">HTTP请求方式</h2>
+<p>
+GET
+</p>
+
+<h2 id="toc_1.5">请求参数</h2>
+<table>
+<tr>
+<td>
+experimentId
+</td>
+<td>
+路径参数
+</td>
+<td>
+数字型
+</td>
+<td>
+要查询的experiment的id号
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.6">测试</h2>
+<pre  class="brush:bash">
+curl -Hacccept:application/xml https://baseurl/experiment/6
+curl -Hacccept:application/json https://baseurl/experiment/6
+</pre>
+
+<h2 id="toc_1.7">返回结果</h2>
+
+<ol>
+<li>
+XML Reslut:
+<pre  class="brush:xml">
+&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;experiment&gt;
+    &lt;id&gt;6&lt;/id&gt;
+    &lt;name&gt;test&lt;/name&gt;
+    &lt;description&gt;test&lt;/description&gt;
+    &lt;startDate&gt;2012-10-16 00:00&lt;/startDate&gt;
+    &lt;endDate&gt;2012-10-16 00:00&lt;/endDate&gt;
+    &lt;isActive&gt;false&lt;/isActive&gt;
+    &lt;alternatives&gt;
+        &lt;alternative&gt;
+            &lt;id&gt;1&lt;/id&gt;
+            &lt;name&gt;testAlternative&lt;/name&gt;
+            &lt;description&gt;test alternative description&lt;/description&gt;
+            &lt;isActive&gt;true&lt;/isActive&gt;
+            &lt;rules&gt;
+                &lt;rule&gt;
+                    &lt;id&gt;1&lt;/id&gt;
+                    &lt;ruleType&gt;PERCENT&lt;/ruleType&gt;
+                    &lt;value&gt;30&lt;/value&gt;
+                &lt;/rule&gt;
+            &lt;/rules&gt;
+        &lt;/alternative&gt;
+        &lt;alternative&gt;
+            &lt;id&gt;2&lt;/id&gt;
+            &lt;name&gt;testAlternative&lt;/name&gt;
+            &lt;description&gt;test alternative description&lt;/description&gt;
+            &lt;isActive&gt;false&lt;/isActive&gt;
+            &lt;rules/&gt;
+        &lt;/alternative&gt;
+    &lt;/alternatives&gt;
+&lt;/experiment&gt;
+</pre>
+
+<li>
+Json Reslut:
+<pre  class="brush:js">
+
+{
+    "name": "test",
+    "description": "test",
+    "startDate": "2012-10-16 00:00",
+    "endDate": "2012-10-16 00:00",
+    "isActive": false,
+    "alternatives": [
+        {
+            "name": "testAlternative",
+            "description": "test alternative description",
+            "isActive": true,
+            "rules": [
+                {
+                    "ruleType": "PERCENT",
+                    "value": "30",
+                    "id": 1
+                }
+            ],
+            "id": 1
+        },
+        {
+            "name": "testAlternative",
+            "description": "test alternative description",
+            "isActive": false,
+            "rules": [
+                
+            ],
+            "id": 2
+        }
+    ],
+    "id": 6
+}
+</pre>
+
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 鐜嬪叴鏈�
+			</div>
+		</div>
+	<div>
+</body>
+</html>

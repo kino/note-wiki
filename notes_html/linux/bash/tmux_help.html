@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>tmux 指南</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">tmux 指南</h1>
+<p>
+转自:<a href="http://wiki.freebsdchina.org/software/t/tmux">http://wiki.freebsdchina.org/software/t/tmux</a>
+</p>
+
+<p>
+tmux是一个优秀的终端复用软件，类似GNU Screen，但来自于OpenBSD，采用BSD授权。使用它最直观的好处就是，通过一个终端登录远程主机并运行tmux后，在其中可以开启多个控制台而无需再“浪费”多余的终端来连接这台远程主机；当然其功能远不止于此。
+</p>
+
+<h2 id="toc_1.1">安装</h2>
+<p>
+可以使用Ports安装tmux，位置在/usr/ports/sysutils/tmux/；tmux仅有一个依赖包libevent，位于/usr/ports/devel/libevent/。
+</p>
+
+<p>
+安装完成后输入命令tmux即可打开软件，界面十分简单，类似一个下方带有状态栏的终端控制台；但根据tmux的定义，在开启了tmux服务器后，会首先创建一个会话，而这个会话则会首先创建一个窗口，其中仅包含一个面板；也就是说，这里看到的所谓终端控制台应该称作tmux的一个面板，虽然其使用方法与终端控制台完全相同。
+</p>
+
+<p>
+tmux使用C/S模型构建，主要包括以下单元模块：
+</p>
+
+<table>
+<tr>
+<td>
+server
+</td>
+<td>
+服务器。输入tmux命令时就开启了一个服务器。
+</td>
+</tr>
+<tr>
+<td>
+session
+</td>
+<td>
+会话。一个服务器可以包含多个会话。
+</td>
+</tr>
+<tr>
+<td>
+window
+</td>
+<td>
+窗口。一个会话可以包含多个窗口。
+</td>
+</tr>
+<tr>
+<td>
+pane
+</td>
+<td>
+面板。一个窗口可以包含多个面板。
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.2">操作</h2>
+<p>
+类似各种平铺式窗口管理器，tmux使用键盘操作，常用快捷键包括：
+</p>
+
+<table>
+<tr>
+<td colspan="2">
+Ctrl+b
+</td>
+<td>
+激活控制台；此时以下按键生效
+</td>
+</tr>
+<tr>
+<td rowspan="9">
+系统操作
+</td>
+<td>
+?
+</td>
+<td>
+列出所有快捷键；按q返回
+</td>
+</tr>
+<tr>
+<td>
+d
+</td>
+<td>
+脱离当前会话；这样可以暂时返回Shell界面，输入tmux attach能够重新进入之前的会话
+</td>
+</tr>
+<tr>
+<td>
+D
+</td>
+<td>
+选择要脱离的会话；在同时开启了多个会话时使用
+</td>
+</tr>
+<tr>
+<td>
+Ctrl+z
+</td>
+<td>
+挂起当前会话
+</td>
+</tr>
+<tr>
+<td>
+r
+</td>
+<td>
+强制重绘未脱离的会话
+</td>
+</tr>
+<tr>
+<td>
+s
+</td>
+<td>
+选择并切换会话；在同时开启了多个会话时使用
+</td>
+</tr>
+<tr>
+<td>
+:
+</td>
+<td>
+进入命令行模式；此时可以输入支持的命令，例如kill-server可以关闭服务器
+</td>
+</tr>
+<tr>
+<td>
+[
+</td>
+<td>
+进入复制模式；此时的操作与vi/emacs相同，按q/Esc退出
+</td>
+</tr>
+<tr>
+<td>
+~
+</td>
+<td>
+列出提示信息缓存；其中包含了之前tmux返回的各种提示信息
+</td>
+</tr>
+<tr>
+<td rowspan="10">
+窗口操作
+</td>
+<td>
+c
+</td>
+<td>
+创建新窗口
+</td>
+</tr>
+<tr>
+<td>
+&amp;
+</td>
+<td>
+关闭当前窗口
+</td>
+</tr>
+<tr>
+<td>
+数字键
+</td>
+<td>
+切换至指定窗口
+</td>
+</tr>
+<tr>
+<td>
+p
+</td>
+<td>
+切换至上一窗口
+</td>
+</tr>
+<tr>
+<td>
+n
+</td>
+<td>
+切换至下一窗口
+</td>
+</tr>
+<tr>
+<td>
+l
+</td>
+<td>
+在前后两个窗口间互相切换
+</td>
+</tr>
+<tr>
+<td>
+w
+</td>
+<td>
+通过窗口列表切换窗口
+</td>
+</tr>
+<tr>
+<td>
+,
+</td>
+<td>
+重命名当前窗口；这样便于识别
+</td>
+</tr>
+<tr>
+<td>
+.
+</td>
+<td>
+修改当前窗口编号；相当于窗口重新排序
+</td>
+</tr>
+<tr>
+<td>
+f
+</td>
+<td>
+在所有窗口中查找指定文本
+</td>
+</tr>
+<tr>
+<td rowspan="14">
+面板操作
+</td>
+<td>
+”
+</td>
+<td>
+将当前面板平分为上下两块
+</td>
+</tr>
+<tr>
+<td>
+%
+</td>
+<td>
+将当前面板平分为左右两块
+</td>
+</tr>
+<tr>
+<td>
+x
+</td>
+<td>
+关闭当前面板
+</td>
+</tr>
+<tr>
+<td>
+!
+</td>
+<td>
+将当前面板置于新窗口；即新建一个窗口，其中仅包含当前面板
+</td>
+</tr>
+<tr>
+<td>
+Ctrl+方向键
+</td>
+<td>
+以1个单元格为单位移动边缘以调整当前面板大小
+</td>
+</tr>
+<tr>
+<td>
+Alt+方向键
+</td>
+<td>
+以5个单元格为单位移动边缘以调整当前面板大小
+</td>
+</tr>
+<tr>
+<td>
+Space
+</td>
+<td>
+在预置的面板布局中循环切换；依次包括even-horizontal、even-vertical、main-horizontal、main-vertical、tiled
+</td>
+</tr>
+<tr>
+<td>
+q
+</td>
+<td>
+显示面板编号
+</td>
+</tr>
+<tr>
+<td>
+o
+</td>
+<td>
+在当前窗口中选择下一面板
+</td>
+</tr>
+<tr>
+<td>
+方向键
+</td>
+<td>
+移动光标以选择面板
+</td>
+</tr>
+<tr>
+<td>
+{
+</td>
+<td>
+向前置换当前面板
+</td>
+</tr>
+<tr>
+<td>
+}
+</td>
+<td>
+向后置换当前面板
+</td>
+</tr>
+<tr>
+<td>
+Alt+o
+</td>
+<td>
+逆时针旋转当前窗口的面板
+</td>
+</tr>
+<tr>
+<td>
+Ctrl+o
+</td>
+<td>
+顺时针旋转当前窗口的面板
+</td>
+</tr>
+</table>
+
+
+<h2 id="toc_1.3">配置</h2>
+<p>
+tmux的系统级配置文件为/etc/tmux.conf，用户级配置文件为~/.tmux.conf。配置文件实际上就是tmux的命令集合，也就是说每行配置均可在进入命令行模式后输入生效。
+下面是一个~/.tmux.conf的示例，其中包括了一些常用的配置：
+</p>
+
+<pre>
+#此类配置可以在命令行模式中输入show-options -g查询
+set-option -g base-index 1                        #窗口的初始序号；默认为0，
+                                                   这里设置为1
+set-option -g display-time 5000                   #提示信息的持续时间；设置足够的时间以避免看不清提示，
+                                                   单位为毫秒
+set-option -g repeat-time 1000                    #控制台激活后的持续时间；设置合适的时间以
+                                                   避免每次操作都要先激活控制台，单位为毫秒
+set-option -g status-keys vi                      #操作状态栏时的默认键盘布局；可以设置为vi或emacs
+set-option -g status-right "#(date +%H:%M' ')"    #状态栏右方的内容；这里的设置将得到类似23:59的显示
+set-option -g status-right-length 10              #状态栏右方的内容长度；建议把更多的空间留给状态栏左方
+                                                   （用于列出当前窗口）
+set-option -g status-utf8 on                      开启状态栏的UTF-8支持
+
+#此类设置可以在命令行模式中输入show-window-options -g查询
+set-window-option -g mode-keys vi    #复制模式中的默认键盘布局；可以设置为vi或emacs
+set-window-option -g utf8 on         #开启窗口的UTF-8支持
+
+#将激活控制台的快捷键由Ctrl+b修改为Ctrl+a
+set-option -g prefix C-a
+unbind-key C-b
+bind-key C-a send-prefix
+
+#添加自定义快捷键
+bind-key z kill-session                     #按z结束当前会话；相当于进入命令行模式后输入kill-session
+bind-key h select-layout even-horizontal    #按h将当前面板布局切换为even-horizontal；
+                                             相当于进入命令行模式后输入select-layout even-horizontal
+bind-key v select-layout even-vertical      #按v将当前面板布局切换为even-vertical；
+                                             相当于进入命令行模式后输入select-layout even-vertical
+</pre>
+
+<h2 id="toc_1.4">更多</h2>
+<p>
+tmux的手册非常详尽，请输入man tmux后阅读。
+</p>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

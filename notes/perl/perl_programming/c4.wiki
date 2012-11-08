@@ -1,0 +1,135 @@
+%title 语句和声明
+=语句和声明=
+日期: 2012-06-20 21:06
+
+%toc
+
+* 每条语句最后要以分号结尾
+* 如果是块的最后一条语句，分号是可选的
+ 
+==循环语句==
+* while
+* until
+* for
+* foreach
+* continue块
+  * while和until语句可以有一个额外的块，continue块。
+  * 每次继续执行到这个块时，它都会执行一次，不管是退出第一个块，还是用一个明确的next
+  * 很少用，因为可以用for
+* 在测试条件里定义的变量，只在该语句块或由测试条件的控制语句块中可见
+  {{{ class="brush:perl"
+      while (my $line = <STDIN>) {
+          $line = lc $line;
+      }
+      continue {
+          print $line;    #仍然可见, 所以continue块也算
+      }
+      # $line 现在超出范围外了
+    }}}
+
+==循环控制==
+* 循环控制语法
+  {{{ class="brush:perl"
+      last LABEL;
+      next LABEL;
+      redo LABEL;
+    }}}
+* LABEL是可选的，如果忽略了， 就用最内层的封闭循环（while for foreach)
+*
+
+==裸块==
+* 一个BLOCK本身是一个执行一次的循环
+* 可以用last退出一个块或用redo重新运行一个块
+* eval{} sub{} do{} 不是循环块
+* 循环控制也不能在一个 if 或 unless 里运行,因为它们也不是循环。但是你总是可以引入
+  一付额外的花括弧,这样就有了一个裸块,而裸块的确是一个循环:
+  {{{ class="brush:perl"
+      if ( /pattern/) {{
+         last if /alpha/;
+         last if /beta/;
+         last if /gamma/;
+         # 在这里处理一些只在 if()里处理的事情
+      }}
+    }}}
+    
+==perl中的switch case==
+* perl中没有switch case语句
+{{{ class="brush:perl"
+    SWITCH: {
+    			if (/^abc/) { $abc = 1; last SWITCH; }
+    			if (/^def/) { $def = 1; last SWITCH; }
+    			if (/^xyz/) { $xyz = 1; last SWITCH; }
+    			$nothing = 1;
+    		}
+    #这里是另外一个:
+    SWITCH: {
+    			/^abc/ && do { $abc = 1; last SWITCH; };
+    			/^def/ && do { $def = 1; last SWITCH; };
+    			/^xyz/ && do { $xyz = 1; last SWITCH; };
+    		}
+    #或者是把每个分支都格式化得更明显:
+    SWITCH: {
+    			/^abc/
+    				&& do {
+    					$abc = 1;
+    					last SWITCH;
+    				};
+    			/^def/
+    				&& do {
+    					$def = 1;
+    					last SWITCH;
+    				};
+    			/^xyz/
+    				&& do {
+    					$xyz = 1;
+    					last SWITCH;
+    				};
+    		}
+    #甚至可以是更恐怖的:
+    if (/^ac/) {$abc = 1}
+    elseif (/^def/) { $def = 1 }
+    elseif (/^xyz/) { $xyz = 1 }
+    else {$nothing = 1}
+  }}}
+  
+==goto==
+* goto LABEL
+* goto EXPR
+* goto &NAME
+
+==全局声明==
+* 子例程和格式声明都是全局声明
+* 声明对执行顺序没有影响
+* 声明只在编译时起作用
+
+==作用域声明==
+
+===作用域变量声明===
+* 私有变量`my`
+* 有选择的访问全局变量`our`
+* 给全局变量提供临时值`my`
+* `our`把名字限制于一个作用域
+* `local`把值限制于一个作用域
+* `my`把名字和值限制于一个作用域
+* 修饰词比逗号绑定的更紧密
+  {{{ class="brush:perl"
+      my $foo, $bar = 1; #错
+      #上面和下面的东西效果一样:
+      my $foo; 
+      $bar = 1;
+	}}}
+	
+===词法作用域的变量：my===
+* 词汇对任何在它的作用域内调用的子例程都是不可见的。
+	
+===词法作用域全局声明：our===
+* 每次使用our时实际上是使用的同一个变量
+ 
+===动态作用域变量：local===
+* 每次执行local时都给全局变量一个临时值
+* 并不影响变量的全局可视性
+* 当到达临时值的末尾时，临时值被丢弃，恢复原先的值
+* 如果晨全局变量为临时值调用其他函数，而该函数看到的将是临时值
+
+==pragma==
+

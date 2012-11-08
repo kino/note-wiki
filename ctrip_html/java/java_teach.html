@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Java Teach</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../style.css">
+<link rel="Stylesheet" type="text/css" href="../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">java 开发平台 </h1>
+
+<p>
+为了以后开发的统一性，易维护性。部门内部关于java的开发应该采取统一的标准。
+</p>
+
+<h2 id="toc_1.1">JDK</h2>
+<ul>
+<li>
+jdk 1.6
+
+</ul>
+
+<h2 id="toc_1.2">Servlet 容器</h2>
+<ul>
+<li>
+Tomcat 7
+
+</ul>
+ 
+<h2 id="toc_1.3">Servlet 版本</h2>
+<ul>
+<li>
+<code>Servlet 3.0</code>
+
+</ul>
+
+<h2 id="toc_1.4">Maven</h2>
+<ul>
+<li>
+Maven 3
+
+<li>
+所有的项目都应该是Maven项目。
+
+</ul>
+
+<h2 id="toc_1.5">Java 开源框架/开源包</h2>
+<ul>
+<li>
+针对同一个包，在不同的产品或项目中我们应该依赖同一个版本。
+
+<li>
+<strong>建立一个pom项目，定义出常用开源包的版本和一些共有的配置。 </strong>
+
+<li>
+<strong>所有的java项目都应该继承这个项目。 </strong>
+
+<li>
+暂时想到的常用包列表, 以后逐步完善。
+
+</ul>
+<table>
+<tr>
+<th>
+GroupId
+</th>
+<th>
+名称
+</th>
+<th>
+版本
+</th>
+<th>
+描述
+</th>
+</tr>
+<tr>
+<td colspan="4">
+<strong>Ioc容器框架</strong>
+</td>
+</tr>
+<tr>
+<td>
+org.springframework
+</td>
+<td>
+spring
+</td>
+<td>
+3.1.1.RELEASE
+</td>
+<td>
+IOC容器，所有的子包都应该采用此版本
+</td>
+</tr>
+<tr>
+<td colspan="4">
+<strong>Web框架</strong>
+</td>
+</tr>
+<tr>
+<td>
+com.sun.jersey
+</td>
+<td>
+jersey
+</td>
+<td>
+1.1.4
+</td>
+<td>
+用于构建Restful服务，所有的子包都应该采用此版本
+</td>
+</tr>
+<tr>
+<td>
+org.apache.struts
+</td>
+<td>
+struts2
+</td>
+<td>
+2.3.4.1
+</td>
+<td>
+MVC web 框架
+</td>
+</tr>
+<tr>
+<td colspan="4">
+<strong>ORM框架</strong>
+</td>
+</tr>
+<tr>
+<td>
+org.mybatis
+</td>
+<td>
+mybatis
+</td>
+<td>
+3.1.1
+</td>
+<td>
+ORM框架
+</td>
+</tr>
+<tr>
+<td>
+org.hibernate
+</td>
+<td>
+hibernate
+</td>
+<td>
+4.1.7.Final
+</td>
+<td>
+ORM框架
+</td>
+</tr>
+<tr>
+<td colspan="4">
+<strong>对象映射转换</strong>
+</td>
+</tr>
+<tr>
+<td>
+com.sun.xml.bind
+</td>
+<td>
+jaxb
+</td>
+<td>
+2.1.9
+</td>
+<td>
+xml与java对象映射解析
+</td>
+</tr>
+<tr>
+<td>
+org.codehaus.jackson
+</td>
+<td>
+jackson
+</td>
+<td>
+1.5.4
+</td>
+<td>
+jackson与java对象映射解析
+</td>
+</tr>
+<tr>
+<td colspan="4">
+<strong>工具包 </strong>
+</td>
+</tr>
+<tr>
+<td>
+com.google.guava
+</td>
+<td>
+guava
+</td>
+<td>
+13.0.1
+</td>
+<td>
+java工具包 
+</td>
+</tr>
+<tr>
+<td colspan="4">
+<strong>单元测试</strong>
+</td>
+</tr>
+<tr>
+<td>
+junit
+</td>
+<td>
+junit
+</td>
+<td>
+4.10
+</td>
+<td>
+单元测试
+</td>
+</tr>
+</table>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

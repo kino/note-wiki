@@ -1,0 +1,8 @@
+%title A/B Test Framework API 文档
+
+=A/B Test Framework API 文档=
+
+==添加管理测试Experiment==
+# [[api/list_experiment|/ab/experiments GET]] 列出所有的测试
+# [[api/create_experiment|/ab/experiment POST]] 创建一个测试
+# [[api/create_experiment|/ab/experiment/{exprimentId} GET]] 获取指定的测试测试

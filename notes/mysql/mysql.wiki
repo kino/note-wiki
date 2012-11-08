@@ -1,0 +1,3 @@
+%title MySql
+
+# [[mysql/top-20-mysql-best-practices|MySQL性能优化的最佳20+条经验 ]]

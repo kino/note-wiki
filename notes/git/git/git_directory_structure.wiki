@@ -1,0 +1,90 @@
+%title git的目录结构(译)
+=git的目录结构(译)=
+日期: 2012-07-20 16:07<br>
+译自：http://www.siteground.com/tutorials/git/directory.htm
+
+%toc
+
+`.git`目录拥有一个类似下面的结构：
+
+==branches==
+一种过时的方式。用于存储`git fetch, git pull, git push`使用的URL缩写，它存储在一个`branches/<name>`的文件中，`name`用来替换命令后`repository`的参数。
+
+==COMMIT_EDITMSG==
+这是最后一次提交的注释。实际上git根本不用它，这是在你做一次提交后，给你的一个参考。
+
+{{{ class="brush:bash"
+    user@user:/GIT/test# cat COMMIT_EDITMSG
+    first commit
+  }}}
+
+==config==
+这是git主要的配置文件. 它保存了你项目的具体的git配置，比如远程库remotes, push配置，追踪分支(tracking branches)等。你的配置会优先从该文件加载，然后再依次从`~/.gitconfigure`和`/etc/gitconfig`加载，前提是它们存在的话。
+
+这个文件的内容类似：
+
+{{{
+    user@user:/GIT/test# cat config
+    [core]
+        repositoryformatversion = 0
+        filemode = false
+        bare = false
+        logallrefupdates = true
+    [remote "origin"]
+        url = git@github.com:user/test.git
+        fetch = +refs/heads/*:refs/remotes/origin/*
+   }}}
+
+==description==
+如果你正在使用`gitweb`或在调用`git instaweb`, 当你查看源码库或所有的版本库时，它就会显示。
+
+==gitweb==
+一个用于存放web脚本的目录。它允许你通过浏览器浏览浏览git库
+
+==HEAD==
+这个文件持有了一个指向当前分支的一个引用。它告诉git使用什么作为下一次提交的父亲。
+
+{{{
+    user@user:/GIT/test# cat HEAD
+    ref: refs/heads/master
+}}}
+
+==hooks/==
+这个目录有一些shell脚本，会在对应的git命令后执行。比如，你执行一次提交后，git会尝试执行`post-commit`这个脚本。
+
+==index==
+`index`将作为工作目录与git库之间的一个暂存区.使用index可以构建一组你想一起提交的更新。当你提交时，提交的就是在index中的东西，而不是你工作目录中的。这是一个二进制文件，包含了一个路径列表，每一条都有权限和一个Blob对象的sha-1名。它的内容可以通过下面的命令列出:
+
+{{{
+    user@user:/GIT/test# git ls-files --stage
+    100644 e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 0    README
+}}}
+
+==info/==
+包含git库中一些其他的信息。
+
+==logs/==
+保存了每个引用分支的变化记录。
+
+==objects/==
+这个目录存储了git中的数据对象--所有你加进来的文件，commits, trees, tags。这些文件通过SHA-1值来标识，前两位是子目录名，后38位是文件名。
+
+For example, if the SHA-1 for a blob we’ve checked in is a576fac355dd17e39fd2671b010e36299f713b4d
+the path to the corresponding file is:
+比如，我们加进来的一个文件blob对应的 SHA-1值是a576fac355dd17e39fd2671b010e36299f713b4d<br>
+对应的文件路径就是：
+{{{
+[GIT_DIR]/objects/a5/76fac355dd17e39fd2671b010e36299f713b4d
+}}}
+
+==ORIG_HEAD==
+前一个HEAD的状态,通常由一些比较危险的命令进行设置，这样就可以较容易恢复。
+
+==packed-refs==
+这个文件由打包好的heads和tags组成。对于高效访问很有效。
+
+==refs/==
+这个目录一般包含三个子目录--heads, remotes and tags。它们分别对应本地分支，远程分支，标签文件。
+
+比如，你创建了一个production的分支， 一个名为.git/refs/heads/production的文件就会被创建并且内容包含一个SHA-1值指向这个分支最近一次的提交。
+

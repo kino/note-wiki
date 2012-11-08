@@ -1,0 +1,285 @@
+%title 结构
+=结构=
+
+日期: 2012-05-26 16:05
+
+%toc
+
+结构是一个或多个变量的集合，这些变量可以是不同的类型，将它们组织在一下名字下。
+
+结构可以拷贝，赋值，传递给函数，函数也可以返回结构类型的返回值。
+
+自动结构和数组也可以进行初始化。
+
+==结构的基础知识==
+
+===结构的声明===
+
+{{{ class="brush:c"
+  //声明一个代表坐标点的结构
+  struct point {
+      int x;
+	  int y;
+  };
+  }}}
+# `struct`是关键字
+# `point`是结构标记，用于为结构命名， _*可以省略*_ ,如果不省略，后面可以用它代表结构声明实例。
+# `x` `y`是结构成员，成员也可以是结构类型
+# 结构标记、结构成员、变通变量可以采用相同的命名，不会冲突
+
+===结构的声明时候声明结构变量===
+
+{{{ class="brush:c"
+  struct point { int x; int y;}  x, y, z;
+  //或
+  struct { int x; int y;}  x, y, z;
+  //同下面的声明类似
+  int x,y,z;
+  }}}
+# 声明了三个代表坐标点的结构实例，`x y z`
+# 如果结构声明后没带变量表，不用为它分配存储空间
+ 
+===使用结构标记声明结构变量===
+
+{{{ class="brush:c"
+  struct point pt;
+  }}}
+# 如果声明结构的时候使用了结构标记
+# 后面就可以使用结构标记声明结构变量
+ 
+===结构变量的初始化===
+
+# 使用初值表
+  {{{ class="brush:c"
+    struct point maxpt={320, 200};
+    }}}
+# 可以使用赋值初始化
+# 可以使用返回相应类型结构的函数初始化
+
+===访问结构成员===
+
+{{{ class="brush:c"
+  pt.x;
+  pt.y;
+  }}}
+  
+===结构成员也可以是结构变量===
+
+{{{ class="brush:c"
+  struct rect {
+      struct point pt1;
+	  struct point pt2;
+  };
+  struct rect screen;
+  screen.pt1.x;
+  }}}
+  
+==结构与函数==
+
+===合法的结构操作===
+# 作为一个整体复制与赋值. 包括作为函数的参数与返回值
+# 通过`&`取址
+# 访问其成员
+# 通过一个常量值列表初始化结构，自动结构(自动变量)可以通过赋值初始化
+# _*结构不可以进行比较*_
+
+===作为函数参数的结构是值传递===
+
+===结构指针===
+{{{ class="brush:c"
+  struct point *pp;//pp是一个指向结构point的指针
+  (*pp).x,(*pp).y;//这是结构成员，括号是必须的
+  }}}
+  
+===结构指针的快捷方式===
+# 如果`p`是一个指向结构的指针，可以通过下列方式引用结构的成员：
+  {{{ class="brush:c"
+     p->结构成员
+    }}}
+# 例子：
+  {{{ class="brush:c"
+     struct rect r, *rp=&r;
+	 //下列表达式是等价的：
+	 r.pt1.x;
+	 (*rp).pt1.x;
+	 rp->pt1.x;
+    }}}
+# 下列运算符的优先级最高：
+  * 结构运算符`.`与`->`
+  * 函数调用`()`
+  * 下标`[]`
+  
+==结构数组==
+
+===结构数组的初始化===
+  {{{ class="brush:c"
+		struct key {
+			char *word;
+			int count;
+		} keytab[] = {
+			"auto", 0,
+			"break", 0,
+			"case", 0,
+			"char", 0,
+			"const", 0,
+			"continue", 0,
+			"default", 0,
+			/* ... */
+			"unsigned", 0,
+			"void", 0,
+			"volatile", 0,
+			"while", 0
+		};
+    }}}
+更精确的做法时每一行的初值都放在花括号内：
+  {{{ class="brush:c"
+     { "auto", 0 },
+     { "break", 0 },
+     { "case", 0 },
+     ...
+    }}}
+
+
+===sizeof===
+# 它是编译时的一元运算符
+# 用于计算任一对象的长度：
+  {{{ class="brush:c"
+     sizeof 对象
+     //或：
+     sizeof(类型名)
+    }}}
+# 返回整型值，用于指定对象或类型占用的存储空间字节数. _*实际上是无符号整型值，类型为*_ *size_t*
+# 对象可以是：变量、数组、结构
+# 类型可以是：init、double、派生类型（结构类型或指针类型）
+
+===数组的长度与项数===
+# _*数组的长度在编译时已确定*_
+# 它等于数组项的长度乘以项数
+# 数组项数为：`数组的长度/数组项的长度`
+# 计算数组的项数：
+  {{{ class="brush:c"
+      #define NKEYS (sizeof keytab / sizeof(struct key))
+      //或
+      #define NKEYS (sizeof keytab / sizeof(keytab[0]))
+    }}}
+  # 第二种方法通用，可以不管数组项的类型, 即使类型变了，也可以不改程序
+  # 条件编译语句`#if`中不能使用`sizeof`,因为预处理器不对类型名进行分析
+  # 预处理器不计算`#define`中的表达式，所以可以用`sizeof`
+  
+==指向结构的指针==
+# `tab`是一个有n个元素的数组
+# `&tab[-1]`与&`tab[n]`都超出了数组tab的范围
+  # 前一个是非法的
+  # _*C语言的定义保证数组末尾之后的第一个元素(即&tab[n])的指针算术运算可以正确执行*_
+   
+==自引用结构==
+
+==表查找==
+
+===遍历链表的标准方法===
+{{{ class="brush:c"
+  for(ptr = head; ptr != NULL; ptr = ptr->next)
+	  ...
+  }}}
+  
+==类型定义(typedef)==
+# 用于建立新的数据类型名，例：
+  {{{ class="brush:c"
+    typedef int Length;
+    }}}
+  * 建立了一个新类型名`Length`
+  * 它与`int`具有相同的意义
+# 另一个例子
+  {{{ class="brush:c"
+    typedef char* String;
+    }}}
+  * 它与char *或字符指针同义
+# 通常将大写字母作为`typedef`定义类型的首字母，以示区别
+# 一个复杂的例子
+  {{{ class="brush:c"
+		typedef struct tnode *Treeptr;
+		typedef struct tnode { /* the tree node: */
+			char *word;
+			/* points to the text */
+			int count;
+			/* number of occurrences */
+			struct tnode *left; /* left child */
+			struct tnode *right; /* right child */
+		} Treenode;
+
+        //分配空间函数：
+		Treeptr talloc(void)
+		{
+			return (Treeptr) malloc(sizeof(Treenode));
+		}
+    }}}
+# _*特别注意：*_
+  * `typedef` _*并没有创建一个新类型*_
+  * 它只是为某个 _*已存在的类型增加了一个名字*_ 而已。
+  * `typedef`声明没有增加新的语义
+  * 通过这种方式声明的变量和通过普通方式声明的变量 _*具有完全相同的属性*_
+  * `typedef`与`#define`类似，前者是通过编译器解释的，后者是通过预处理器，前者强于后者
+# 一个函数指针的例子
+  {{{ class="brush:c"
+		typedef int (*PFI)(char *, char *);
+		//使用
+		PFI strcmp, numcmp;
+    }}}
+  * 定义了类型`PFI`：一个指向函数的指针，具有两个`char *`类型的参数，返回`int`
+# 为什么使用`typedef`
+  * 可以使程序参数化，比如各机器`int`可能长度不一样，可以预先定义一种类型，在不同的机器上也选择相同的长度
+  * 提供更好的说明性。
+
+==联合==
+  {{{ class="brush:c"
+		union u_tag {
+			int ival;
+			float fval;
+			char *sval;
+		} u;
+    }}}
+# 联合定义了一种变量
+# 可以保存多种类型中任何一种类型的对象
+# 但同一时刻只能保存一种类型
+# 所以它的空间要足以保存这些类型中最长的变量
+# _*读取的类型必须是最近一次存入的类型*_
+  * 程序员负责追踪当前保存在联合中的类型
+# 访问联合成员
+  {{{ class="brush:c"
+    联合名.成员
+    //或
+    联合指针->成员
+    }}}
+# 联合就是 _*一种结构，它所有成员相对于基地址的偏移量都是0*_ ,此结构要大到足够容纳最‘宽’的成员
+# 联合的合法操作和结构一样：整体赋值、复制、取址及访问其一个成员
+# _*联合只能用其 第一个 成员类型的值进行初始化*_ , 上面的只能用`int`初始化
+
+==位字段==
+
+# 将多个对象保存在一个机器字中，节省存储空间
+# 直接访问一个字中的位字段的能力
+# `位字段`: 是“字” 中相邻位的集合
+# “字word”是单个的存储单元
+# 定义
+  {{{ class="brush:c"
+     strutct {
+         unsigned int is_keyword : 1;
+         unsigned int is_extern : 1;
+         unsigned int is_static : 1;
+	 } flags;
+    }}}
+  * 定义了一个变量`flags`
+  * 它包含三个一位的字段keyword
+  * 冒号后的数字表示字段的宽度
+  * 字段声明为`unsigned int`,保证它们是无符号量
+# 字段的使用和其他结构成员一样：
+  {{{ class="brush:c"
+     flags.is_extern=flags.is_static=1;
+     
+     if(flags.is_extern==0 && flags.is_static==0)
+       ...
+    }}}
+# _*注意：*_
+  * 字段可以不命名，保有冒号和宽度，起填充作用
+  * 字段的分配是从左到右还从右到左依赖于具体的机器
+  * 字段不是数组，并没有地址，所以不使用`&`运算符

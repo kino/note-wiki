@@ -1,0 +1,82 @@
+%title perl程序结构
+=perl程序结构=
+日期: 2012-06-04 16:06
+%toc
+
+# unless,和if相反的控制结构，条件为假时执行。
+# unless也有else。
+# until和while相反的结构，直到条件为真时才停止运行。
+# 表达式后可以紧接控制修饰语。如，if 修饰语可以像if 块那样使用：
+  {{{ class="brush:perl"
+      print “$n is a negative number.\n” if $n<0;
+      
+      #类似的例子：
+      &error(“Invalid input”) unless &valid($input);
+      $i *= 2 unitl $i > $j;
+      print “”, ($n += 2) while $n <10;
+      &greet($_) foreach @person;
+	}}}
+# elsif 注意else的拼写，没有第二个e。
+# for结构
+  {{{ class="brush:perl"
+      for(initialization; test; increment){
+          body;
+          body;
+      }
+	}}}
+
+# for中没有；号，则当作foreach
+  {{{ class="brush:perl"
+      #实际上是foreach 循环,从１到１０
+      for(1..10){ 
+          print “I can count to $_!\n”;
+      }
+	}}}
+# last，类似于其他语言的break，用于结束循环。
+  * 它作用于：for, foreach, while, until，以及“裸”块
+# 这可能是一个坏主意，但可以在子程序里面使用循环控制操作符控制子程序外面的循环。
+  * 也就是说，如果在循环块内调用一个子程序，子程序内执行last 操作，同时子程序没有循环块，那么程序的流程会跳到主程序循环块的后面。
+  * 在将来的Perl 中，这种在子程序内的循环控制能力会被去掉，没有人会怀念它的。
+# next，和其他语言的continue类似。
+# 循环控制的第三个操作是redo。它会调到当前循环块的顶端，不进行条件表达式判断以及接着本次循环。
+  {{{ class="brush:perl"
+      #输入测试
+      my @words = qw{ fred barney pebbles dinoWilma betty };
+      my $errors = 0;
+      foreach(@words){
+          ##redo 跳到这里##
+          print “Type the word ‘$_’: ”;
+          chomp(my $try = <STDIN>);
+          if($try ne $_){
+              print “sorry –That’s not right.\n\n”;
+              $errors++;
+              redo; #跳转到循环顶端
+          }
+      }
+      print “You’ve completed the test, with $errors errors.\n”
+	}}}
+# 如果要从最内层的循环中跳出来，可以使用标签(label)。
+  * 要给循环体加上标签，可在循环前面加上标签和冒号。
+# && || 短路操作的结果是最后被执行语句的返回值，而非仅仅是一个Boolean 值。
+  {{{ class="brush:perl"
+      my $last_name = $last_name{$someone} ||‘(No last name)’;
+	}}}
+# 三元操作符，多个分支的编程技巧：
+  {{{ class="brush:perl"
+      my $size =
+      ($width < 10 ) ? “small”:
+      ($width < 20) ? “medium”:
+      ($width < 50) ? “large”:
+      “extra_large”; #default
+	}}}
+# 酷例：
+  {{{ class="brush:perl"
+      ($m < $n) && ($m = $n);
+      ($m > 10) || print“why it it not greater?\n”
+      ($m < $n) ? ($m = $x) : ($n = $x);
+      open CHAPTER, $filename
+      or die “Can’t open‘$filename’:$!”;
+	}}}
+# and 与or。这些单词操作符和符号操作符的含义相同
+  * 但它们(单词操作符)在优先级的底端。
+

@@ -1,0 +1,5 @@
+%title 常用设置技巧列表
+=常用设置技巧=
+# [[frq/swap_capslock_and_ctrl|GNOME下交换CapsLock和Ctrl]]
+# [[frq/install_font|安装字体]]
+# [[frq/fs_inotify_max_user_watches|设置系统参数fs.inotify.max_user_watches]]

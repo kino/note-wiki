@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>perl函数</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">perl函数</h1>
+<p>
+日期: 2012-06-04 16:06
+<div class="toc">
+<ul>
+<li><a href="#toc_1">perl函数</a>
+</ul>
+</div>
+</p>
+
+<ol>
+<li>
+定义一个子程序：
+<pre  class="brush:perl">
+    sub marine {
+        $n += 1; #全局变量$n
+        print "Hello, sailor number $n!\";
+    }
+</pre>
+
+<li>
+子程序定义是全局的，可以在任何地方定义。
+
+<li>
+没有私有的子程序，如果有两个同名的子程序同时存在，后面的一个将覆盖前面一个定义。
+
+<li>
+通过&amp;调用子程序
+<pre  class="brush:perl">
+    &amp;marine;
+</pre>
+
+<li>
+子程序的返回值是最后一个被计算的表达式。
+
+<li>
+如果向子程序传递参数，参数将存储在列表@_中。
+
+<ul>
+<li>
+@_是子程序中的私有变量，不会影响到全局中的@_。
+
+<li>
+如果有一个全局变量@_，在调用子程序前会存储起来，调用完后再还回去。
+
+<li>
+如果使用&amp;调用子程序，且没有使用()传递参数，如果这时在子程序中使用@_，就是使用的全局@_。但不见意这样做！
+
+</ul>
+<li>
+可以使用my创建私有变量，创建的这些变量只在当前代码块中有用。默认情况下变量都是全局的。
+<pre  class="brush:perl">
+    my($m,$n)
+</pre>
+
+<li>
+如果子程序声明在前，调用在后，调用时可以省略&amp;。但如果有内嵌的函数重名，则不能省略。
+<pre  class="brush:perl">
+    sub division{
+        $_[0] / $_[1]; #第一个参数除以第二个参数
+    }
+    my $quotient = division 355, 113; #可以省略掉括号
+</pre>
+
+<li>
+子程序的返回值可以是标量，也可以是列表。
+
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

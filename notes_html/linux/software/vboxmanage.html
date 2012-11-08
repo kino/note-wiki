@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>使用vboxmanage管理VirtualBox</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">使用vboxmanage管理VirtualBox</h1>
+
+<p>
+日期: 2012-03-31 12:03<br>
+整理自: <a href="http://www.91linux.com/html/article/guanli/centos/20101012/20920.html">http://www.91linux.com/html/article/guanli/centos/20101012/20920.html</a>
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">使用vboxmanage管理VirtualBox</a>
+<ul>
+<li><a href="#toc_1.1">安装VirtualBox</a>
+<li><a href="#toc_1.2">加载一个已存在的VM</a>
+<li><a href="#toc_1.3">查看VM列表</a>
+<li><a href="#toc_1.4">启动一个VM并开启远程桌面</a>
+<li><a href="#toc_1.5">VM管理</a>
+<li><a href="#toc_1.6">硬盘管理</a>
+<li><a href="#toc_1.7">创建IDE接口</a>
+<li><a href="#toc_1.8">修改VM</a>
+<li><a href="#toc_1.9">挂载ISO安装盘</a>
+<li><a href="#toc_1.10">将vdi磁盘放在设备0的第0个端口</a>
+<li><a href="#toc_1.11">将ISO挂载放在设备0的第1个端口</a>
+<li><a href="#toc_1.12">将ISO加到虚拟机的DVD光驱里</a>
+<li><a href="#toc_1.13">启动|关闭|暂停</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">安装VirtualBox</h2>
+
+<ol>
+<li>
+安装virtaulbox
+<pre  class="brush:bash">
+sudo rpm -i Virtual*.rpm
+</pre>
+
+<li>
+安装virtaulbox extention pack
+<pre  class="brush:bash">
+sudo voxmanage extpack install oracle*.pack
+</pre>
+
+</ol>
+
+<h2 id="toc_1.2">加载一个已存在的VM</h2>
+
+<ol>
+<li>
+从其他地方拷过来VM
+
+<li>
+安装virtaulbox
+<pre  class="brush:bash">
+vboxmanage registervm /path/*.vbox
+</pre>
+
+</ol>
+	
+<h2 id="toc_1.3">查看VM列表</h2>
+
+<ul>
+<li>
+
+<pre  class="brush:bash">
+vboxmanage list vms
+</pre>
+
+</ul>
+
+	
+<h2 id="toc_1.4">启动一个VM并开启远程桌面</h2>
+
+<ul>
+<li>
+
+<pre  class="brush:bash">
+vboxheadless --startvm WinXP --vrdp=on&amp; 
+</pre>
+
+</ul>
+
+<h2 id="toc_1.5">VM管理</h2>
+
+<ul>
+<li>
+创建一个全新的VM
+<pre  class="brush:bash">
+vboxmanage createvm --name "winxp" --register
+</pre>
+
+<li>
+删除一个VM
+<pre  class="brush:bash">
+vboxmanage unregistervm &lt;uuid&gt;|&lt;name&gt;  
+</pre>
+
+<li>
+查看地一个vmw信息
+<pre  class="brush:bash">
+vboxmanage showvminfo &lt;uuid&gt;|&lt;name&gt;  
+</pre>
+
+<li>
+查看地VM列表
+<pre  class="brush:bash">
+vboxmanage list vms
+</pre>
+
+<li>
+创建一个硬盘
+<pre  class="brush:bash">
+vboxmanage createvdi --filename /path/winxp.vdi --size 80000 --remember
+</pre>
+
+</ul>
+	
+<h2 id="toc_1.6">硬盘管理</h2>
+
+<ul>
+<li>
+创建一个硬盘
+<pre  class="brush:bash">
+vboxmanage createvdi --filename /path/winxp.vdi --size 80000 --remember
+</pre>
+
+<li>
+删除一个硬盘
+<pre  class="brush:bash">
+vboxmanage unregisterimage disk /path/winxp.vdi
+</pre>
+
+</ul>
+	
+<h2 id="toc_1.7">创建IDE接口</h2>
+<ul>
+<li>
+
+<pre  class="brush:bash">
+vboxmanage storagectl winxp --name "IDE Controller" --add ide
+vboxmanage storagectl winxp –name "SATA Controller" –add sata
+</pre>
+
+</ul>
+	
+<h2 id="toc_1.8">修改VM</h2>
+<ul>
+<li>
+
+<pre  class="brush:bash">
+ vboxmanage modifyvm "winxp" --ostype "Windows XP" --memory "1024" --vram "16" --boot2 disk --boot1 dvd --hda "/path/winxp.vdi" --sata on --acpi on --pae on --hwvirtex on --nic1 bridged --cableconnected1 on --nictype1 "82540EM" --bridgeadapter1 eth0 --intnet1 brigh1 --macaddress1 auto --vrdp on --vrdpport 4000 --vrdpmulticon on
+ SATA:
+ vboxmanage modifyvm "winxp" --ostype "Windows XP" --memory "1024" --vram "16" --boot2 disk --boot1 dvd --sda "/path/winxp.vdi" --sata on --acpi on --pae on --hwvirtex on --nic1 bridged --cableconnected1 on --nictype1 "82540EM" --bridgeadapter1 eth0 --intnet1 brigh1 --macaddress1 auto --vrdp on --vrdpport 4000 --vrdpmulticon on
+</pre>
+
+</ul>
+	
+<h2 id="toc_1.9">挂载ISO安装盘</h2>
+<ul>
+<li>
+
+<pre  class="brush:bash">
+ vboxmanage openmedium dvd /iso/winxp.iso
+</pre>
+
+</ul>
+
+<h2 id="toc_1.10">将vdi磁盘放在设备0的第0个端口</h2>
+<ul>
+<li>
+
+<pre  class="brush:bash">
+vboxmanage storageattach winxp --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium /path/winxp.vdi
+</pre>
+
+</ul>
+	
+<h2 id="toc_1.11">将ISO挂载放在设备0的第1个端口</h2>
+<ul>
+<li>
+
+<pre  class="brush:bash">
+vboxmanage storageattach winxp --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium /iso/winxp.iso
+</pre>
+
+</ul>
+	
+<h2 id="toc_1.12">将ISO加到虚拟机的DVD光驱里</h2>
+<ul>
+<li>
+
+<pre  class="brush:bash">
+vboxmanage modifyvm "winxp" --dvd /iso/winxp.iso
+</pre>
+
+</ul>
+	
+<h2 id="toc_1.13">启动|关闭|暂停</h2>
+<ul>
+<li>
+启动
+<pre  class="brush:bash">
+ vboxmanage startvm "winxp" -type vrdp
+</pre>
+
+<li>
+暂停
+<pre  class="brush:bash">
+ vboxmanage controlvm "winxp" pause
+</pre>
+
+<li>
+继续
+<pre  class="brush:bash">
+ vboxmanage controlvm "winxp" resume
+</pre>
+
+<li>
+重启
+<pre  class="brush:bash">
+ vboxmanage controlvm "winxp" reset
+</pre>
+
+<li>
+关机
+<pre  class="brush:bash">
+ vboxmanage controlvm "winxp" poweroff
+</pre>
+
+<li>
+休眠
+<pre  class="brush:bash">
+ VBoxManage controlvm "winxp" savestate
+</pre>
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

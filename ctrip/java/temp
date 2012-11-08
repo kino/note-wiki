@@ -1,0 +1,95 @@
+<experiment>
+    <url>http://localhost:8080/ab/experiments/2</url>
+    <name>Test One</name>
+    <description>Test One</description>
+    <startDate>2012-11-01 00:00</startDate>
+    <endDate>2012-12-31 00:00</endDate>
+    <isActive>true</isActive>
+    <ruleType>
+        <url>http://localhost:8080/ab/rule-types/1</url>
+        <code>PERCENT</code>
+        <description>group the user by percent.</description>
+    </ruleType>
+    <alternatives>
+        <alternative>
+            <url>http://localhost:8080/ab/experiments/2/alternatives/7</url>
+            <code>A_A</code>
+            <name>Alternative a</name>
+            <description>test alternative a</description>
+            <isActive>true</isActive>
+            <ruleParams>
+                <url>http://localhost:8080/ab/experiments/2/alternatives/7/rule-params</url>
+                <param1>30</param1>
+            </ruleParams>
+        </alternative>
+        <alternative>
+            <url>http://localhost:8080/ab/experiments/2/alternatives/8</url>
+            <code>A_B</code>
+            <name>Alternative b</name>
+            <description>test alternative b</description>
+            <isActive>true</isActive>
+            <ruleParams>
+                <url>http://localhost:8080/ab/experiments/2/alternatives/8/rule-params</url>
+                <param1>30</param1>
+            </ruleParams>
+        </alternative>
+    </alternatives>
+</experiment>
+
+
+
+
+ {
+    "url": "http://localhost:8080/ab/experiments/2",
+    "name": "Test one",
+    "description": "Test one",
+    "startDate": "2012-11-01 00:00",
+    "endDate": "2012-12-31 00:00",
+    "isActive": true,
+    "ruleType": {
+        "url": "http://localhost:8080/ab/rule-types/1",
+        "code": "PERCENT",
+        "description": "group the user by percent."
+    },
+    "alternatives": [
+        {
+            "code": "A_A",
+            "url": "http://localhost:8080/ab/experiments/2/alternatives/7",
+            "name": "Alternative a",
+            "description": "test alternative description a",
+            "isActive": true,
+            "ruleParams": {
+                "url": "http://localhost:8080/ab/experiments/2/alternatives/7/rule-params",
+                "param1": "30",
+                "param2": null,
+                "param3": null,
+                "param4": null,
+                "param5": null,
+                "param6": null,
+                "param7": null,
+                "param8": null,
+                "param9": null
+            }
+        },
+        {
+            "code": "A_B",
+            "url": "http://localhost:8080/ab/experiments/2/alternatives/7",
+            "name": "Alternative b",
+            "description": "test alternative description b",
+            "isActive": true,
+            "ruleParams": {
+                "url": "http://localhost:8080/ab/experiments/2/alternatives/7/rule-params",
+                "param1": "30",
+                "param2": null,
+                "param3": null,
+                "param4": null,
+                "param5": null,
+                "param6": null,
+                "param7": null,
+                "param8": null,
+                "param9": null
+            }
+        }
+    ]
+}
+

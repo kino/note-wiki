@@ -1,0 +1,41 @@
+%title 语句和声明
+=语句和声明=
+日期: 2012-06-20 21:06
+
+%toc
+
+* 每条语句最后要以分号结尾
+* 如果是块的最后一条语句，分号是可选的
+ 
+==循环语句==
+* while
+* until
+* for
+* foreach
+
+==循环控制==
+* 循环控制语法
+  {{{ class="brush:perl"
+      last LABEL;
+      next LABEL;
+      redo LABEL;
+    }}}
+* LABEL是可选的，如果忽略了， 就用最内层的封闭循环（while for foreach)
+*
+
+==裸块==
+* 一个BLOCK本身是一个执行一次的循环
+* 可以用last退出一个块或用redo重新运行一个块
+* eval{} sub{} do{} 不是循环块
+* 循环控制也不能在一个 if 或 unless 里运行,因为它们也不是循环。但是你总是可以引入
+  一付额外的花括弧,这样就有了一个裸块,而裸块的确是一个循环:
+  {{{ class="brush:perl"
+      if ( /pattern/) {{
+         last if /alpha/;
+         last if /beta/;
+         last if /gamma/;
+         # 在这里处理一些只在 if()里处理的事情
+      }}
+    }}}
+
+

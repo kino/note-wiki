@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<experiments>
+    <experiment>
+        <id>6</id>
+        <name>test</name>
+        <description>test</description>
+        <startDate>2012-10-16 00:00</startDate>
+        <endDate>2012-10-16 00:00</endDate>
+        <isActive>false</isActive>
+        <alternatives>
+            <alternative>
+                <id>1</id>
+                <name>testAlternative</name>
+                <description>test alternative description</description>
+                <isActive>true</isActive>
+                <rules>
+                    <rule>
+                        <id>1</id>
+                        <ruleType>PERCENT</ruleType>
+                        <value>30</value>
+                    </rule>
+                </rules>
+            </alternative>
+            <alternative>
+                <id>2</id>
+                <name>testAlternative</name>
+                <description>test alternative description</description>
+                <isActive>false</isActive>
+                <rules/>
+            </alternative>
+        </alternatives>
+    </experiment>
+    <experiment>
+        <id>7</id>
+        <name>test</name>
+        <description>test</description>
+        <startDate>2012-10-16 00:00</startDate>
+        <endDate>2012-10-16 00:00</endDate>
+        <isActive>true</isActive>
+        <alternatives/>
+    </experiment>
+</experiments>

@@ -1,0 +1,11 @@
+%title git中使用vimdiff比较差异
+=git中使用vimdiff比较差异=
+日期: 2012-07-20 14:07
+%toc
+
+设置两条全局设置：
+
+    git config --global diff.tool vimdiff<br>
+    git config --global difftool.prompt No
+
+然后就可以用`git difftool`来比较差异了, `git diff` 还是会用plain text显示。

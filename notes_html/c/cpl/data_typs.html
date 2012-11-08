@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>类型、运算符，长度</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">类型、运算符，长度</h1>
+
+<p>
+日期: 2012-04-05 19:04
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">类型、运算符，长度</a>
+<ul>
+<li><a href="#toc_1.1">数据类型及长度</a>
+<ul>
+<li><a href="#toc_1.1.1">基本数据类型</a>
+<li><a href="#toc_1.1.2">限定符short long</a>
+<li><a href="#toc_1.1.3">限定符signed unsigned</a>
+<li><a href="#toc_1.1.4">long double</a>
+</ul>
+<li><a href="#toc_1.2">常量</a>
+<ul>
+<li><a href="#toc_1.2.1">数字常量</a>
+<li><a href="#toc_1.2.2">字符常量</a>
+<li><a href="#toc_1.2.3">常量表达式在编译进求值，而不是在运行时求值</a>
+<li><a href="#toc_1.2.4">字符串常量</a>
+<li><a href="#toc_1.2.5">枚举常量</a>
+</ul>
+<li><a href="#toc_1.3">声明</a>
+<li><a href="#toc_1.4">算术运算符</a>
+<li><a href="#toc_1.5">关系运算符与逻辑运算符</a>
+<li><a href="#toc_1.6">类型转换</a>
+<ul>
+<li><a href="#toc_1.6.1">隐式转换</a>
+</ul>
+<li><a href="#toc_1.7">自增、自减运算符</a>
+<li><a href="#toc_1.8">位操作符</a>
+<li><a href="#toc_1.9">赋值运算符与表达式</a>
+<ul>
+<li><a href="#toc_1.9.1">赋值运算符</a>
+<li><a href="#toc_1.9.2">赋值语句具有值</a>
+<li><a href="#toc_1.9.3">条件表达式</a>
+</ul>
+<li><a href="#toc_1.10">运算符优先级与求值顺序</a>
+<ul>
+<li><a href="#toc_1.10.1">求值顺序</a>
+</ul>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">数据类型及长度</h2>
+
+<h3 id="toc_1.1.1">基本数据类型</h3>
+<ul>
+<li>
+<code>char</code>  字符型，占用一个字节，用于存放本地字符集中的一个字符
+
+<li>
+<code>int</code> 整数型，通常反映机器中整数的自然长度
+
+<li>
+<code>float</code> 单精度浮点数
+
+<li>
+<code>double</code> 双精度浮点数
+
+</ul>
+ 
+<h3 id="toc_1.1.2">限定符short long</h3>
+<ul>
+<li>
+用于限定<code>int</code>
+<pre  class="brush:c">
+  short int sh;
+  long int counter;
+</pre>
+
+<li>
+<code>int</code>可以省略
+<pre  class="brush:c">
+  short sh;
+  long counter;
+</pre>
+
+<li>
+short与int至少为16位
+
+<li>
+long至少为32位
+
+<li>
+short不得长于int
+
+<li>
+int不得长于long
+
+</ul>
+
+<h3 id="toc_1.1.3">限定符signed unsigned</h3>
+<ul>
+<li>
+可以限定任何类型
+
+<li>
+不带限定符的<code>char</code>是否带符号取决于具体的机器
+
+<li>
+但可打印的字符总是正值
+
+</ul>
+ 
+<h3 id="toc_1.1.4">long double</h3>
+<ul>
+<li>
+表示高精度浮点数
+
+<li>
+浮点型的长度也取决于具体的机器
+
+</ul>
+ 
+<p>
+ <b>有关类型长度定义的常量以及与机器和编译相关的属性可以在头文件&lt;limits.h&gt;与&lt;float.h&gt;中找到</b>
+</p>
+ 
+<h2 id="toc_1.2">常量</h2>
+
+<h3 id="toc_1.2.1">数字常量</h3>
+
+<ul>
+<li>
+<b>int:</b> <code>100</code>
+
+<li>
+<b>long(后缀为l或L):</b> <code>100l 100L</code>
+
+<li>
+<b>unsigned(后缀为u或U):</b> <code>100u 100U 100ul 100UL</code>
+
+<li>
+<b>double(不带后缀):</b> <code>1.24, 1e-2</code>
+
+<li>
+<b>float(后缀为f或F):</b> <code>1.24f, 1.24F, 1e-2f, 1e-2F</code>
+
+<li>
+<b>long double(后缀为l或L):</b> <code>1.24l, 1.24L, 1e-2l, 1e-2L</code>
+
+<li>
+<b>八进制(前缀0):</b> <code>037</code>
+
+<li>
+<b>十六进制(前缀为0x或0X):</b> <code>0x1f, 0X1F, 0XFUL(表示为unsigned long, 15)</code>
+
+</ul>
+
+<h3 id="toc_1.2.2">字符常量</h3>
+
+<ul>
+<li>
+一个字符常量是一个整数
+
+<li>
+书写时将一个字符括在单引号中，如：<code>'x'</code>
+
+<li>
+转义字符：<code>'\n', '\t'</code>
+
+<li>
+八进制表示法<b>\ooo</b>,ooo表示1～3个八进制数：<code>'\013' 表示VTAB</code>
+
+<li>
+十六进制表示法<b>\xhh</b>,hh表示一个或多个十六进制数：<code>'\xb' 表示VTAB</code>
+
+<li>
+<b>'\0'表示值为0的字符，也就是空字符null</b>
+
+</ul>
+ 
+<h3 id="toc_1.2.3">常量表达式在编译进求值，而不是在运行时求值</h3>
+
+<pre  class="brush:c">
+ #define MAXLINE 1000
+ char line[MAXLINE+1];
+ //或：
+ #define LEAP 1 /* in leap years */
+ int days[31+28+LEAP+31+30+31+30+31+31+30+31+30+31];
+</pre>
+
+<h3 id="toc_1.2.4">字符串常量</h3>
+
+<ul>
+<li>
+又叫字符串字面值
+
+<li>
+就是字符数组，以<code>'\0'</code>结尾
+
+<li>
+所以物理存储中，比双引号中多一个
+
+<li>
+<code>'x'</code> 是一个整数
+
+<li>
+<code>"x"</code> 是一字符数组，包含：<code>'x' '\0' </code>
+
+</ul>
+ 
+<h3 id="toc_1.2.5">枚举常量</h3>
+
+<pre  class="brush:c">
+ enum boolean {NO,YES}
+</pre>
+
+<ul>
+<li>
+<em><strong>就是一常量整型值列表</strong></em>
+
+<li>
+无显示说明: 第一个值为0, 第二个值为1, 依此类推
+
+<li>
+若只指定部分值，未指定的根据最后一个指定的向后递增
+<pre  class="brush:c">
+ //FEB为2，MAR为3 ... ...
+ enum months {JAN=1,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC}
+</pre>
+
+<li>
+不同枚举中的名字必须互不相同
+
+<li>
+同一枚举中的不同名字可以拥有相同的值
+
+<li>
+可以生成枚举类型的变量，但编译器并不会检查存储的值是否为合法的的枚举值。
+
+<li>
+但它提供检查的机会
+
+<li>
+通常情况下，比<code>#define</code>好
+
+</ul>
+ 
+<h2 id="toc_1.3">声明</h2>
+
+<ul>
+<li>
+所有变量必须先声明再使用。
+
+<li>
+可以在声明的同时进行初始化。
+
+<li>
+非自动变量只能初始化一次, 并且是在程序开始执行之前, 初始化表达式必须为常量表达式	
+
+<li>
+默认情况下，外部变量与静态变量被初始化为0，未显示初始化的自动变量为未定义值，即无效值。
+
+<li>
+<strong>任何变量声明都可以使用限定符const:</strong> 
+
+<ul>
+<li>
+表示该变量值不能修改
+
+<li>
+如果是数组，表示数组所有元素的值都不能修改
+
+<li>
+如果试图修改const限定的变量，其结果取决于具体的实现
+
+</ul>
+</ul>
+
+<h2 id="toc_1.4">算术运算符</h2>
+
+<ul>
+<li>
++ - * / %
+
+<li>
+% 不能用于float 和double
+
+<li>
+若存在负操作数，整数除法截取方向与取模结果依赖于具体的机器实现
+
+<li>
+优先级：二元+ -  &lt;  * / % &lt; 一元+ -
+
+<li>
+采用从左到右的接合规则
+
+</ul>
+ 
+<h2 id="toc_1.5">关系运算符与逻辑运算符</h2>
+<p>
+优先级：
+</p>
+<ul>
+<li>
+&gt; &gt;= &lt; &lt;=  相同, 但低于 == !=
+
+<li>
+&amp;&amp; 高于 ||
+
+<li>
+! 将非0操作数转换为0, 将0转换为1
+
+</ul>
+ 
+<h2 id="toc_1.6">类型转换</h2>
+
+<p>
+当运算符的几个操作数类型不一致时，需要转换成共同的数据类型。
+</p>
+
+<p>
+<strong>自动转换</strong>, 将“比较窄”的类型转换成“比较宽”的类型，并且不丢失信息。
+</p>
+
+<p>
+<strong>char</strong> 为比较窄的整型，可以放心自由使用。
+</p>
+
+<p>
+<strong>&lt;ctype.h&gt;</strong> 头文件定义了一组与字符集无关的测试和转换函数，比如： <code>tolower(c)</code>
+</p>
+
+<p>
+<strong>c并没有规定char是有符号的还是无符号的</strong> 所以当转换成整数时，有没有可能是负的，这要依赖于具体的机器实现。<br/>
+<strong>但c规定了标准打印字符都是正的</strong>
+</p>
+
+<p>
+<strong>逻辑表达式为真时，值为1，为假时，值为0</strong> 
+</p>
+<pre  class="brush:c">
+   d = '9' &gt; '0'; // d 为 1
+</pre>
+  
+<h3 id="toc_1.6.1">隐式转换</h3>
+
+<p>
+如果两个操作数具有不同的类型时，需要将“较低”的类型转换为“较高”的类型，运算结果为较高的类型。 
+</p>
+
+<p>
+如果没有unsigned操作数，使用如下规则:
+</p>
+
+<ol>
+<li>
+如果一个为<code>long double</code>, 另一个转换为<code>long double</code>
+
+<li>
+如果一个为<code>double</code>,另一个转换为<code>double</code>
+
+<li>
+如果一个为<code>float</code>,另一个转换为<code>float</code>
+
+<li>
+将<code>char</code>与<code>short</code>转换为<code>int</code>
+
+<li>
+如果一个操作数为<code>long</code>,另一个也转换成<code>long</code>
+
+</ol>
+ 
+<p>
+<strong><em>注意：</em></strong>  表达式中的<code>float</code>并不会自动转换成<code>double</code>
+</p>
+
+<p>
+如果操作数中包含unsigned，转换规则就会复杂一些，因为有符号数与无符号数的比较运算是和机器相的。
+</p>
+<pre  class="brush:c">
+  //int为16位，long为32位
+  -1L&lt;1U;  //unsigned int 1 为提升为signed long 
+  -1L&gt;1UL; //signed long -1被提升为unsigned long, 变成一个很大的数
+</pre>
+
+
+<p>
+赋值也要进行类型转换。
+</p>
+
+<p>
+无论是否进行符号扩展，字符型变量都要转换成整形变量。
+</p>
+
+<p>
+把较长的整数转换成较短的整数或字符型时，高位部分被丢弃。
+</p>
+
+<p>
+float转换为int时，小数部分被截取掉。<br/>
+double转换为float时，是四舍五入还是截取，要依赖于具体的实现。
+</p>
+
+<p>
+参数传递给函数时，要进行类型转换。<br/>
+没有函数原型（声明)的情况下，char与short被转换为int, float被转换为double.
+</p>
+
+<p>
+显示强制类型转换： <strong>(类型名)表达式</strong> <br/>
+<strong><em>注意：</em></strong>  强制类型转换只是生成一个新的指定类型的值，原变量的值并没改变.
+它与其他一元操作符具有相同的优先级
+</p>
+
+<p>
+通常情况下，函数是通过函数原型声明的，声明会对参数进行自动的强制类型转换。
+</p>
+<pre  class="brush:c">
+  //声明：
+  double sqrt(double);
+  //调用
+  sqrt(2); //int 2 会自动转型为double 2.0
+</pre>
+  
+
+<h2 id="toc_1.7">自增、自减运算符</h2>
+<pre  class="brush:c">
+  int n1,n2,a;
+  n1=n2=5;
+  a=n1++;        // a 等于 5
+  a=++n2;        // a 等于 6
+</pre>
+  
+<h2 id="toc_1.8">位操作符</h2>
+
+<p>
+6个操作符，只能用于整型数，即只能用于： <code>char,short,int,long</code>
+</p>
+
+
+<table>
+<tr>
+<td>
+&amp;
+</td>
+<td>
+按位与 AND
+</td>
+</tr>
+<tr>
+<td>
+\\
+</td>
+<td>
+按位或 OR
+</td>
+</tr>
+<tr>
+<td>
+^
+</td>
+<td>
+按位异或 XOR
+</td>
+</tr>
+<tr>
+<td>
+&lt;&lt;
+</td>
+<td>
+左移
+</td>
+</tr>
+<tr>
+<td>
+&gt;&gt;
+</td>
+<td>
+右移
+</td>
+</tr>
+<tr>
+<td>
+~
+</td>
+<td>
+按位求反, 一元操作符
+</td>
+</tr>
+</table>
+
+<p>
+<em><strong>算术移位与逻辑移位</strong></em>
+</p>
+<ul>
+<li>
+对signed类型进行右移，左边空出的部分用符号位补，为算术移位
+
+<li>
+用0补为逻辑移位
+
+</ul>
+
+<p>
+<em><strong>将x的后６位置0:</strong></em>
+</p>
+<pre  class="brush:c">
+  x = x &amp; ~077;
+</pre>
+<p>
+或：
+</p>
+<pre  class="brush:c">
+  x = x &amp; 0177700;
+</pre>
+<p>
+<em><strong>注：</strong></em> 上面的要好于下面的，因为下面的假定x为16位的数值。
+上面的也没有增加额外的开销，因为<code>~077</code>是常量表达式，会在编译时求值。
+</p>
+
+<h2 id="toc_1.9">赋值运算符与表达式</h2>
+
+<h3 id="toc_1.9.1">赋值运算符</h3>
+<ul>
+<li>
+<code>+=</code> 被称为 <em><strong>赋值运算符</strong></em>
+<pre  class="brush:c">
+  i += 2;
+</pre>
+
+<li>
+<code>expr1</code> 可以是一个表达式，而不一定是一个单独的变量
+<pre  class="brush:c">
+ expr1 op= expr2;
+</pre>
+
+</ul>
+
+
+<h3 id="toc_1.9.2">赋值语句具有值</h3>
+
+<ul>
+<li>
+值的类型为左操作数的值
+
+<li>
+值为赋值操作完成后的值
+<pre  class="brush:c">
+   while((c=getchar())!=EOF)
+   //+= -= 也可以用在表达式中，但比较少使用
+</pre>
+
+</ul>
+
+<h3 id="toc_1.9.3">条件表达式</h3>
+
+<pre  class="brush:c">
+   expr1 ? expr2 : expr3;
+</pre>
+
+<ul>
+<li>
+条件表达式实际上是一种表达式，可以用在其他表达式可以使用的任何地方。
+
+<li>
+如果expr2与expr3类型不一样，其结果由前面所述的转换规则决定。
+
+<li>
+如果n为int, f为float, 例如:
+<pre  class="brush:c">
+  (n &gt; 0) ? f : n;
+</pre>
+
+<ul>
+<li>
+<em><strong>无论n是否为正值，其表达式结果类型都为float</strong></em>
+
+</ul>
+</ul>
+
+<h2 id="toc_1.10">运算符优先级与求值顺序</h2>
+
+<h3 id="toc_1.10.1">求值顺序</h3>
+<ul>
+<li>
+C语言未指定一个运算符中多个操作数的计算顺序，　&amp;&amp; || ?: , 除外
+<pre  class="brush:c">
+  x = f() + g();
+  //不知道f()和g()哪个先执行，如果f()是否执行会影响到g()的执行结果，比如f()会改变g()用到的变量
+  //上面表达式的值就会因执行顺序不同而不同
+</pre>
+
+<li>
+C语言未指定函数调用中各个参数的计算顺序
+<pre  class="brush:c">
+  printf("%d %d \n", n++, power(2,n);
+  //你不知道n++与power(2,n)哪个先执行，
+  //所以你不知道传入power(2,n)中的n是n的原始值还是n++运算后的值
+</pre>
+
+<li>
+函数调用、嵌套赋值语句、自增与自减运算符都有可能产生副作用
+<pre  class="brush:c">
+   a[i]=i++;
+//你不知道下标是i的原始值还是i++运算后的值
+</pre>
+
+<li>
+如果代码的执行结果与求值顺序有关，就不是好的程序设计
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

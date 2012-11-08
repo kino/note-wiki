@@ -1,0 +1,106 @@
+%title perl中的字符串
+=perl中的字符串=
+
+日期: 2012-06-03 16:06
+%toc
+
+# 有perl中，最短的字符串是空串，最长的字符串是填满整个内存。
+# perl中的字符串可以包括任意字符，意味着你可以创建、遍历、操作二进制数据
+# 在perl中，null并没有特殊意义。
+# 单引号字符串
+  * 单引号代表字符串的开始与结束
+  * 只有单引号'和反斜线\是特殊字符，其它所有字符都代表其本身，包括换行符在内。
+  * 换句话说，在单引号字符串中，只有用到了单引号和反斜线时才需要转义。比如在字符串中你写了\n，并不会当作换行符处理，而只是两个普通的字符\和n
+  * 对于\，只有它后面紧跟着\和'时，才会被当作特殊字符处理
+# 双引号字符串
+  * 和我们熟悉的在其它语言中的字符串一样。\会被当作转义字符处理。
+  * 它还有一个特有的特质：变量内插。就是当字符串中含有一个变量名时，它会用变量值来代替它。
+# 连接操作符.  比如：
+  {{{ class="brush:perl"
+    "Hello".' '."World!" #结果就是"Hello World!"
+	}}}
+# 重复操作符x 是一小写字母。操作符左边是一个字符串，操作符右边是一个数字，操作结果会把字符串重复那个数字的次数。
+  {{{ class="brush:perl"
+    "hello"x5 #操作结果就是"hellohellohellohellohello"
+	}}}
+  * 注意：当x右边的数字是一个非整数时，将转换为小于等于它的整数，比如4.8会转换成4,而当这个数字小于1时，则会产生一个空串。
+# 查找子字符串使用index：
+  {{{ class="brush:perl"
+    $where = index($big, $small);
+	}}}
+  * 它还有第三个参数，它要求从后面的某个地方开始查询，它会告诉index从什么位置开始。
+  * 从后往前查使用rindex
+# 子字符串substr
+  {{{ class="brush:perl"
+      $part = substr($string, $initial_position, $length);
+      #$initial_position可以为负
+      #$length可以省略
+	}}}
+# 比较酷的应用：
+  {{{ class="brush:perl"
+      my $string = “Hello, world!”;
+      substr($string, 0, 5) = “Goodbye”; # $string 现在变成了“Goodbye, world!”
+      #下例将字符串的最后20 个字符串中的fred 替换成barney。
+      substr($string, -20) =~ s/fred/barney/g;
+      #使用susbtr第四个参数，第四个参数是替换的字符串：
+      my $previous_value = substr($string, 0, 5, “Goodbye”);
+	}}}
+# sprintf 函数的参数和printf 的参数完全相同（除了可选的文件句柄外），但它返回的是被请求的字符串，而非打印出来。
+  {{{ class="brush:perl"
+      my $data_tag = sprintf
+          “%4d/%02d/%02d %02d:%02d:%02d”,
+          $yr, $mo, $da, $h, $m, $s;
+	}}}
+  * 在上例中，$date_tag 得到像“2038/01/19 3:00:08”这样的值。
+  * 格式化数字中的前置0 的含义是，如果需要，在前面加上0，使之达到需要的宽度。
+  * 格式中如果没有前置0，则日期－时间的结果字符串中，我们得到不需要的空格，而非0，看起来像“2038/ 1/19 3: 0: 8”。
+  * 保留小数点后两位
+  {{{ class="brush:perl"
+      my $money = sprintf “%.2f”, 2.49997;
+      sub big_money {
+          my $number = sprintf “%.2f”, shift @_;
+          
+          #在do-nothing 循环中，每一次加入一个逗号
+          1 while $number =~ s/^(-?\d+) (\d\d\d)/$1,$2/;
+          
+          #将美元符号放入合适的位置
+          $number =~ s/^(-?)/$1\$/;
+          $number;
+      }
+      #while的新用法
+	}}}
+# 高级排序，排序子程序：
+  * 子程序
+  {{{ class="brush:perl"
+      sub by_number {
+          if($a < $b){-1} elsif($a > $b){1} else {0}
+      }
+      my @result = sort by_number @some_numbers;
+	}}}
+  * <=>(用于数字比较) 和 cmp(用于字符串比较）:
+  {{{ class="brush:perl"
+      sub by_number {$a <=> $b }
+      sub case_insenstive {“\L$a”cmp “\L$b”} #无关大小写
+	}}}
+  * inline:
+  {{{ class="brush:perl"
+      my @numbers = sort { $a <=> $b } @some_numbers;
+      #降序：
+      my @descending = reverse sort { $a <=> $b } @some_numbers;
+      #or
+      my @descending = sort {$b <=> $a } @some_nubmers;
+	}}}
+# hash排序
+  {{{ class="brush:perl"
+      my %score = (“barney”=>, “fred”=>205, “dino”=> 30);
+      my @winners = sort by_score keys %score;
+      sub by_socre { $score{$b} <=> $score{$a}}
+      
+      #多级排序：
+      my @winners = sort by_score_and_name keys %score;
+      sub by_score_and_name {
+          $score{$b} <=> $score{$a} #按照降序的成绩
+          #or
+          $a cmp $b; #字母顺序的名字
+      }
+	}}}

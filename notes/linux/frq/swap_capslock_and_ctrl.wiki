@@ -1,0 +1,10 @@
+%title GNOME下交换CapsLock和Ctrl
+=GNOME下交换CapsLock和Ctrl=
+在GNOME下：
+
+# System -> Preference -> keyboard
+# 选择Layout Tab页
+# 再选Options
+# 里面有`Ctrl Key Position`选项
+  * 将CapsLock作为附加Ctrl
+  * 交换CapsLock和Ctrl

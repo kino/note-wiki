@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>测试数据</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">测试数据</h1>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">测试数据</a>
+<ul>
+<li><a href="#toc_1.1">FileChannel</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">FileChannel</h2>
+<ol>
+<li>
+ 建立文件hello.txt
+
+<li>
+ 进程A逐条写入100万条
+
+<li>
+ 进程B一条条读出
+
+<li>
+ 进程A,B同时启动, 一个写，一个读
+
+<li>
+ 读写期间, 重命名：mv hello.txt world.txt; 
+
+<li>
+ 读写期间，重建新的hello.txt: echo “hello” &gt; hello.txt
+
+</ol>
+ 
+<p>
+结果：
+</p>
+<ul>
+<li>
+总数据量：2.1G
+
+<li>
+进程A写耗时：297427ms
+
+<li>
+进程B写耗时：297599ms
+
+</ul>
+<p>
+通过 文件+Rotate+FileChannel 快算交换数据也许不错。
+</p>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

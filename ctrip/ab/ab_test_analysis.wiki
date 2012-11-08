@@ -1,0 +1,155 @@
+=A/B Test Framework 分析=
+
+%title
+
+==何为AB测试==
+* 针对一个功能点，我们有多套方案
+* 我们想用事实说明那个方案更好
+* 并行测试多个方案的实际运行结果,得出分析报告，确定最终方案。
+
+==目标用户==
+* 想要进行AB测试的App
+
+==目标==
+* 提供一个基础平台
+* 可以方便的构建一个AB测试
+* 可以方便的对这个测试进行管理
+* 提供一个简便的client, 可以方便的嵌入测试点
+* 收集相应的测试数据
+* 分析数据，得出结论，供用户使用。
+
+==名词解释==
+===Experiment===
+* 一次测试
+===Alternative===
+* 测试中的一个方案
+* _*[Control Alternative]*_: 目前正在使用的当前方案
+===Rule===
+* 分配规则
+* 如何决定一个用户使用哪一个Alternative
+* 一旦决定，测试期间就不能变，除非该Alternative被撤消。
+
+==测试流程==
+* 一个ExperimentX开始后，用户后第一次访问app
+* 根据用户信息，决定Alternative
+* 使用选定的Alternative
+* 收集用户的操作信息
+* <b>该用户后续的访问都要使用相同的Alternative</b>
+ 
+==Framework 构成==
+* <b>RESTFul Service:</b> 提供数据服务
+* <b>后台系统</b>
+  # 管理正在运行的Experiment
+  # Experiment的报表系统
+* <b>Client Library:</b> 提供相应的client library 供app使用
+{{./ab_big.png}}
+ 
+==RESTFul Service==
+| /ab/experiment                                                          | GET POST       |                                                  |
+| /ab/experiment/{experimentId}                                           | GET PUT        |                                                  |
+| /ab/experiment/{experimentId}/rule                                      | GET POST       | 只允许创建一次，不能修改，分配规则确定后不能修改 |
+| /ab/experiment/{experimentId}/alternative                               | GET POST       |                                                  |
+| /ab/experiment/{experimentId}/alternative/{alternativeId}               | GET PUT DELETE |                                                  |
+| /ab/experiment/{experimentId}/alternative/{alternativeId}/ruleparameter | GET PUT        |                                                  |
+| /ab/experiment/{experimentId}/log                                       | GET POST       |                                                  |
+
+==Client Library==
+| <i>alternativeId</i> <b>abTest(</b><i>experimentId, userInfo</i><b>)</b>   | 根据用户信息获取应该使用的指定的Experiment |
+| <i>void</i> <b>abLog(</b><i>experimentId, userInfo, logContent</i><b>)</b> | 记录Experiment的日志                       |
+
+== 关注点、难点 ==
+
+===如何判定是同一个用户 ===
+* 最完美的方式是我们任何时候都可以确定正在操作或请求的是不是同一个自然人。
+* 但现实情况是我们大多数时候在和设备终端打交道，或者和注册用户打交道
+* 所以有很多场景，我们是不能作出明确判定的：
+  # 如果一个用户有多种设备，如何保证他看到相同的Alternative，依赖用户登录信息。
+  # 对于登录前后都开放的Experiment：
+    # 一个用户在登录前确定了Alternative，登录后发现他已经确定过Alternative，这时就会有两套Alternative，如何决定。
+* 简单的解决方案， 对Experiment分类
+  # 只对登录用户进行的Experiment，根据用户信息进行分配
+  # 其他Experiment，根据终端设备进行分配
+  
+===确定GUID===
+* GUID追踪的实际是终端，在大多数情况下一个终端会是固定的用户在使用
+* 如何确定GUID,可以使用UUID,一个32位的16进制数: 550e8400-e29b-41d4-a716-446655440000
+* 如何根据GUID实现简便的按比例分配。
+  # 假设UUID每一位都是随机的，取最后一位或两位取模
+  # 扩展一个GUID: 
+    * GUID = UUID + N位内的随机数, 如：550e8400-e29b-41d4-a716-446655440000.16
+    * 根据随机数进行取模
+    * 确定N的大小，选取一个比较安全的数字。
+
+===分配规则 ===
+* 最常用的按比例分配：10%AlternativeA， 10%AlternativeB， 剩余使用Control Alternative
+* 特质用户：比如北京的25~40岁之间的男性用户，10% AlternativeA, 10% AlternativeB
+
+===分配规则引擎 ===
+# 简单方案
+  * 定义有限的几种分配类型，比如：比例分配，地区分配，比例+地区分配。
+  * 一个Experiment只能使用一种分配类型。
+# 自定义多维度分配规则
+  * 定义出可用于分配的维度：比例/定量， IP段，地区， 性别， 年龄， 职业 etc.
+  * 用户自己定义组合出用AlternativeX的用户， 对于ExperimentX:
+    * AlternativeA: 北京 男 限10000
+    * AlternativeB: 上海 男 限10000
+  * 难点是可能出现没意义的分配规则，这个问题不大，任何一个Experiment肯定是经过严格申核的。
+  
+===如何保证对同一用户多次请求，Alternative一致 ===
+# 方案一：算法一致
+  * 每次重新使用规则引擎计算出该用的Alternative
+  * 简单
+  * 只对全部人数按比例分配生效
+  * 对特质用户不生效，比如在北京的现在来上海了，或取不到地区信息。
+# 方案二：记录分配信息
+  * 第一次分配非Control Alternative后，记录下分配信息，下次直接用。
+  * 难点，数据量大，再次查询需要时间。
+  * 变向解决方案，记入Cookie, 前提是不能有过多的experiment同时进行，不然cookie也不够用。
+   
+=== 我们要记录哪些信息 ===
+# 通用信息：experimentId alternatimeId ip time guid uid clientType(browser) 
+# 指标信息，转化率信息等，对于任何一个Experiment在构建之初就应该确定自己关心什么
+  * 比如注册转化率
+  * 当用户点击注册按钮时，就收集一条信息
+=== 数据分析 ===
+# 通用分析
+# 每个Experiment的特有分析
+# 分析的数据来源
+  * AB Test Framework自身收集的信息
+  * 从其他系统抽取相应的信息，进行分析，比如日志信息，User Tracker信息等。
+  
+==对于一个要使用AB Test Fromwork用户的使用流程 ==
+# 设计一个ABTest方案.
+# 确定Alternative, 并实现相应的业务代码。
+# 去Framework后台申请一个Experiment并建立起来, 获取一个ExperimentId.
+# 使用相应的 Client Library, 接入AB Test Service.
+  {{{ class="brush:js"
+      int alternativeId = abTest(...);
+      if(alternativeId = 1){
+         doSomething1();
+      }else if(alternativeId = 2){
+         doSomething2();
+      }else if(alternativeId = 3){
+         doSomething3();
+      }else{
+         doAsUsual();
+      }
+    }}}
+# 在关注点加入监视代码收集信息
+  {{{ class="brush:js"
+      registerBtn.click(function(){
+          abLog(....);
+      });
+    }}}
+# 结束测试，等待分析结果
+# 根据分析结果，确定最终Alternative, 清理代码。
+
+==模块RESTFul Service设计==
+==模块Client Library设计==
+==模块Management System设计==
+==模块Reporter设计==
+
+    
+
+
+

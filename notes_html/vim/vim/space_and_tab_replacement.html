@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>vim中空格与TAB的替换(转)</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">vim中空格与TAB的替换(转)</h1>
+<p>
+日期: 2012-07-20 10:07<br>
+转自：<a href="http://www.cnblogs.com/rangzee/archive/2010/07/06/1772000.html">http://www.cnblogs.com/rangzee/archive/2010/07/06/1772000.html</a>
+<div class="toc">
+<ul>
+<li><a href="#toc_1">vim中空格与TAB的替换(转)</a>
+</ul>
+</div>
+</p>
+
+<p>
+<strong>在.vimrc中添加以下代码后，重启vim即可实现按TAB产生4个空格：</strong>
+</p>
+<blockquote>
+set ts=4  (注：ts是tabstop的缩写，设TAB宽4个空格) <br>
+set expandtab
+</blockquote>
+ 
+<p>
+<strong>对于已保存的文件，可以使用下面的方法进行空格和TAB的替换：</strong>
+</p>
+
+<p>
+<strong>TAB替换为空格：</strong>
+</p>
+<blockquote>
+:set ts=4 <br>
+:set expandtab <br>
+:%retab!
+</blockquote>
+ 
+<p>
+<strong>空格替换为TAB：</strong>
+</p>
+<blockquote>
+:set ts=4       <br>                               
+:set noexpandtab     <br>
+:%retab!
+</blockquote>
+    
+<p>
+<em><strong>加!是用于处理非空白字符之后的TAB，即所有的TAB，若不加!，则只处理行首的TAB。</strong></em>
+</p>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

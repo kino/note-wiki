@@ -1,0 +1,42 @@
+%title Java Teach
+
+=java 开发平台 =
+
+为了以后开发的统一性，易维护性。部门内部关于java的开发应该采取统一的标准。
+
+==JDK==
+* jdk 1.6
+
+==Servlet 容器==
+* Tomcat 7
+ 
+==Servlet 版本==
+* `Servlet 3.0`
+
+==Maven==
+* Maven 3
+* 所有的项目都应该是Maven项目。
+
+==Java 开源框架/开源包==
+* 针对同一个包，在不同的产品或项目中我们应该依赖同一个版本。
+* *建立一个pom项目，定义出常用开源包的版本和一些共有的配置。 *
+* *所有的java项目都应该继承这个项目。 *
+* 暂时想到的常用包列表, 以后逐步完善。
+| GroupId              | 名称      | 版本          | 描述                                            |
+|----------------------|-----------|---------------|-------------------------------------------------|
+| *Ioc容器框架*        | >         | >             | >                                               |
+| org.springframework  | spring    | 3.1.1.RELEASE | IOC容器，所有的子包都应该采用此版本             |
+| *Web框架*            | >         | >             | >                                               |
+| com.sun.jersey       | jersey    | 1.1.4         | 用于构建Restful服务，所有的子包都应该采用此版本 |
+| org.apache.struts    | struts2   | 2.3.4.1       | MVC web 框架                                    |
+| *ORM框架*            | >         | >             | >                                               |
+| org.mybatis          | mybatis   | 3.1.1         | ORM框架                                         |
+| org.hibernate        | hibernate | 4.1.7.Final   | ORM框架                                         |
+| *对象映射转换*       | >         | >             | >                                               |
+| com.sun.xml.bind     | jaxb      | 2.1.9         | xml与java对象映射解析                           |
+| org.codehaus.jackson | jackson   | 1.5.4         | jackson与java对象映射解析                       |
+| *工具包 *            | >         | >             | >                                               |
+| com.google.guava     | guava     | 13.0.1        | java工具包                                      |
+| *单元测试*           | >         | >             | >                                               |
+| junit                | junit     | 4.10          | 单元测试                                        |
+

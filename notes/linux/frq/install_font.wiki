@@ -1,0 +1,7 @@
+%title 安装字体
+
+=安装字体=
+
+# sudo cp xxx.ttf /usr/share/fonts/opentype/
+# sudo chmod 644 /usr/share/fonts/opentype/xxx.ttf
+# sudo fc-cache -f -v

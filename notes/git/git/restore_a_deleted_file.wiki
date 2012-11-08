@@ -1,0 +1,41 @@
+%title 找回已删除的文件 
+=找回已删除的文件=
+日期: 2012-07-30 16:07
+
+%toc
+
+==如果已知具体的文件路径和名称==
+  {{{ class="brush:bash"
+      #得出删除指定文件的commit
+      #rev-list 用于列出符合条件commits, HEAD代表从指定的commit列起
+      # -n 1只列出一个commit, -- <filepath>代表对<filepath>进行修改的commit
+      # 从HEAD起，所有对<filepath>修改过的commit, 列出第一个，也就是最近的一个，不加-n 1就会列出所有
+      git rev-list -n 1 HEAD -- <filepath> 
+      
+      #从删除文件commit的父commit中可以恢复文件
+      git checkout <deletingcommit>^ -- <filepath> 
+    }}}
+    
+==如果知道文件所在文件夹但忘记了具体的文件名==
+  {{{ class="brush:bash"
+      #列出所有对<dirpath>进行修改过的且这种修改包含删除文件的commit
+      git log --diff-filter=D --summary -- <dirpath>
+      
+      #浏览日志找到想要的已删除文件，记住所在commit<deletingcommit>
+      
+      #从删除文件commit的父commit中可以恢复文件
+      git checkout <deletingcommit>^ -- <filepath> 
+    }}}
+
+    
+==对所要恢复的文件没记住什么确定的信息==
+  {{{ class="brush:bash"
+      #列出所有包含删除文件的commit
+      git log --diff-filter=D --summary 
+      
+      #浏览日志找到想要的已删除文件，记住所在commit<deletingcommit>
+      
+      #从删除文件commit的父commit中可以恢复文件
+      git checkout <deletingcommit>^ -- <filepath> 
+    }}}
+

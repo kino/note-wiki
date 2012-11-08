@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>通道</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">通道</h1>
+<p>
+日期: 2012-10-22 19:07
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">通道</a>
+<ul>
+<li><a href="#toc_1.1">Channel 和 Buffer 的关系 </a>
+<li><a href="#toc_1.2">类层次结构 </a>
+<li><a href="#toc_1.3">两类I/O对对应两类Channel</a>
+<li><a href="#toc_1.4">Channel 之间复制</a>
+<li><a href="#toc_1.5">关闭Channel</a>
+<li><a href="#toc_1.6">Gather &amp; Scatter</a>
+<li><a href="#toc_1.7">FileChannel</a>
+<ul>
+<li><a href="#toc_1.7.1">文件锁 </a>
+</ul>
+<li><a href="#toc_1.8">内存映射文件</a>
+<ul>
+<li><a href="#toc_1.8.1">Channel-to-Channel</a>
+</ul>
+<li><a href="#toc_1.9">Socket 通道</a>
+<ul>
+<li><a href="#toc_1.9.1">非阻塞模式 </a>
+<li><a href="#toc_1.9.2">ServerSocketChannel</a>
+<li><a href="#toc_1.9.3">SocketChannel</a>
+<li><a href="#toc_1.9.4">DatagramChannel</a>
+</ul>
+<li><a href="#toc_1.10">管首Pipe</a>
+<li><a href="#toc_1.11">工具类Channels</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">Channel 和 Buffer 的关系 </h2>
+<ul>
+<li>
+Channel通道就是用于交换东西的管道
+
+<li>
+Buffer就是可以在通道里跑并负责运东西的工具
+
+<li>
+通道一端的XX将东西放进Buffer，然后把Buffer放进通道送到时另一端，在另一端的YY收到Buffer，从Buffer里取出自己想要的东西。反之亦然。
+
+</ul>
+
+<h2 id="toc_1.2">类层次结构 </h2>
+<p>
+<img src="nio_hierarchy.png" />
+</p>
+
+<ul>
+<li>
+Channel只能在 <strong>字节缓冲区 </strong> 上操作
+
+<li>
+所以从Channel接口继承而来的接口都是面向字节的，如： <code>ByteWritabelChannel</code>, <code>ByteReadableChannel</code>
+
+<li>
+具体的实现类从这里 <code>java.nio.channels.spi</code> 的类继承而来，这里面两个重要的类：`AbstractSelectableChannel<code>, </code>AbstractInterruptibleChannel`
+
+</ul>
+
+<h2 id="toc_1.3">两类I/O对对应两类Channel</h2>
+<table>
+<tr>
+<th>
+I/O
+</th>
+<th>
+Channel
+</th>
+<th>
+Creation
+</th>
+</tr>
+<tr>
+<td>
+File I/O
+</td>
+<td>
+FileChannel
+</td>
+<td>
+RandomAccessFile, FileOutputStream, FileInputStream 的getChannel()方法
+</td>
+</tr>
+<tr>
+<td rowspan="3">
+Stream I/O
+</td>
+<td>
+SocketChannel
+</td>
+<td>
+SocketChannel.open()
+</td>
+</tr>
+<tr>
+<td>
+ServerSocketChaneel
+</td>
+<td>
+ServerSocketChannel.open()
+</td>
+</tr>
+<tr>
+<td>
+DatagramChannel
+</td>
+<td>
+DatagramChannel.open()
+</td>
+</tr>
+</table>
+<p>
+Demo:
+</p>
+<pre  class="brush:java">
+SocketChannel sc = SocketChannel.open();
+sc.connect (new InetSocketAddress ("somehost", someport));
+
+ServerSocketChannel ssc = ServerSocketChannel.open();
+ssc.socket().bind (new InetSocketAddress (somelocalport));
+
+DatagramChannel dc = DatagramChannel.open();
+
+RandomAccessFile raf = new RandomAccessFile ("somefile", "r");
+FileChannel fc = raf.getChannel();
+</pre>
+  
+<h2 id="toc_1.4">Channel 之间复制</h2>
+<pre  class="brush:java">
+    //每次读之前，清空buffer, 较多的系统调用
+    private static void channelCopey1(ReadableByteChannel in, WritableByteChannel out) throws IOException {
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(1024);
+
+        while(in.read(byteBuffer)!=-1){
+            byteBuffer.flip();
+            while (byteBuffer.hasRemaining()) {
+                out.write(byteBuffer);
+            }
+            byteBuffer.clear();
+        }
+    }
+    
+    //写一次，压缩，接着读, 较少的系统调用， 最后需要check
+    private static void channelCopey2(ReadableByteChannel in, WritableByteChannel out) throws IOException {
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(1024);
+
+        while(in.read(byteBuffer)!=-1){
+            byteBuffer.flip();
+            out.write(byteBuffer);
+            byteBuffer.compact();
+        }
+
+        byteBuffer.flip();
+        while (byteBuffer.hasRemaining()){
+            out.write(byteBuffer);
+        }
+    }
+</pre>
+
+<h2 id="toc_1.5">关闭Channel</h2>
+<ul>
+<li>
+Channel不能被重复使用
+
+<li>
+一个Channel代表一个与特定i/o服务的连接，并封装其状态
+
+<li>
+关闭Channel,连接丢失
+
+<li>
+关闭非阻塞Channel时，也可能导致线程阻塞，取决于操作系统和文件系统
+
+<li>
+多次调用close没有坏处
+
+<li>
+InterruptibleChannel
+
+<ul>
+<li>
+当一个线程在一个Channel被阻塞并同时被中断，则关闭Channel,抛ClosedByInterruptException 
+
+<li>
+当i/o操作被中断时，总是关闭Channel
+
+<li>
+可以被异步关闭
+
+<li>
+一个Channel被关闭，所有在此Channel阻塞的线程被唤醒，并收到一个AsynchronousCloseException
+
+</ul>
+</ul>
+
+<pre  class="brush:java">
+ package java.nio.channels; 
+ public interface Channel { 
+     public boolean isOpen( ); 
+     public void close( ) throws IOException; 
+ }
+</pre>
+  
+<h2 id="toc_1.6">Gather &amp; Scatter</h2>
+<ul>
+<li>
+<strong>Gather:</strong> 将一个Buffer数组一次性写入Channel
+
+<li>
+<strong>Scatter:</strong> 从一个Channel读入数据，放到Buffer数组，直到没数据可读或所有Buffer被填满
+
+<li>
+操作系统会有优化
+<pre  class="brush:java">
+public interface ScatteringByteChannel extends ReadableByteChannel { 
+    public long read (ByteBuffer [] dsts) throws IOException; 
+    public long read (ByteBuffer [] dsts, int offset, int length) throws IOException; }
+    public interface GatheringByteChannel extends WritableByteChannel { 
+    public long write(ByteBuffer[] srcs) throws IOException; 
+    public long write(ByteBuffer[] srcs, int offset, int length) throws IOException; 
+    //offset  从Buffer数组中的哪个buffer使用起
+    //length 使用几个buffer
+}
+</pre>
+
+</ul>
+  
+<p>
+<img src="nio_channel_gather_scatter.png" />
+</p>
+
+<h2 id="toc_1.7">FileChannel</h2>
+<p>
+<img src="nio_channel_file.png" />
+</p>
+
+<ul>
+<li>
+FileChannel都是阻塞式
+
+<li>
+不能直接创建，必须通过打开的文件对象获得（FileInputStream, FileOutputStream, RandomAccessFile).getChannel()
+
+<li>
+文件io最强大之处在于异步io
+
+<li>
+FileChannel是线程安全的
+
+<ul>
+<li>
+但影响Channel位置和文件大小的操作是单线程的
+
+</ul>
+</ul>
+
+<pre  class="brush:java">
+ package java.nio.channels; 
+public abstract class FileChannel extends AbstractChannel implements ByteChannel, GatheringByteChannel, ScatteringByteChannel { 
+    // This is a partial API listing 
+    // All methods listed here can throw java.io.IOException 
+    public abstract int read (ByteBuffer dst, long position) 
+    public abstract int write (ByteBuffer src, long position) 
+    
+    public abstract long size( ) 
+    
+    public abstract long position( ) 
+    public abstract void position (long newPosition) 
+    
+    public abstract void truncate (long size) 
+    public abstract void force (boolean metaData) 
+    
+    public final FileLock lock( ) 
+    public abstract FileLock lock (long position, long size, boolean shared) 
+    public final FileLock tryLock( ) 
+    public abstract FileLock tryLock (long position, long size, boolean shared) 
+    
+    public abstract MappedByteBuffer map (MapMode mode, long position, long size) 
+    public static class MapMode { 
+        public static final MapMode READ_ONLY 
+        public static final MapMode READ_WRITE 
+        public static final MapMode PRIVATE 
+    }
+    
+    public abstract long transferTo (long position, long count, WritableByteChannel target) 
+    public abstract long transferFrom (ReadableByteChannel src, long position, long count) 
+}
+</pre>
+  
+<ul>
+<li>
+在文件大小之外的位置读，返回end-of-file
+
+<li>
+在文件大小之外的位置写，导致文件扩容
+
+<li>
+指定位置的读写， 不会影响position
+
+<li>
+truncate(size), 重置文件的大小，可能丢数据，将position设为新的size
+
+<li>
+force() 将所有的修改应用的磁盘
+
+</ul>
+
+<h3 id="toc_1.7.1">文件锁 </h3>
+<ul>
+<li>
+锁是和文件关联而不是Channel
+
+<li>
+锁是和进程关联，而不是线程
+
+<ul>
+<li>
+一个jvm线和获得一个文件的独占锁
+
+<li>
+这个jvm的其他线程可以访问文件
+
+<li>
+另一个jvm的线程就不可以（属于另一个进程)
+<pre  class="brush:java">
+ 
+public abstract class FileChannel extends AbstractChannel implements ByteChannel, GatheringByteChannel, ScatteringByteChannel { 
+    // This is a partial API listing 
+    public final FileLock lock( ) //能锁定的最大范围:fileChannel.lock (0L, Long.MAX_VALUE, false);
+    public abstract FileLock lock (long position, long size, boolean shared) 
+    
+    public final FileLock tryLock( ) 
+    public abstract FileLock tryLock (long position, long size, boolean shared) 
+}
+
+
+public abstract class FileLock
+{
+    public final FileChannel channel( ) 
+    
+    public final long position( ) 
+    public final long size( ) 
+    
+    public final boolean isShared( ) 
+    public final boolean overlaps (long position, long size) 
+    public abstract boolean isValid( ); 
+    public abstract void release( ) throws IOException; 
+}
+</pre>
+
+</ul>
+</ul>
+  
+<ul>
+<li>
+锁失效：调用release(), 关联的Channel关闭， jvm关闭
+
+<li>
+size position exclusivity创建时指定，不能修改
+
+<li>
+isShared():是否是共享锁，如果操作系统不支持，返回false,哪怕创建时指定true
+
+<li>
+overlaps:是否与指定区域有重合
+
+</ul>
+
+<h2 id="toc_1.8">内存映射文件</h2>
+<ul>
+<li>
+调用FileChannel.map()
+
+<li>
+在一个打开的文件和一种ByteBuffer之间建立一种虚拟映射
+
+<li>
+创建一个由磁盘文件支持的虚拟内存映射
+
+<li>
+MappedByteBuffer
+
+<li>
+不和Channel相关联，关闭Channel，不会破坏映射
+
+<li>
+unmap方法
+<pre  class="brush:java">
+ 
+public abstract class FileChannel extends AbstractChannel implements ByteChannel, GatheringByteChannel, ScatteringByteChannel { 
+    // This is a partial API listing 
+    public abstract MappedByteBuffer map (MapMode mode, long position,long size)//不能超出文件大小或范围, 否则文件会被增大, 即使是读操作 
+    public static class MapMode { 
+        public static final MapMode READ_ONLY 
+        public static final MapMode READ_WRITE 
+        public static final MapMode PRIVATE //写时拷贝
+     
+        public final MappedByteBuffer load( ) 
+        public final boolean isLoaded( ) 
+        public final MappedByteBuffer force( )
+    } 
+}
+</pre>
+
+</ul>
+  
+<h3 id="toc_1.8.1">Channel-to-Channel</h3>
+<pre  class="brush:java">
+public abstract class FileChannel extends AbstractChannel implements ByteChannel, GatheringByteChannel, ScatteringByteChannel { 
+    // This is a partial API listing 
+    public abstract long transferTo (long position, long count, WritableByteChannel target) 
+    public abstract long transferFrom (ReadableByteChannel src, long position, long count) 
+}
+</pre>
+<ul>
+<li>
+只有FileChannel拥有这两个方法
+
+<li>
+没数据传输，就会终止
+
+<li>
+对非阻塞Channel，如果队列已满就会终止
+
+</ul>
+
+<h2 id="toc_1.9">Socket 通道</h2>
+<ul>
+<li>
+三个成员
+
+<ul>
+<li>
+DatagramChannel
+
+<li>
+SocketChannel
+
+<li>
+ServerSocketChannel
+
+</ul>
+<li>
+ServerSocketChannel负责监听和创建新的SocketChannel, 本身从不传输数据
+
+<li>
+三种Channel实例化时，都会创建对等的Socket
+
+<ul>
+<li>
+DatagramSocket
+
+<li>
+Socket
+
+<li>
+ServerSocket
+
+<li>
+通过调用方法channel.socket()获得
+
+<li>
+三种Socket身上也有getChannel()方法，获得Channel
+
+<li>
+但如果Socket是通过传统方式创建（比如直接实例化），它就没有Channel, getChannel返回null
+
+</ul>
+</ul>
+
+<h3 id="toc_1.9.1">非阻塞模式 </h3>
+<ul>
+<li>
+设置为非阻塞模式需要socket通道的公用超级类：SelectableChannel
+<pre  class="brush:java">
+    public abstract class SelectableChannel extends AbstractChannel implements Channel { 
+        // This is a partial API listing 
+        public abstract void configureBlocking (boolean block) throws IOException; 
+        public abstract boolean isBlocking( );
+        public abstract Object blockingLock( ); 
+    }
+</pre>
+
+<ol>
+<li>
+有条件选择是用来查询通道的机制
+
+<li>
+可以判断一个通道是否准备好一个目标操作：读、写 etc.
+
+<li>
+非阻塞性io和可选择性是紧密相连的
+
+<li>
+服务端经常采用非阻塞式，可以管理很多SocketChannel
+
+<li>
+通道的是否阻塞是可以修改的，但前提是先通过blockingLock()获得锁
+<pre  class="brush:java">
+        Socket socket = null; 
+        Object lockObj = serverChannel.blockingLock( ); 
+        // have a handle to the lock object, but haven't locked it yet 
+        // may block here until lock is acquired 
+        synchronize (lockObj) { 
+            // This thread now owns the lock; mode can't be changed boolean 
+            prevState = serverChannel.isBlocking( );
+            serverChannel.configureBlocking (false); 
+            socket = serverChannel.accept( ); 
+            serverChannel.configureBlocking (prevState); 
+        }
+        // lock is now released, mode is allowed to change 
+        if (socket != null) { 
+            doSomethingWithTheSocket (socket); 
+        }
+</pre>
+
+</ol>
+</ul>
+    
+<h3 id="toc_1.9.2">ServerSocketChannel</h3>
+<pre  class="brush:java">
+    public abstract class ServerSocketChannel extends AbstractSelectableChannel { 
+        public static ServerSocketChannel open( ) throws IOException 
+        public abstract ServerSocket socket( ); 
+        public abstract ServerSocket accept( ) throws IOException; 
+        public final int validOps( ) 
+    }
+</pre>
+  
+<ul>
+<li>
+通过静态工厂创建
+
+<li>
+新创建的未邦定端口
+
+<li>
+通过socket()获得对待的ServerSocket
+
+<li>
+使用ServerSocket的bind方法邦定端口
+<pre  class="brush:java">
+    ServerSocketChannel ssc = ServerSocketChannel.open( ); 
+    ServerSocket serverSocket = ssc.socket( ); 
+    // Listen on port 1234
+    serverSocket.bind (new InetSocketAddress (1234));
+</pre>
+
+<li>
+<strong>accept():</strong>
+
+<ul>
+<li>
+ServerSocket: 总是阻塞返回一个Socket实例
+
+<li>
+ServerSocketChannel: 
+
+<ol>
+<li>
+返回一个SocketChannel, 返回的对象能在非阻塞模式下运行
+
+<li>
+如果在非阻塞模式下运行，若没连接，立即返回null
+
+</ol>
+</ul>
+</ul>
+    
+<h3 id="toc_1.9.3">SocketChannel</h3>
+<pre  class="brush:java">
+    public abstract class SocketChannel extends AbstractSelectableChannel 
+        implements ByteChannel, ScatteringByteChannel, GatheringByteChannel { 
+        
+        // This is a partial API listing 
+        public static SocketChannel open( ) throws IOException 
+        public static SocketChannel open (InetSocketAddress remote) throws IOException 
+        
+        public abstract Socket socket( ); 
+        
+        public abstract boolean connect (SocketAddress remote) throws IOException;
+        public abstract boolean isConnectionPending( ); 
+        public abstract boolean finishConnect( ) throws IOException; 
+        public abstract boolean isConnected( ); 
+        
+        public final int validOps( ) 
+        
+    }
+</pre>
+
+<ul>
+<li>
+Socket与SocketChannel封装点对点，有序的网络连接，类似TCP/IP
+
+<li>
+新创建的SocketChannel会创建一个对等的Socket, 反之不成立
+
+<li>
+connect()在不同的对象上调用:
+
+<ul>
+<li>
+<strong>Socket:</strong> 在连接建立好或超时之前，会阻塞
+
+<li>
+<strong>SocketChannel:</strong> 在连接建立好或超时之前，会阻塞
+
+<ol>
+<li>
+阻塞模式， 同Socket一样
+
+<li>
+非阻塞模式，发起连接，立即返回，返回true说明连接成功建立，返回false,连接没有立即建立，但会并发的进行再次连接
+
+</ol>
+</ul>
+<li>
+finishConnect( )任何时候都可以安全地进行调用。一个非阻塞模式的SocketChannel对象上调用finishConnect( )方法，可能：
+
+<ul>
+<li>
+connect( )方法未被调用。产生NoConnectionPendingException异常。
+
+<li>
+连接正在进行，未完成。什么都不会发生，finishConnect( )立即返回false值。
+
+<li>
+非阻塞模式下调用connect( )方法之后，SocketChannel又被切换回了阻塞模式。如果有必要，调用线程会阻塞直到连接完成，finishConnect( )接着会返回true
+
+<li>
+初次调用connect( )或最后一次调用finishConnect( )之后，连接建立过程已经完成。SocketChannel对象的内部状态将被更新到已连接状态，finishConnect( )会返回true，然后SocketChannel就可以传输数据了。
+
+<li>
+连接已经建立。那么什么都不会发生，finishConnect( )方法会返回true值。
+
+</ul>
+<li>
+如果尝试连接失败，再次调用finishConnect()会返回异常
+
+<li>
+当通道处于中间的连接等待（connection-pending）状态时，只能调用finishConnect( )、isConnectPending( )或isConnected( )方法。
+
+</ul>
+ 
+<p>
+<strong>SocketChannel是线程安全的. connect( )和finishConnect( )方法是互相同步的，并且只要其中一个操作正在进行，任何读或写的方法调用都会阻塞，即使是在非阻塞模式下。如果此情形下您有疑问或不能承受一个读或写操作在某个通道上阻塞，请用isConnected( )方法测试一下连接状态。 </strong>
+</p>
+
+<h3 id="toc_1.9.4">DatagramChannel</h3>
+<pre  class="brush:java">
+    public abstract class DatagramChannel extends AbstractSelectableChannel 
+        implements ByteChannel, ScatteringByteChannel, GatheringByteChannel { 
+        
+        // This is a partial API listing 
+        public static DatagramChannel open( ) throws IOException 
+        public abstract DatagramSocket socket( ); 
+        
+        public abstract DatagramChannel connect (SocketAddress remote) throws IOException; 
+        public abstract boolean isConnected( ); 
+        public abstract DatagramChannel disconnect( ) throws IOException; 
+        
+        public abstract SocketAddress receive (ByteBuffer dst) throws IOException;
+        public abstract int send (ByteBuffer src, SocketAddress target) 
+        
+        public abstract int read (ByteBuffer dst) throws IOException; 
+        public abstract long read (ByteBuffer [] dsts) throws IOException; 
+        public abstract long read (ByteBuffer [] dsts, int offset, int length) throws IOException; 
+        
+        public abstract int write (ByteBuffer src) throws IOException; 
+        public abstract long write(ByteBuffer[] srcs) throws IOException; 
+        public abstract long write(ByteBuffer[] srcs, int offset, int length) throws IOException; 
+    }
+</pre>
+  
+<ul>
+<li>
+SocketChannel面向流协议TCP/IP, DatagramChannel面向包协议UDP/IP
+
+<li>
+它有一个关联的DatagramSocket
+
+<li>
+它可以即当服务器(监听者），又当客户端（接收者）
+
+<li>
+如果需要监听，需要先邦定一个端口, 通过DatagramSocket的bind()方法
+
+<li>
+DatagramChannel是无连接的
+
+<ul>
+<li>
+每个数据包是自包含的实体，拥有自己的目的地址，不依赖其他数据包
+
+<li>
+可以发送单独的数据包给不同的目的地址
+
+<li>
+也可以接收来自不同地址的数据包
+
+<li>
+每个数据包拥有自己的源信息
+
+</ul>
+<li>
+未邦定的DatagramChannel也可以接收数据包
+
+<ul>
+<li>
+因创建时，已经分配了一个动态端口号
+
+<li>
+这往这个端口的数据包就会收到
+
+<li>
+通常收到的是用来回复它原先发出的数据包
+
+</ul>
+<li>
+通过receive()和send()来实现接收与发送
+<pre  class="brush:java">
+    public abstract class DatagramChannel extends AbstractSelectableChannel
+        implements ByteChannel, ScatteringByteChannel, GatheringByteChannel { 
+        
+        // This is a partial API listing 
+        public abstract SocketAddress receive (ByteBuffer dst) throws IOException; 
+        public abstract int send (ByteBuffer src, SocketAddress target) 
+    }
+</pre>
+
+<ul>
+<li>
+<strong>receive()</strong>
+
+<ol>
+<li>
+数据包放入buffer
+
+<li>
+返回源地址
+
+<li>
+阻塞状态，等待直到有数据包到达
+
+<li>
+非阻塞状态，若无数据包，返回null
+
+<li>
+若buffer空间不足，数据包剩余数据丢失
+
+</ol>
+<li>
+<strong>send()</strong>
+
+<ol>
+<li>
+发送数据到指定地址
+
+<li>
+阻塞状态，等待直到数据包加入传输队列
+
+<li>
+非阻塞状态，buffer字节数或0
+
+<li>
+全有全无，即如果传输队列没有足够的空间发送数据包，则什么都不发送
+
+<li>
+返回非0值，不代表成功到达目的地，只是代表加入了传输队列
+
+<li>
+以太网不能发送超过1500字节的包，如果数据报过大，会被切片
+
+</ol>
+</ul>
+<li>
+<strong>连接connect</strong>
+<pre  class="brush:java">
+    public abstract class DatagramChannel extends AbstractSelectableChannel 
+        implements ByteChannel, ScatteringByteChannel, GatheringByteChannel{ 
+        
+        // This is a partial API listing 
+        public abstract DatagramChannel connect (SocketAddress remote) throws IOException; 
+        public abstract boolean isConnected( ); 
+        public abstract DatagramChannel disconnect( ) throws IOException; 
+    }
+</pre>
+
+<ul>
+<li>
+如果使用连接
+
+<li>
+只能接收来自指定地址的包，其他包被网络层丢弃
+
+<li>
+只能发送包给指定地址
+
+<li>
+不能建立会话
+
+<li>
+所以没有实际连接，只有用来限定合法的远程地址的本地信息
+
+<li>
+所以没finishConnect()方法
+
+<li>
+通过isConnected()测定连接状态
+
+<li>
+可以进行任意次数的连接和断开连接
+
+<li>
+连接后，发送不用指定源地址，收到的源地址也是已知的
+
+<li>
+所以可以使用read()和write方法,还有scatter() gather
+
+<ol>
+<li>
+返回字节数量：读取的或写入的. 非阻塞状态，可能返回0
+
+<li>
+非连接状态，不能使用这两个方法
+
+</ol>
+</ul>
+<li>
+使用 DatagramSocket的理由
+
+<ul>
+<li>
+程序可以承受数据丢失或无序的数据。
+
+<li>
+希望“发射后不管”（fire and forget）而不需要知道您发送的包是否已接收。
+
+<li>
+数据吞吐量比可靠性更重要。
+
+<li>
+您需要同时发送数据给多个接受者（多播或者广播）。
+
+<li>
+包隐喻比流隐喻更适合手边的任务。
+
+</ul>
+</ul>
+    
+<h2 id="toc_1.10">管首Pipe</h2>
+<p>
+<img src="nio_pipe.png" />
+</p>
+
+<ul>
+<li>
+用来在两个实体间单向传递数据的导管
+
+<ul>
+<li>
+linux在两个进程间，一个进程的输出作为另一个进程的输入
+
+<li>
+java中是在jvm中的两个线程间
+
+</ul>
+<li>
+提供 <em><strong>一对 </strong></em> 回环机制的Channel: SinkChannel SourceChannel
+
+<li>
+任何写入SinkChannel上的数据，都可以从SourceChannel上读出
+<pre  class="brush:java">
+    package java.nio.channels; 
+    public abstract class Pipe { 
+        public static Pipe open( ) throws IOException 
+        public abstract SourceChannel source( ); 
+        public abstract SinkChannel sink( );
+
+        public static abstract class SourceChannel 
+            extends AbstractSelectableChannel 
+            implements ReadableByteChannel, ScatteringByteChannel 
+            
+        public static abstract class SinkChannel 
+            extends AbstractSelectableChannel 
+            implements WritableByteChannel, GatheringByteChannel 
+    }
+</pre>
+
+<li>
+通过open方法创建
+
+<li>
+创建时就创建了两个channel
+
+<li>
+两个通道可以和选择器一起使用
+
+</ul>
+
+<h2 id="toc_1.11">工具类Channels</h2>
+<ul>
+<li>
+newChannel()
+
+<li>
+newInputstream()
+
+<li>
+newOutputstream()
+
+<li>
+newReader()
+
+<li>
+newWriter()
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

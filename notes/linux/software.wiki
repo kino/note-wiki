@@ -1,0 +1,6 @@
+%title 我安装的软件
+=我安装的软件=
+
+* mp3blaster mp3文本播放器
+* w3m 文本浏览器
+* [[software/vboxmanage|使用vboxmanage管理VirtualBox]]

@@ -1,0 +1,22 @@
+%title 设置系统参数fs.inotify.max_user_watches
+
+=设置系统参数fs.inotify.max_user_watches=
+
+日期: 2012-04-20 10:04
+
+%toc
+
+==临时修改==
+{{{ class="brush:bash"
+  echo 100000 | sudo tee /proc/sys/fs/inotify/max_user_watches
+  }}}
+  
+==修改系统配置==
+# 修改配置文件. 在配置文件`/etc/sysctl.conf`中加入：
+{{{ class="brush:bash"
+  fs.inotify.max_user_watches = 524288
+  }}}
+# 使配置生效
+{{{ class="brush:bash"
+  sudo sysctl -p
+  }}}

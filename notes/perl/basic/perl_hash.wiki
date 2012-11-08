@@ -1,0 +1,59 @@
+%title 哈希
+=哈希=
+
+日期: 2012-06-03 20:06
+%toc
+
+
+# 在名字前面是美元符号($)，后面是花括号({})，则其为hash 元素。
+# 要引用整个hash，使用百分号("%")作为前缀。前面几页中使用的hash 的名字为%family_name。
+# 列表和hash互相赋值：
+  * 下面的赋值方法，元素个数必须是偶数，因为由key/value 对组成。元素个数为奇数是不可靠的，这通常会引起警告。
+  {{{ class="brush:perl"
+      %some_hash = ("foo", 35, "bar", 12.4, 2.5, "hello", "wilma", 1.72e30, "betty", "bye\n");
+	}}}
+  * 下面称为：将hash 展开，并将其key/value 对返回到一个列表中。返回的key/value 顺序和存放的顺序可能不同
+  {{{ class="brush:perl"
+      @array_array = %some_hash
+	}}}
+# 使用=>为hash赋值。在perl中，在任何地方，可以使用=>代替","。
+  {{{ class="brush:perl"
+      my %last_name = (
+              "fred" => "flintstone",
+              "dino" => undef,
+              "barney"=> "rubble";
+              "betty"=> "rubble",
+              );
+	}}}
+  * 任何大箭头符号(=>)左侧的bareword（由字母，数字，下划线，但不是由数字开头，前面有可选的加号或减号，组成的序列）都暗含着由引号括起来了的。
+  * 因此可以省略掉大箭头符号(=>)左侧bareword 上的引号。你也可以忽略掉hash的花括号中的引号，如果里面只有作为key 的bareword.
+# 有用的hash函数：keys、values
+  {{{ class="brush:perl"
+      my %hash = ("a"=>1, "b"=>2, "c"=>3);
+      my @k = keys %hash;
+      my @v = values %hash;
+	}}}
+# each函数,返回键值列表
+  {{{ class="brush:perl"
+    while (($key, $value) = each %hash){
+	    print “$key => $value\n”;
+    }
+
+    foreach $key (sort keys %hash){
+	    $value =$hass{$key};
+	    print “$key => $value\n”;
+	    #也可以不使用额外的临时变量$value
+	    #print “$key => $hash{key}\n”;
+    }
+	}}}
+# 要查看hash 中是否存在某个key（某人是否有借书卡），可以使用exists 函数，如果hash 中存在此key，则返回true，这和是否有对应的value 无关：
+  {{{ class="brush:perl"
+      if(exists $books{$dino}){
+          print "Hey, there's a libaray card for dino!\n";
+      }
+	}}}
+# delete 函数将某个给定的key（包括其对应的value）从hash中删除。（如果不存在这个key,则什么也不做；不会有警告或者错误信息。）
+  {{{ class="brush:perl"
+      my $person = "betty";
+      delete $books{$person}; #将$person 的借书卡删除掉
+	}}}

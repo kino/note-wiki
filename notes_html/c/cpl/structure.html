@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>结构</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">结构</h1>
+
+<p>
+日期: 2012-05-26 16:05
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">结构</a>
+<ul>
+<li><a href="#toc_1.1">结构的基础知识</a>
+<ul>
+<li><a href="#toc_1.1.1">结构的声明</a>
+<li><a href="#toc_1.1.2">结构的声明时候声明结构变量</a>
+<li><a href="#toc_1.1.3">使用结构标记声明结构变量</a>
+<li><a href="#toc_1.1.4">结构变量的初始化</a>
+<li><a href="#toc_1.1.5">访问结构成员</a>
+<li><a href="#toc_1.1.6">结构成员也可以是结构变量</a>
+</ul>
+<li><a href="#toc_1.2">结构与函数</a>
+<ul>
+<li><a href="#toc_1.2.1">合法的结构操作</a>
+<li><a href="#toc_1.2.2">作为函数参数的结构是值传递</a>
+<li><a href="#toc_1.2.3">结构指针</a>
+<li><a href="#toc_1.2.4">结构指针的快捷方式</a>
+</ul>
+<li><a href="#toc_1.3">结构数组</a>
+<ul>
+<li><a href="#toc_1.3.1">结构数组的初始化</a>
+<li><a href="#toc_1.3.2">sizeof</a>
+<li><a href="#toc_1.3.3">数组的长度与项数</a>
+</ul>
+<li><a href="#toc_1.4">指向结构的指针</a>
+<li><a href="#toc_1.5">自引用结构</a>
+<li><a href="#toc_1.6">表查找</a>
+<ul>
+<li><a href="#toc_1.6.1">遍历链表的标准方法</a>
+</ul>
+<li><a href="#toc_1.7">类型定义(typedef)</a>
+<li><a href="#toc_1.8">联合</a>
+<li><a href="#toc_1.9">位字段</a>
+</ul>
+</ul>
+</div>
+
+<p>
+结构是一个或多个变量的集合，这些变量可以是不同的类型，将它们组织在一下名字下。
+</p>
+
+<p>
+结构可以拷贝，赋值，传递给函数，函数也可以返回结构类型的返回值。
+</p>
+
+<p>
+自动结构和数组也可以进行初始化。
+</p>
+
+<h2 id="toc_1.1">结构的基础知识</h2>
+
+<h3 id="toc_1.1.1">结构的声明</h3>
+
+<pre  class="brush:c">
+  //声明一个代表坐标点的结构
+  struct point {
+      int x;
+	  int y;
+  };
+</pre>
+<ol>
+<li>
+<code>struct</code>是关键字
+
+<li>
+<code>point</code>是结构标记，用于为结构命名， <em><strong>可以省略</strong></em> ,如果不省略，后面可以用它代表结构声明实例。
+
+<li>
+<code>x</code> <code>y</code>是结构成员，成员也可以是结构类型
+
+<li>
+结构标记、结构成员、变通变量可以采用相同的命名，不会冲突
+
+</ol>
+
+<h3 id="toc_1.1.2">结构的声明时候声明结构变量</h3>
+
+<pre  class="brush:c">
+  struct point { int x; int y;}  x, y, z;
+  //或
+  struct { int x; int y;}  x, y, z;
+  //同下面的声明类似
+  int x,y,z;
+</pre>
+<ol>
+<li>
+声明了三个代表坐标点的结构实例，<code>x y z</code>
+
+<li>
+如果结构声明后没带变量表，不用为它分配存储空间
+
+</ol>
+ 
+<h3 id="toc_1.1.3">使用结构标记声明结构变量</h3>
+
+<pre  class="brush:c">
+  struct point pt;
+</pre>
+<ol>
+<li>
+如果声明结构的时候使用了结构标记
+
+<li>
+后面就可以使用结构标记声明结构变量
+
+</ol>
+ 
+<h3 id="toc_1.1.4">结构变量的初始化</h3>
+
+<ol>
+<li>
+使用初值表
+<pre  class="brush:c">
+  struct point maxpt={320, 200};
+</pre>
+
+<li>
+可以使用赋值初始化
+
+<li>
+可以使用返回相应类型结构的函数初始化
+
+</ol>
+
+<h3 id="toc_1.1.5">访问结构成员</h3>
+
+<pre  class="brush:c">
+  pt.x;
+  pt.y;
+</pre>
+  
+<h3 id="toc_1.1.6">结构成员也可以是结构变量</h3>
+
+<pre  class="brush:c">
+  struct rect {
+      struct point pt1;
+	  struct point pt2;
+  };
+  struct rect screen;
+  screen.pt1.x;
+</pre>
+  
+<h2 id="toc_1.2">结构与函数</h2>
+
+<h3 id="toc_1.2.1">合法的结构操作</h3>
+<ol>
+<li>
+作为一个整体复制与赋值. 包括作为函数的参数与返回值
+
+<li>
+通过<code>&amp;</code>取址
+
+<li>
+访问其成员
+
+<li>
+通过一个常量值列表初始化结构，自动结构(自动变量)可以通过赋值初始化
+
+<li>
+<em><strong>结构不可以进行比较</strong></em>
+
+</ol>
+
+<h3 id="toc_1.2.2">作为函数参数的结构是值传递</h3>
+
+<h3 id="toc_1.2.3">结构指针</h3>
+<pre  class="brush:c">
+  struct point *pp;//pp是一个指向结构point的指针
+  (*pp).x,(*pp).y;//这是结构成员，括号是必须的
+</pre>
+  
+<h3 id="toc_1.2.4">结构指针的快捷方式</h3>
+<ol>
+<li>
+如果<code>p</code>是一个指向结构的指针，可以通过下列方式引用结构的成员：
+<pre  class="brush:c">
+   p-&gt;结构成员
+</pre>
+
+<li>
+例子：
+<pre  class="brush:c">
+   struct rect r, *rp=&amp;r;
+//下列表达式是等价的：
+r.pt1.x;
+(*rp).pt1.x;
+rp-&gt;pt1.x;
+</pre>
+
+<li>
+下列运算符的优先级最高：
+
+<ul>
+<li>
+结构运算符<code>.</code>与<code>-&gt;</code>
+
+<li>
+函数调用<code>()</code>
+
+<li>
+下标<code>[]</code>
+
+</ul>
+</ol>
+  
+<h2 id="toc_1.3">结构数组</h2>
+
+<h3 id="toc_1.3.1">结构数组的初始化</h3>
+<pre  class="brush:c">
+struct key {
+	char *word;
+	int count;
+} keytab[] = {
+	"auto", 0,
+	"break", 0,
+	"case", 0,
+	"char", 0,
+	"const", 0,
+	"continue", 0,
+	"default", 0,
+	/* ... */
+	"unsigned", 0,
+	"void", 0,
+	"volatile", 0,
+	"while", 0
+};
+</pre>
+<p>
+更精确的做法时每一行的初值都放在花括号内：
+</p>
+<pre  class="brush:c">
+   { "auto", 0 },
+   { "break", 0 },
+   { "case", 0 },
+   ...
+</pre>
+
+
+<h3 id="toc_1.3.2">sizeof</h3>
+<ol>
+<li>
+它是编译时的一元运算符
+
+<li>
+用于计算任一对象的长度：
+<pre  class="brush:c">
+   sizeof 对象
+   //或：
+   sizeof(类型名)
+</pre>
+
+<li>
+返回整型值，用于指定对象或类型占用的存储空间字节数. <em><strong>实际上是无符号整型值，类型为</strong></em> <strong>size_t</strong>
+
+<li>
+对象可以是：变量、数组、结构
+
+<li>
+类型可以是：init、double、派生类型（结构类型或指针类型）
+
+</ol>
+
+<h3 id="toc_1.3.3">数组的长度与项数</h3>
+<ol>
+<li>
+<em><strong>数组的长度在编译时已确定</strong></em>
+
+<li>
+它等于数组项的长度乘以项数
+
+<li>
+数组项数为：<code>数组的长度/数组项的长度</code>
+
+<li>
+计算数组的项数：
+<pre  class="brush:c">
+    #define NKEYS (sizeof keytab / sizeof(struct key))
+    //或
+    #define NKEYS (sizeof keytab / sizeof(keytab[0]))
+</pre>
+
+<ol>
+<li>
+第二种方法通用，可以不管数组项的类型, 即使类型变了，也可以不改程序
+
+<li>
+条件编译语句<code>#if</code>中不能使用<code>sizeof</code>,因为预处理器不对类型名进行分析
+
+<li>
+预处理器不计算<code>#define</code>中的表达式，所以可以用<code>sizeof</code>
+
+</ol>
+</ol>
+  
+<h2 id="toc_1.4">指向结构的指针</h2>
+<ol>
+<li>
+<code>tab</code>是一个有n个元素的数组
+
+<li>
+<code>&amp;tab[-1]</code>与&amp;<code>tab[n]</code>都超出了数组tab的范围
+
+<ol>
+<li>
+前一个是非法的
+
+<li>
+<em><strong>C语言的定义保证数组末尾之后的第一个元素(即&amp;tab[n])的指针算术运算可以正确执行</strong></em>
+
+</ol>
+</ol>
+   
+<h2 id="toc_1.5">自引用结构</h2>
+
+<h2 id="toc_1.6">表查找</h2>
+
+<h3 id="toc_1.6.1">遍历链表的标准方法</h3>
+<pre  class="brush:c">
+  for(ptr = head; ptr != NULL; ptr = ptr-&gt;next)
+	  ...
+</pre>
+  
+<h2 id="toc_1.7">类型定义(typedef)</h2>
+<ol>
+<li>
+用于建立新的数据类型名，例：
+<pre  class="brush:c">
+  typedef int Length;
+</pre>
+
+<ul>
+<li>
+建立了一个新类型名<code>Length</code>
+
+<li>
+它与<code>int</code>具有相同的意义
+
+</ul>
+<li>
+另一个例子
+<pre  class="brush:c">
+  typedef char* String;
+</pre>
+
+<ul>
+<li>
+它与char *或字符指针同义
+
+</ul>
+<li>
+通常将大写字母作为<code>typedef</code>定义类型的首字母，以示区别
+
+<li>
+一个复杂的例子
+<pre  class="brush:c">
+typedef struct tnode *Treeptr;
+typedef struct tnode { /* the tree node: */
+	char *word;
+	/* points to the text */
+	int count;
+	/* number of occurrences */
+	struct tnode *left; /* left child */
+	struct tnode *right; /* right child */
+} Treenode;
+
+      //分配空间函数：
+Treeptr talloc(void)
+{
+	return (Treeptr) malloc(sizeof(Treenode));
+}
+</pre>
+
+<li>
+<em><strong>特别注意：</strong></em>
+
+<ul>
+<li>
+<code>typedef</code> <em><strong>并没有创建一个新类型</strong></em>
+
+<li>
+它只是为某个 <em><strong>已存在的类型增加了一个名字</strong></em> 而已。
+
+<li>
+<code>typedef</code>声明没有增加新的语义
+
+<li>
+通过这种方式声明的变量和通过普通方式声明的变量 <em><strong>具有完全相同的属性</strong></em>
+
+<li>
+<code>typedef</code>与<code>#define</code>类似，前者是通过编译器解释的，后者是通过预处理器，前者强于后者
+
+</ul>
+<li>
+一个函数指针的例子
+<pre  class="brush:c">
+typedef int (*PFI)(char *, char *);
+//使用
+PFI strcmp, numcmp;
+</pre>
+
+<ul>
+<li>
+定义了类型<code>PFI</code>：一个指向函数的指针，具有两个<code>char *</code>类型的参数，返回<code>int</code>
+
+</ul>
+<li>
+为什么使用<code>typedef</code>
+
+<ul>
+<li>
+可以使程序参数化，比如各机器<code>int</code>可能长度不一样，可以预先定义一种类型，在不同的机器上也选择相同的长度
+
+<li>
+提供更好的说明性。
+
+</ul>
+</ol>
+
+<h2 id="toc_1.8">联合</h2>
+<pre  class="brush:c">
+union u_tag {
+	int ival;
+	float fval;
+	char *sval;
+} u;
+</pre>
+<ol>
+<li>
+联合定义了一种变量
+
+<li>
+可以保存多种类型中任何一种类型的对象
+
+<li>
+但同一时刻只能保存一种类型
+
+<li>
+所以它的空间要足以保存这些类型中最长的变量
+
+<li>
+<em><strong>读取的类型必须是最近一次存入的类型</strong></em>
+
+<ul>
+<li>
+程序员负责追踪当前保存在联合中的类型
+
+</ul>
+<li>
+访问联合成员
+<pre  class="brush:c">
+  联合名.成员
+  //或
+  联合指针-&gt;成员
+</pre>
+
+<li>
+联合就是 <em><strong>一种结构，它所有成员相对于基地址的偏移量都是0</strong></em> ,此结构要大到足够容纳最‘宽’的成员
+
+<li>
+联合的合法操作和结构一样：整体赋值、复制、取址及访问其一个成员
+
+<li>
+<em><strong>联合只能用其 第一个 成员类型的值进行初始化</strong></em> , 上面的只能用<code>int</code>初始化
+
+</ol>
+
+<h2 id="toc_1.9">位字段</h2>
+
+<ol>
+<li>
+将多个对象保存在一个机器字中，节省存储空间
+
+<li>
+直接访问一个字中的位字段的能力
+
+<li>
+<code>位字段</code>: 是“字” 中相邻位的集合
+
+<li>
+“字word”是单个的存储单元
+
+<li>
+定义
+<pre  class="brush:c">
+   strutct {
+       unsigned int is_keyword : 1;
+       unsigned int is_extern : 1;
+       unsigned int is_static : 1;
+} flags;
+</pre>
+
+<ul>
+<li>
+定义了一个变量<code>flags</code>
+
+<li>
+它包含三个一位的字段keyword
+
+<li>
+冒号后的数字表示字段的宽度
+
+<li>
+字段声明为<code>unsigned int</code>,保证它们是无符号量
+
+</ul>
+<li>
+字段的使用和其他结构成员一样：
+<pre  class="brush:c">
+   flags.is_extern=flags.is_static=1;
+   
+   if(flags.is_extern==0 &amp;&amp; flags.is_static==0)
+     ...
+</pre>
+
+<li>
+<em><strong>注意：</strong></em>
+
+<ul>
+<li>
+字段可以不命名，保有冒号和宽度，起填充作用
+
+<li>
+字段的分配是从左到右还从右到左依赖于具体的机器
+
+<li>
+字段不是数组，并没有地址，所以不使用<code>&amp;</code>运算符
+
+</ul>
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

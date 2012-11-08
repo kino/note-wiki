@@ -1,0 +1,134 @@
+%title perl正则表达式
+=perl正则表达式=
+
+日期: 2012-06-03 21:06
+%toc
+
+# $_和正则表达式
+  {{{ class="brush:perl"
+     $_ ="yabba dabba doo";
+     if(/abba/){
+         print "It matched!\n";
+     }
+	}}}
+# m//匹配
+  {{{ class="brush:perl"
+      m(fred), m<fred>, m{fred}, m[fred]，或者m,fred,, m!fred!, m^fred^
+      #如果使用正斜线（/）作为分隔符，则可以省略掉前面的m。
+	}}}
+# 不区分大小写：/i
+# 使.匹配任何字符：/s
+# 添加空格：/x
+# 锚定^和$
+# 词锚定\b。 \B
+# =~:使用绑定操作符(=~)将告诉Perl 将右边的模式在左边的字符串上进行匹配，而非对$_匹配。
+# 模式内的内插
+  {{{ class="brush:perl"
+	   #! /usr/bin/perl –w
+	   my $what = “larry”;
+	   while(<>){
+	       if(/^($what)/)
+	           print “We saw $what in beginning of $_;”;
+	   }
+	}}}
+# 匹配变量$1 $2 $3 $4 ...
+  {{{ class="brush:perl"
+	    $_ = “Hello there, neighbor”;
+	    if(/(\S+)(\S+),(\S+)/){
+	        print “words were $1 $2 $3”;
+	    }
+	}}}
+	
+# 自动匹配变量：$& $` $'
+  * 字符串中匹配的部分存在$&中，
+  * 匹配部分的前一部分存放在$`之中，
+  * 后一部分被存到$'。
+  * 使用这三个变量会使其它地方的正则表达式的运行数度会变慢一些。
+# 一般的量词：花括号({})，花括号中有2 个数字，由逗号隔开，表示前面一项允许重复的次数。
+  * 模式/a{5,15}/将匹配5 个到15 个a 中的任意一个（包括5，和15）
+  * 省略第二数字，代表没有上限
+  * 如果边逗号也省了，代表匹配确切的次数
+# 使用s///进行替换
+# 使用/g 进行全局替换
+# 不同的分隔符
+  * 非配对的字符，由于没有左字符和右字符的区别，则可以像使用正斜线(/)那样使用。
+  * 如，使用井号（#） 
+    {{{ class="brush:perl"
+        s#^https://#http://#;
+	  }}}
+  * 配对的字符，也就是说其左字符和右字符不的，则必需使用两对：一对存放模式，一对存放替换的字符串。
+  * 此时，分隔符甚至可以是不同的。事实上，分隔符还可以使用普通的符号（非配对的）。下面三例是等价的：
+    {{{ class="brush:perl"
+        s{fred}{barney};
+        s[fred](barney);
+        s<fred>#barney#;
+	  }}}
+# 替换操作中也可以使用/i, /x, 和/s，
+# 替换的邦定操作： =~
+    {{{ class="brush:perl"
+	    $file_name =~ s#^.*###s; #将$file_name 中所有的Unix 类型的路径去掉
+	  }}}
+# \U \L \E \u \l 也可以在字符串中使用
+  * \U
+    {{{ class="brush:perl"
+	    $_ =“I saw Barney with Fred.”;
+	    s/(fred|barney)/\U$1/gi; #$_现在是“I saw BARNEY with FRED.”
+	  }}}
+  * 默认时，会影响到剩余的（替换的）字符串。可以使用\E 来改变这种影响：
+    {{{ class="brush:perl"
+	    s/(\w+) with (\w+)/\U$2\E with $1/I; #$1 现在是“I saw FRED with barney.”
+	  }}}
+  * 如使用\u 和\L 表示“第一个字母大写，其它字母均小写”,顺序无关。
+    {{{ class="brush:perl"
+	    s/(fred|barney)/\u\L$1/ig; #$_现在为“I saw Fred with Barney.”
+	  }}}
+# split操作
+    {{{ class="brush:perl"
+        @fields = split /separtor/, $string;
+	  }}}
+# join函数
+    {{{ class="brush:perl"
+        my $result = join $glue, @pieces;
+	  }}}
+# 在列表context 中使用模式匹配(m//)时，如果匹配成功返回值为内存变量值的列表；如果匹配失败则为空列表：
+    {{{ class="brush:perl"
+        $_ ="Hello there, neighbor!";
+        my($first, $second, $third) =/(\S+) (\S+), (\S+)/;
+        print "$second is my $third\n";
+	  }}}
+  * 这种方法使我们可以给这些匹配的变量以合适的名字，这些值不会由于下次模式匹配而被覆盖
+# /g 修饰符也可在m//中使用，它允许你在字符串中的多处进行匹配。
+  * 在这里，由括号括起来的模式将在每一次匹配成功时返回其内存中所存放的值：
+    {{{ class="brush:perl"
+        my $text = "Fred dropped a 5 ton granite block on Mr. Slate";
+        my @words = ($text =~ /([a-z]+)/ig);
+        print "Result: @words\n";
+        #Result: Fred dropped a ton granite block on Mr slate
+	  }}}
+# 非贪婪的量词：+? *? ?? {1,3}?
+# 锚定^和$是指整个字符串的开头和结束。但/m 这个正则表达式选项允许它们根据内部的换行符进行匹配
+# $^I 和 <>
+    {{{ class="brush:perl"
+	    #! /usr/bin/perl –w
+	    use strict;
+	    chomp(my $date = ‘date’);
+	    $^I =“.bak”;
+	    while(<>){
+	    	s/^Author:.*/Author: Randal L. Scharwartz/;
+	    	s/^Phone:.*\n//;
+	    	s/^Date:.*/Date: $date/;
+	    	print;
+	    }
+	  }}}
+# 一个命令行：
+    {{{ class="brush:perl"
+        $perl –p –i.bak –w –e ‘s/Randall/Randal/g’fred*.dat
+	  }}}
+# 非捕捉用的()
+    {{{ class="brush:perl"
+	    if(/(bronto)?saurus (steak|burger)/){
+	    	print “Fred wants a $2\n”;
+	    }
+	  }}}
+
+

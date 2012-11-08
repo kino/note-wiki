@@ -1,0 +1,23 @@
+%title vim中空格与TAB的替换(转)
+=vim中空格与TAB的替换(转)=
+日期: 2012-07-20 10:07<br>
+转自：http://www.cnblogs.com/rangzee/archive/2010/07/06/1772000.html
+%toc
+
+*在.vimrc中添加以下代码后，重启vim即可实现按TAB产生4个空格：*
+    set ts=4  (注：ts是tabstop的缩写，设TAB宽4个空格) <br>
+    set expandtab
+ 
+*对于已保存的文件，可以使用下面的方法进行空格和TAB的替换：*
+
+*TAB替换为空格：*
+    :set ts=4 <br>
+    :set expandtab <br>
+    :%retab!
+ 
+*空格替换为TAB：*
+    :set ts=4       <br>                               
+    :set noexpandtab     <br>
+    :%retab!
+    
+_*加!是用于处理非空白字符之后的TAB，即所有的TAB，若不加!，则只处理行首的TAB。*_

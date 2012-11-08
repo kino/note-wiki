@@ -1,0 +1,66 @@
+%title perl执行外部命令
+=perl执行外部命令=
+日期: 2012-07-10 18:07
+参考整理自：http://hi.baidu.com/develop_skill/blog/item/d69bc0cbf010da4ff31fe72b.html
+http://blog.waterlin.org/articles/在perl中用system、exec、readpipe函数来执行系统命令.html
+            
+
+%toc
+
+==1. `system("command")`==
+* 使用该命令将开启一个子进程执行引号中的命令，父进程将等待子进程结束并继续执行下面的代码。
+* 它会返回执行后的状态，比如说
+  {{{ class="brush:perl"
+
+      @args = (“command”, “arg1″, “arg2″);
+      system(@args) == 0 or die “system @args failed: $?”
+      
+      #当然，你也可以用类似于下面的语句来检查出错的原因：
+      if ($? == -1) {
+          print “failed to execute: $!\n”;
+      }elsif ($? & 127) {
+          printf “child died with signal %d, %s coredump\n”, ($? & 127),  ($? & 128) ? ‘with’ : ‘without’;
+      } else {
+          printf “child exited with value %d\n”, $? >> 8;
+      }
+	}}}
+
+==2. `exec("command")`==
+* 效果同system命令类似，区别是不会开启子进程，而是取代父进程，因此执行完引号中的命令后进程即结束。一般和fork配合使用。
+* 仅仅是执行一个系统的命令，一般情况下并没有返回值。exec只有在系统没有你要执行的命令的情况下，才会返回false值。
+  {{{ class="brush:perl"
+      exec (‘foo’)   or print STDERR “couldn’t exec foo: $!”;
+      { exec (‘foo’) }; print STDERR “couldn’t exec foo: $!”;
+	}}}
+
+==3. ``command``==
+使用反引号调用外部命令能够捕获其标准输出，并按行返回且每行结束处附带一个回车。反引号中的变量在编译时会被内插为其值。
+
+==4. `readpipe("command")`==
+* 返回系统命令运行的结果。例如：
+  {{{ class="brush:perl"
+    @result = readpipe( “ls -l /tmp” );
+    print “@result”;
+	}}}
+
+==5. 带管道的文件句柄== 
+{{{ class="brush:perl"
+    open LIST "ls -l|";
+    open MORE "|more";
+    @list=<LIST>;
+    print MORE @list;
+    close(LIST);
+    close(MORE);
+  }}}
+使用带管道的文件句柄来执行外部命令，使用方式与读写文件类似。可以从外部命令的输出读取数据，也可以将数据输出到外部命令作为输入。
+
+==6. exec和fork结合使用==
+{{{ class="brush:perl"
+    defined(my $pid=fork) or die "Can not fork: $!\n";
+        unless ($pid) {
+            exec ("date");
+        }
+    waitpid ($pid,0);
+  }}}
+使用fork将会开启子进程与父进程同时执行之后的代码，其中父进程中fork会返回一个非零的数，而子进程中将返回零。
+上面的代码完成和system("date")相同的功能。比起system单纯地调用外部命令，fork可以完成更加复杂的进程操作。

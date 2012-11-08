@@ -1,0 +1,142 @@
+%title 使用vboxmanage管理VirtualBox
+
+=使用vboxmanage管理VirtualBox=
+
+日期: 2012-03-31 12:03<br>
+整理自: http://www.91linux.com/html/article/guanli/centos/20101012/20920.html
+
+%toc
+
+==安装VirtualBox==
+
+# 安装virtaulbox
+  {{{ class="brush:bash"
+  sudo rpm -i Virtual*.rpm
+	}}}
+# 安装virtaulbox extention pack
+  {{{ class="brush:bash"
+  sudo voxmanage extpack install oracle*.pack
+	}}}
+
+==加载一个已存在的VM==
+
+# 从其他地方拷过来VM
+# 安装virtaulbox
+  {{{ class="brush:bash"
+  vboxmanage registervm /path/*.vbox
+	}}}
+	
+==查看VM列表==
+
+* 
+  {{{ class="brush:bash"
+  vboxmanage list vms
+	}}}
+
+	
+==启动一个VM并开启远程桌面==
+
+* 
+  {{{ class="brush:bash"
+  vboxheadless --startvm WinXP --vrdp=on& 
+	}}}
+
+==VM管理==
+
+* 创建一个全新的VM
+  {{{ class="brush:bash"
+  vboxmanage createvm --name "winxp" --register
+	}}}
+* 删除一个VM
+  {{{ class="brush:bash"
+  vboxmanage unregistervm <uuid>|<name>  
+	}}}
+* 查看地一个vmw信息
+  {{{ class="brush:bash"
+  vboxmanage showvminfo <uuid>|<name>  
+	}}}
+* 查看地VM列表
+  {{{ class="brush:bash"
+  vboxmanage list vms
+	}}}
+* 创建一个硬盘
+  {{{ class="brush:bash"
+  vboxmanage createvdi --filename /path/winxp.vdi --size 80000 --remember
+	}}}
+	
+==硬盘管理==
+
+* 创建一个硬盘
+  {{{ class="brush:bash"
+  vboxmanage createvdi --filename /path/winxp.vdi --size 80000 --remember
+	}}}
+* 删除一个硬盘
+  {{{ class="brush:bash"
+  vboxmanage unregisterimage disk /path/winxp.vdi
+	}}}
+	
+==创建IDE接口==
+* 
+  {{{ class="brush:bash"
+  vboxmanage storagectl winxp --name "IDE Controller" --add ide
+  vboxmanage storagectl winxp –name "SATA Controller" –add sata
+	}}}
+	
+==修改VM==
+* 
+  {{{ class="brush:bash"
+   vboxmanage modifyvm "winxp" --ostype "Windows XP" --memory "1024" --vram "16" --boot2 disk --boot1 dvd --hda "/path/winxp.vdi" --sata on --acpi on --pae on --hwvirtex on --nic1 bridged --cableconnected1 on --nictype1 "82540EM" --bridgeadapter1 eth0 --intnet1 brigh1 --macaddress1 auto --vrdp on --vrdpport 4000 --vrdpmulticon on
+ SATA:
+   vboxmanage modifyvm "winxp" --ostype "Windows XP" --memory "1024" --vram "16" --boot2 disk --boot1 dvd --sda "/path/winxp.vdi" --sata on --acpi on --pae on --hwvirtex on --nic1 bridged --cableconnected1 on --nictype1 "82540EM" --bridgeadapter1 eth0 --intnet1 brigh1 --macaddress1 auto --vrdp on --vrdpport 4000 --vrdpmulticon on
+	}}}
+	
+==挂载ISO安装盘==
+* 
+  {{{ class="brush:bash"
+   vboxmanage openmedium dvd /iso/winxp.iso
+	}}}
+
+==将vdi磁盘放在设备0的第0个端口==
+* 
+  {{{ class="brush:bash"
+  vboxmanage storageattach winxp --storagectl "IDE Controller" --port 0 --device 0 --type hdd --medium /path/winxp.vdi
+	}}}
+	
+==将ISO挂载放在设备0的第1个端口==
+* 
+  {{{ class="brush:bash"
+  vboxmanage storageattach winxp --storagectl "IDE Controller" --port 1 --device 0 --type dvddrive --medium /iso/winxp.iso
+	}}}
+	
+==将ISO加到虚拟机的DVD光驱里==
+* 
+  {{{ class="brush:bash"
+  vboxmanage modifyvm "winxp" --dvd /iso/winxp.iso
+	}}}
+	
+==启动|关闭|暂停==
+* 启动
+  {{{ class="brush:bash"
+ vboxmanage startvm "winxp" -type vrdp
+	}}}
+* 暂停
+  {{{ class="brush:bash"
+ vboxmanage controlvm "winxp" pause
+	}}}
+* 继续
+  {{{ class="brush:bash"
+ vboxmanage controlvm "winxp" resume
+	}}}
+* 重启
+  {{{ class="brush:bash"
+ vboxmanage controlvm "winxp" reset
+	}}}
+* 关机
+  {{{ class="brush:bash"
+ vboxmanage controlvm "winxp" poweroff
+	}}}
+* 休眠
+  {{{ class="brush:bash"
+ VBoxManage controlvm "winxp" savestate
+	}}}
+

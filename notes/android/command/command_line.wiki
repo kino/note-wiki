@@ -1,0 +1,59 @@
+%title 常用Android命令行工具
+=常用Android命令行工具=
+参考整理自： http://huangqinqin.iteye.com/blog/770017
+日期: 2012-07-10 16:07
+%toc
+
+==1.启动和关闭ADB服务==
+
+* 关闭adb服务 
+  {{{ class="brush:bash"
+      adb kill-server 
+	}}}
+* 启动adb服务 
+  {{{ class="brush:bash"
+      adb start-server 
+	}}}
+	
+==2.查询当前模拟器/设备的实例==
+  {{{ class="brush:bash"
+      adb devices 
+	}}}
+
+
+==3.安装、卸载和运行程序==
+
+* 安装一个apk
+  {{{ class="brush:bash"
+      adb install ebook.apk 
+	}}}
+* 通过adb卸载一个程序，参数为程序的package
+  {{{ class="brush:bash"
+      adb uninstall net.blogjava.mobile.ebook 
+	}}}
+* 如果程序已经安装，需要先卸载再安装
+  {{{ class="brush:bash"
+      adb install -r ebook.apk 
+	}}}
+* 卸载时保留数据和缓冲目录
+  {{{ class="brush:bash"
+      adb uninstall -k net.blogjava.mobile.ebook 
+	}}}
+* 通过`-s`指定特定的模拟器或真机
+  {{{ class="brush:bash"
+      adb -s emulator-5554 install ebook.apk 
+      adb -s HT9BYL904399 install ebook.apk 
+      adb -s emulator-5554 install -r ebook.apk 
+      adb -s HT9BYL904399 install -r ebook.apk 
+      adb -s emulator-5554 uninstall net.blogjava.mobile.ebook 
+      adb -s HT9BYL904399 uninstall -k net.blogjava.mobile.ebook 
+	}}}
+* 通过`-d`指定连接的唯一usb设备，如果超过一个，会报一个错
+* 通过`-e`指定连接的唯一模拟器，如果超过一个，会报一个错
+* 通过adb运行设备上的指定程序
+  {{{ class="brush:bash"
+      adb -s emulator-5554 shell am start -n net.blogjava.mobile.ebook/net.blogjava.mobile.ebook.Main 
+      adb -s HT9BYL904399 shell am start -n net.blogjava.mobile.ebook/net.blogjava.mobile.ebook.Main 
+      #其中Main是ebook.apk的主Activity。相当于Windows应用程序的主窗体或Web应用程序的主页面。am是shell命令。关于shell命令将在后成的部分 
+	}}}
+

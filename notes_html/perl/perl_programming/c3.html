@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>一元和二元操作符</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">一元和二元操作符</h1>
+<p>
+日期: 2012-06-08 11:06
+<div class="toc">
+<ul>
+<li><a href="#toc_1">一元和二元操作符</a>
+<ul>
+<li><a href="#toc_1.1">箭头操作符</a>
+<li><a href="#toc_1.2">自增和自减操作符</a>
+<li><a href="#toc_1.3">指数运算</a>
+<li><a href="#toc_1.4">表意一元操作符</a>
+<li><a href="#toc_1.5">邦定操作符</a>
+<li><a href="#toc_1.6">乘号操作符</a>
+<li><a href="#toc_1.7">附加操作符</a>
+<li><a href="#toc_1.8">移位操作符</a>
+<li><a href="#toc_1.9">命名一元操作符</a>
+<li><a href="#toc_1.10">文件操作测试符</a>
+<li><a href="#toc_1.11">关系操作符</a>
+<li><a href="#toc_1.12">相等操作符</a>
+<li><a href="#toc_1.13">位操作符</a>
+<li><a href="#toc_1.14">短路操作符</a>
+<li><a href="#toc_1.15">范围操作符</a>
+<li><a href="#toc_1.16">条件操作符</a>
+<li><a href="#toc_1.17">赋值作符</a>
+<li><a href="#toc_1.18">逗号操作符</a>
+<li><a href="#toc_1.19">列表操作符(右向)</a>
+<li><a href="#toc_1.20">逻辑与、或、非和异或</a>
+<li><a href="#toc_1.21">没有的C操作符</a>
+</ul>
+</ul>
+</div>
+</p>
+
+<h2 id="toc_1.1">箭头操作符</h2>
+<ul>
+<li>
+如果右边是一个[...]数组脚标，一个{...}散列脚标，一个(...)子例程参数列表
+
+<ul>
+<li>
+左边必须是一个对应的数组、散列、或子例程引用
+<pre  class="brush:perl">
+        $aref-&gt;[42]              #一个数组析值
+        $href-&gt;{"corned beff"}   #一个散列析值
+        $sref-&gt;(1,2,3)           #一个子例程析值
+</pre>
+
+</ul>
+<li>
+否则它就是某种方法的调用
+
+<ul>
+<li>
+右边必须是一个方法名，或包含方法名的简单标量变量
+
+<li>
+左边必须是一个对象名，或一个类的名字
+<pre  class="brush:perl">
+        $yogi = Bear-&gt;new("Yogi");     #一个类方法调用
+	    $yogi-&gt;swipe($picnic);         #一个对象方法调用
+</pre>
+
+</ul>
+</ul>
+
+<h2 id="toc_1.2">自增和自减操作符</h2>
+<ul>
+<li>
+如果在数字环境中，就是我们所认识的正常功能。
+
+<li>
+如果在字符串环境中，且匹配模式 /^[a-zA-Z]*<strong>[0-9]</strong>*$/
+
+<ul>
+<li>
+采用字符串方式，且会进位
+<pre  class="brush:perl">
+        print ++($foo = '99'); # 打印'100'
+        print ++($foo = 'a0'); # 打印'a1'
+        prin ++($foo = 'Az'); # 打印'Ba'
+        print ++($foo = 'zz'); # 打印'aaa'
+</pre>
+
+</ul>
+</ul>
+	  
+<h2 id="toc_1.3">指数运算</h2>
+<p>
+-2**<strong>4, 是-(2</strong>**<strong>4), 而不是(-2)</strong>**4
+</p>
+
+<h2 id="toc_1.4">表意一元操作符</h2>
+<ul>
+<li>
+<code>!</code>逻辑否
+
+<li>
+<code>-</code>
+
+<ul>
+<li>
+如果是数字，数学取负
+
+<li>
+如果是一个标识符，返回一个由负号和标识符连在一起的字符串
+
+</ul>
+<li>
+<code>~</code>
+
+<ul>
+<li>
+如果是数字，按位取反
+
+<li>
+如果是字符串，返回等长字符串，但所有字符串所有的位都是互补的
+
+</ul>
+<li>
+<code>+</code>
+
+<li>
+<code>\</code>
+
+<ul>
+<li>
+给它后面的东西创建一个引用
+
+</ul>
+</ul>
+   
+<h2 id="toc_1.5">邦定操作符</h2>
+<ul>
+<li>
+<code>=~</code>
+
+<ul>
+<li>
+将一个字符串和一个模式进行匹配、替换、或者换字绑定在一起。
+
+<li>
+字符串放左边，操作符放右边
+
+<li>
+返回值说明操作符是否成功
+
+<li>
+绑定操作符本身实际上不做任何事情
+
+<li>
+如果右边只是一个表达式，将进入搜索模式
+<pre  class="brush:perl">
+		  $_=~$pat;
+          #等效于：
+		  $_=~/$pat/;
+</pre>
+
+</ul>
+<li>
+<code>!~</code>
+
+<ul>
+<li>
+与<code>=~</code>类似，返回值是<code>=~</code>对应返回值的逻辑非
+<pre  class="brush:perl">
+          $string !~ /pattern/;
+          #等效于：
+          not $string =~ /pattern/;
+</pre>
+
+</ul>
+</ul>
+   
+<h2 id="toc_1.6">乘号操作符</h2>
+<ul>
+<li>
+<code>* / %</code>
+
+<li>
+<code>x</code> 复制操作符
+
+<ul>
+<li>
+标量环境，返回一个由左操作数重复右操作数次数连接起来的字符串
+
+<li>
+列表环境，如果左操作数是在小括号中的列表，<code>x</code>的作用是一个列表复制器
+<pre  class="brush:perl">
+        @ones = (1) x80;     #一个 80 个 1 的列表
+        @ones = (5) x @ones; #把所有元素设置为 5
+        
+        #类似,你还可以用 x 初始化数组和散列片段:
+        @keys = qw(perls before swine);
+        @hash{@keys} = (" ") x @keys;
+        #在赋值语句右边@keys当做一个标量值(返回数组长度)。
+</pre>
+
+</ul>
+</ul>
+
+
+<h2 id="toc_1.7">附加操作符</h2>
+<ul>
+<li>
+<code>+ -</code> 把参数从字符串转换为一个数字值
+
+<li>
+<code>.</code>连接字符串
+
+</ul>
+
+<h2 id="toc_1.8">移位操作符</h2>
+<ul>
+<li>
+<code>&gt;&gt; &lt;&lt;</code>
+
+</ul>
+ 
+<h2 id="toc_1.9">命名一元操作符</h2>
+
+<ul>
+<li>
+表 3-2 命名单目操作符
+
+</ul>
+<table>
+<tr>
+<td>
+-X (file tests)
+</td>
+<td>
+gethostbyname
+</td>
+<td>
+localtime
+</td>
+<td>
+return
+</td>
+</tr>
+<tr>
+<td>
+alarm
+</td>
+<td>
+getnetbyname
+</td>
+<td>
+lock
+</td>
+<td>
+rmdir
+</td>
+</tr>
+<tr>
+<td>
+caller
+</td>
+<td>
+getpgrp
+</td>
+<td>
+log
+</td>
+<td>
+scalar
+</td>
+</tr>
+<tr>
+<td>
+chdir
+</td>
+<td>
+getprotobyname
+</td>
+<td>
+lstat
+</td>
+<td>
+sin
+</td>
+</tr>
+<tr>
+<td>
+chroot
+</td>
+<td>
+glob
+</td>
+<td>
+my
+</td>
+<td>
+sleep
+</td>
+</tr>
+<tr>
+<td>
+cos
+</td>
+<td>
+gmtime
+</td>
+<td>
+oct
+</td>
+<td>
+sqrt
+</td>
+</tr>
+<tr>
+<td>
+defined
+</td>
+<td>
+goto
+</td>
+<td>
+ord
+</td>
+<td>
+srand
+</td>
+</tr>
+<tr>
+<td>
+delete
+</td>
+<td>
+hex
+</td>
+<td>
+quotemeta
+</td>
+<td>
+stat
+</td>
+</tr>
+<tr>
+<td>
+do
+</td>
+<td>
+int
+</td>
+<td>
+rand
+</td>
+<td>
+uc
+</td>
+</tr>
+<tr>
+<td>
+eval
+</td>
+<td>
+lc
+</td>
+<td>
+readlink
+</td>
+<td>
+ucfirst
+</td>
+</tr>
+<tr>
+<td>
+exists
+</td>
+<td>
+lcfirst
+</td>
+<td>
+ref
+</td>
+<td>
+umask
+</td>
+</tr>
+<tr>
+<td>
+exit
+</td>
+<td>
+length
+</td>
+<td>
+require
+</td>
+<td>
+undef
+</td>
+</tr>
+</table>
+
+<ul>
+<li>
+一元操作符比起某些二元操作符优先级高
+<pre  class="brush:perl">
+      sleep 4 | 3;
+      # 等价于
+      (sleep 4) | 3;
+</pre>
+
+<li>
+<code>print</code>是一个列表操作符，而不是一元操作符
+<pre  class="brush:perl">
+      print 4 | 3;
+      # 等价于
+      print (4 | 3);
+</pre>
+
+<li>
+可以用小括号把一个命名的一元操作符转换成一个函数
+
+<li>
+一元操作符没有参数时，默认使用<code>$_</code>
+
+<li>
+下列记号被称为模糊字符，它会根据需要将自身转换为操作符或项。一元操作符后期待一个项
+
+</ul>
+<p>
+表 3-3 模糊字符
+<table>
+<tr>
+<th>
+字符
+</th>
+<th>
+操作符
+</th>
+<th>
+项
+</th>
+</tr>
+<tr>
+<td>
++
+</td>
+<td>
+加法
+</td>
+<td>
+单目正号
+</td>
+</tr>
+<tr>
+<td>
+-
+</td>
+<td>
+减法
+</td>
+<td>
+单目负号
+</td>
+</tr>
+<tr>
+<td>
+*
+</td>
+<td>
+乘法
+</td>
+<td>
+*类型团
+</td>
+</tr>
+<tr>
+<td>
+/
+</td>
+<td>
+除法
+</td>
+<td>
+/pattern/
+</td>
+</tr>
+<tr>
+<td>
+&lt;
+</td>
+<td>
+小于号,左移
+</td>
+<td>
+&lt;HANDLE&gt;,&lt;&lt;END
+</td>
+</tr>
+<tr>
+<td>
+.
+</td>
+<td>
+连接
+</td>
+<td>
+.3333
+</td>
+</tr>
+<tr>
+<td>
+?
+</td>
+<td>
+?:
+</td>
+<td>
+?pattern?
+</td>
+</tr>
+<tr>
+<td>
+%
+</td>
+<td>
+模除
+</td>
+<td>
+%assoc
+</td>
+</tr>
+<tr>
+<td>
+&amp;
+</td>
+<td>
+&amp;, &amp;&amp;
+</td>
+<td>
+&amp;subroutine(子过程)
+</td>
+</tr>
+</table>
+</p>
+
+<ul>
+<li>
+一个典型的错误
+<pre  class="brush:perl">
+      #这里&lt;会被当成输入符号&lt;&gt;的开始，而不是一个小于号，因为一元操作符length后期待一个项
+      next if length &lt; 80;
+      
+      #如果实在不想打$_,可以使用下列方式
+      next if (length) &lt; 80;
+      next if length() &lt; 80;
+      next if  80 &gt; length;
+      next unless  length &gt;= 80;
+</pre>
+
+</ul>
+ 
+<h2 id="toc_1.10">文件操作测试符</h2>
+<ul>
+<li>
+当解析器需要一个项时，负号加一个字母会被当成一个文件测试符
+
+<li>
+它是接受一个参数的一元操作符
+
+<li>
+省略参数时，将<code>$_</code>当成参数，<code>-t</code>除外，它将测试<code>STDIN</code>
+
+</ul>
+<p>
+表 3-4 文件测试操作符
+<table>
+<tr>
+<th>
+操作符
+</th>
+<th>
+含义
+</th>
+</tr>
+<tr>
+<td>
+-r
+</td>
+<td>
+文件可以被有效的 UID/GID 读取。
+</td>
+</tr>
+<tr>
+<td>
+-w
+</td>
+<td>
+文件可以被有效的 UID/GID 写入。
+</td>
+</tr>
+<tr>
+<td>
+-x
+</td>
+<td>
+文件可以被有效的 UID/GID 执行。
+</td>
+</tr>
+<tr>
+<td>
+-o
+</td>
+<td>
+文件被有效 UID 所有
+</td>
+</tr>
+<tr>
+<td>
+-R
+</td>
+<td>
+文件可以被真实的 UID/GID 读取。
+</td>
+</tr>
+<tr>
+<td>
+-W
+</td>
+<td>
+文件可以被真实的 UID/GID 写入。
+</td>
+</tr>
+<tr>
+<td>
+-X
+</td>
+<td>
+文件可以被真实的 UID/GID 执行。
+</td>
+</tr>
+<tr>
+<td>
+-O
+</td>
+<td>
+文件被真实的 UID 所有
+</td>
+</tr>
+<tr>
+<td>
+-e
+</td>
+<td>
+文件存在
+</td>
+</tr>
+<tr>
+<td>
+-z
+</td>
+<td>
+文件大小为零
+</td>
+</tr>
+<tr>
+<td>
+-s
+</td>
+<td>
+文件大小不为零(返回大小)
+</td>
+</tr>
+<tr>
+<td>
+-f
+</td>
+<td>
+文件是简单文件
+</td>
+</tr>
+<tr>
+<td>
+-d
+</td>
+<td>
+文件是目录
+</td>
+</tr>
+<tr>
+<td>
+-l
+</td>
+<td>
+文件是符号连接
+</td>
+</tr>
+<tr>
+<td>
+-p
+</td>
+<td>
+文件是命名管道(FIFO)。
+</td>
+</tr>
+<tr>
+<td>
+-S
+</td>
+<td>
+文件是套接字
+</td>
+</tr>
+<tr>
+<td>
+-b
+</td>
+<td>
+文件是特殊块文件
+</td>
+</tr>
+<tr>
+<td>
+-c
+</td>
+<td>
+文件是特殊字符文件
+</td>
+</tr>
+<tr>
+<td>
+-t
+</td>
+<td>
+文件句柄为一个 tty 打开了
+</td>
+</tr>
+<tr>
+<td>
+-u
+</td>
+<td>
+文件设置了 setuid 位
+</td>
+</tr>
+<tr>
+<td>
+-g
+</td>
+<td>
+文件设置了 setgid 位
+</td>
+</tr>
+<tr>
+<td>
+-k
+</td>
+<td>
+文件设置了 sticky 位
+</td>
+</tr>
+<tr>
+<td>
+-T
+</td>
+<td>
+文件是文本文件
+</td>
+</tr>
+<tr>
+<td>
+-B
+</td>
+<td>
+文件是一个二进制文件(与-T 对应)
+</td>
+</tr>
+<tr>
+<td>
+-M
+</td>
+<td>
+自从修改以来的文件以天记的年龄(从开始起)
+</td>
+</tr>
+<tr>
+<td>
+-A
+</td>
+<td>
+自从上次访问以来的文件以天记的年龄(从开始起)
+</td>
+</tr>
+<tr>
+<td>
+-C
+</td>
+<td>
+自从 inode 修改以来的文件以天记的年龄(从开始起)
+</td>
+</tr>
+</table>
+</p>
+
+<ul>
+<li>
+下划线<code>_</code>作为文件测试操作符的参数，将使用前一个文件测试使用的结构，省缺一个系统调用
+<pre  class="brush:perl">
+      print "Can do. \n" if -r $a || -w _ || -x _;
+</pre>
+
+</ul>
+	   
+	   
+<h2 id="toc_1.11">关系操作符</h2>
+
+<p>
+3-5 关系操作符
+<table>
+<tr>
+<th>
+数字
+</th>
+<th>
+字串
+</th>
+<th>
+含义
+</th>
+</tr>
+<tr>
+<td>
+gt
+</td>
+<td>
+大于
+</td>
+</tr>
+<tr>
+<td>
+&gt;=
+</td>
+<td>
+ge
+</td>
+<td>
+大于或等于
+</td>
+</tr>
+<tr>
+<td>
+&lt;
+</td>
+<td>
+lt
+</td>
+<td>
+小于
+</td>
+</tr>
+<tr>
+<td>
+&lt;=
+</td>
+<td>
+le
+</td>
+<td>
+小于或等于
+</td>
+</tr>
+</table>
+</p>
+
+
+<h2 id="toc_1.12">相等操作符</h2>
+
+<p>
+表 3-6 相等操作符
+<table>
+<tr>
+<th>
+数字
+</th>
+<th>
+字串
+</th>
+<th>
+含义
+</th>
+</tr>
+<tr>
+<td>
+==
+</td>
+<td>
+eq
+</td>
+<td>
+等于
+</td>
+</tr>
+<tr>
+<td>
+=
+</td>
+<td>
+ne
+</td>
+<td>
+不等于
+</td>
+</tr>
+<tr>
+<td>
+&lt;=&gt;
+</td>
+<td>
+cmp
+</td>
+<td>
+比较,带符号结果
+</td>
+</tr>
+</table>
+</p>
+
+
+<h2 id="toc_1.13">位操作符</h2>
+<ul>
+<li>
+如果两个操作数是数字，则将两个操作数转换为整数，再进行操作
+
+<ul>
+<li>
+保证至少32位
+
+</ul>
+<li>
+如果两个操作数是字符串，将用两个字符串里面的位进行操作
+
+<ul>
+<li>
+没有字长限制
+
+<li>
+短的那个尾部用0补足
+
+</ul>
+<li>
+如果两个操作数一个是数字一个是字符串，则将字符串转换为数字，再进行操作
+
+</ul>
+
+<h2 id="toc_1.14">短路操作符</h2>
+<ul>
+<li>
+<code>&amp;&amp; || and or</code>
+
+<li>
+不返回0或1，返回最后计算的值
+
+<li>
+<code>and or</code>优先级低
+
+</ul>
+
+<h2 id="toc_1.15">范围操作符</h2>
+<ul>
+<li>
+<code>..</code>
+
+<li>
+标量环境返回一个布尔值
+
+<ol>
+<li>
+如果左操作数为假则一直为假
+
+<li>
+如果左操作数为真，保持状态真直到右操作数为真。即右操作数为真，范围操作符为假
+
+</ol>
+<li>
+列表环境返回从左值到右值计数的数值
+<pre  class="brush:perl">
+      if(101 .. 200) {print;}             #打印第二个一百行
+      next line if( 1.. /^$/);            #忽略开头行
+      s/^/&gt; / if (/^$/ .. eof());         #引起体
+      
+      for (101 .. 200) {print;}           #打印 101102 。。。 199200
+      @foo = @foo[0 .. $#foo];            #一个昂贵的空操作
+      @foo = @foo[ -5 .. -1];             #最后 5 个元素的片段
+      
+      #如果左边的值大于右边的值,则返回一个空列表。
+      
+      @alphabet = ('A' .. 'Z');                      #以获得所有英文字母
+      $hexdigit = (0 .. 9, 'a' .. 'f')[$num &amp; 15];   #获得一个十六进制位
+      @z2 = ('01' .. '31'); print $z2[$mday];        #获得带有前导零的日期
+      @combos = ('aa' .. 'zz');                      #获取所有两个小写字符的组合。
+      @bigcombos = ('aaaaaa' .. 'zzzzzz');           #要小心:
+</pre>
+
+</ul>
+	
+<h2 id="toc_1.16">条件操作符</h2>
+<p>
+<code>?:</code>
+</p>
+
+<h2 id="toc_1.17">赋值作符</h2>
+<pre  class="brush:perl">
+= **= += *= &amp;= &lt;&lt;= &amp;&amp;=
+      -= /= |= &gt;&gt;= ||=
+      .= %= ^= 
+         x=
+</pre>
+	
+
+<h2 id="toc_1.18">逗号操作符</h2>
+<ul>
+<li>
+<code>,</code>
+
+<li>
+标量环境
+
+<ol>
+<li>
+计算左参数，丢弃
+
+<li>
+计算左参数，返回
+<pre  class="brush:perl">
+      $a = (1,3); #$a为3
+</pre>
+
+</ol>
+<li>
+列表环境
+
+<ol>
+<li>
+只是列表参数的分隔符
+
+<li>
+不会丢弃任何数值
+<pre  class="brush:perl">
+      @a = (1,3); #构造了一个有两个元素的列表
+</pre>
+
+</ol>
+<li>
+<code>=&gt;</code>大多数情况下是逗号的同义词
+
+<ol>
+<li>
+强制将左边的标识符解释为一个字符串
+
+</ol>
+</ul>
+	
+
+<h2 id="toc_1.19">列表操作符(右向)</h2>
+
+<h2 id="toc_1.20">逻辑与、或、非和异或</h2>
+
+<h2 id="toc_1.21">没有的C操作符</h2>
+<ul>
+<li>
+<code>&amp;</code>取址操作符，perl里有<code>\</code>
+
+<li>
+<code>*</code>析值取址操作符，perl里不需要，因有有引用
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

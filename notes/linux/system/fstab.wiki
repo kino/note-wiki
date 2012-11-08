@@ -1,0 +1,5 @@
+%title fstab
+
+=fstab=
+
+[https://wiki.archlinux.org/index.php/Fstab]

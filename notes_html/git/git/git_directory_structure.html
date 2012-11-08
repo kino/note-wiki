@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>git的目录结构(译)</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">git的目录结构(译)</h1>
+<p>
+日期: 2012-07-20 16:07<br>
+译自：<a href="http://www.siteground.com/tutorials/git/directory.htm">http://www.siteground.com/tutorials/git/directory.htm</a>
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">git的目录结构(译)</a>
+<ul>
+<li><a href="#toc_1.1">branches</a>
+<li><a href="#toc_1.2">COMMIT_EDITMSG</a>
+<li><a href="#toc_1.3">config</a>
+<li><a href="#toc_1.4">description</a>
+<li><a href="#toc_1.5">gitweb</a>
+<li><a href="#toc_1.6">HEAD</a>
+<li><a href="#toc_1.7">hooks/</a>
+<li><a href="#toc_1.8">index</a>
+<li><a href="#toc_1.9">info/</a>
+<li><a href="#toc_1.10">logs/</a>
+<li><a href="#toc_1.11">objects/</a>
+<li><a href="#toc_1.12">ORIG_HEAD</a>
+<li><a href="#toc_1.13">packed-refs</a>
+<li><a href="#toc_1.14">refs/</a>
+</ul>
+</ul>
+</div>
+
+<p>
+<code>.git</code>目录拥有一个类似下面的结构：
+</p>
+
+<h2 id="toc_1.1">branches</h2>
+<p>
+一种过时的方式。用于存储<code>git fetch, git pull, git push</code>使用的URL缩写，它存储在一个<code>branches/&lt;name&gt;</code>的文件中，<code>name</code>用来替换命令后<code>repository</code>的参数。
+</p>
+
+<h2 id="toc_1.2">COMMIT_EDITMSG</h2>
+<p>
+这是最后一次提交的注释。实际上git根本不用它，这是在你做一次提交后，给你的一个参考。
+</p>
+
+<pre  class="brush:bash">
+    user@user:/GIT/test# cat COMMIT_EDITMSG
+    first commit
+</pre>
+
+<h2 id="toc_1.3">config</h2>
+<p>
+这是git主要的配置文件. 它保存了你项目的具体的git配置，比如远程库remotes, push配置，追踪分支(tracking branches)等。你的配置会优先从该文件加载，然后再依次从<code>~/.gitconfigure</code>和<code>/etc/gitconfig</code>加载，前提是它们存在的话。
+</p>
+
+<p>
+这个文件的内容类似：
+</p>
+
+<pre>
+    user@user:/GIT/test# cat config
+    [core]
+        repositoryformatversion = 0
+        filemode = false
+        bare = false
+        logallrefupdates = true
+    [remote "origin"]
+        url = git@github.com:user/test.git
+        fetch = +refs/heads/*:refs/remotes/origin/*
+</pre>
+
+<h2 id="toc_1.4">description</h2>
+<p>
+如果你正在使用<code>gitweb</code>或在调用<code>git instaweb</code>, 当你查看源码库或所有的版本库时，它就会显示。
+</p>
+
+<h2 id="toc_1.5">gitweb</h2>
+<p>
+一个用于存放web脚本的目录。它允许你通过浏览器浏览浏览git库
+</p>
+
+<h2 id="toc_1.6">HEAD</h2>
+<p>
+这个文件持有了一个指向当前分支的一个引用。它告诉git使用什么作为下一次提交的父亲。
+</p>
+
+<pre>
+    user@user:/GIT/test# cat HEAD
+    ref: refs/heads/master
+</pre>
+
+<h2 id="toc_1.7">hooks/</h2>
+<p>
+这个目录有一些shell脚本，会在对应的git命令后执行。比如，你执行一次提交后，git会尝试执行<code>post-commit</code>这个脚本。
+</p>
+
+<h2 id="toc_1.8">index</h2>
+<p>
+<code>index</code>将作为工作目录与git库之间的一个暂存区.使用index可以构建一组你想一起提交的更新。当你提交时，提交的就是在index中的东西，而不是你工作目录中的。这是一个二进制文件，包含了一个路径列表，每一条都有权限和一个Blob对象的sha-1名。它的内容可以通过下面的命令列出:
+</p>
+
+<pre>
+    user@user:/GIT/test# git ls-files --stage
+    100644 e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 0    README
+</pre>
+
+<h2 id="toc_1.9">info/</h2>
+<p>
+包含git库中一些其他的信息。
+</p>
+
+<h2 id="toc_1.10">logs/</h2>
+<p>
+保存了每个引用分支的变化记录。
+</p>
+
+<h2 id="toc_1.11">objects/</h2>
+<p>
+这个目录存储了git中的数据对象--所有你加进来的文件，commits, trees, tags。这些文件通过SHA-1值来标识，前两位是子目录名，后38位是文件名。
+</p>
+
+<p>
+For example, if the SHA-1 for a blob we’ve checked in is a576fac355dd17e39fd2671b010e36299f713b4d
+the path to the corresponding file is:
+比如，我们加进来的一个文件blob对应的 SHA-1值是a576fac355dd17e39fd2671b010e36299f713b4d<br>
+对应的文件路径就是：
+</p>
+<pre>
+[GIT_DIR]/objects/a5/76fac355dd17e39fd2671b010e36299f713b4d
+</pre>
+
+<h2 id="toc_1.12">ORIG_HEAD</h2>
+<p>
+前一个HEAD的状态,通常由一些比较危险的命令进行设置，这样就可以较容易恢复。
+</p>
+
+<h2 id="toc_1.13">packed-refs</h2>
+<p>
+这个文件由打包好的heads和tags组成。对于高效访问很有效。
+</p>
+
+<h2 id="toc_1.14">refs/</h2>
+<p>
+这个目录一般包含三个子目录--heads, remotes and tags。它们分别对应本地分支，远程分支，标签文件。
+</p>
+
+<p>
+比如，你创建了一个production的分支， 一个名为.git/refs/heads/production的文件就会被创建并且内容包含一个SHA-1值指向这个分支最近一次的提交。
+</p>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

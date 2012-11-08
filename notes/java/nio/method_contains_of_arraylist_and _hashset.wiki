@@ -1,0 +1,35 @@
+%title ArrayList与HashSet的Contains实现
+
+=ArrayList与HashSet的Contains实现=
+
+日期: 2012-05-13 14:05
+
+%toc
+
+==ArrayList的方法contains实现==
+# ArrayList的数据结构是一数组
+# contains就是遍历这个数组,然后调用equals方法,进行比较,有一个为true就返回true.
+# 也就是说只要数组中有一个元素和参数equals为true,就为包含
+
+==HashSet的contains方法实现==
+# HashSet的数据结构是一个HashMap
+# Set中的元素作为Map的key存在的
+# 利用了Map中key的唯一性,保证了Set中没有重复元素
+# 但HashMap中如何确定key的唯一性的呢,
+  # 看过源码就发现,并不是简单的根据equals来确定的,它有两个条件
+  # 首先secondaryHash(key.hashCode())相等
+  # 其次,equals返回true.
+  
+所以在java中,HashSet中如何确定一个元素已经包含了呢?
+# 首先经过HashMap中方法secondaryHash的验证
+# 再经过equals方法的验证
+
+{{{ class="brush:c"
+  //list 为一ArrayList
+  Set set = new HashSet();
+  set.addAll(list);
+  
+  list.contains(obj);  //为true
+  set.constains(obj);  //不一定为true
+  }}}
+

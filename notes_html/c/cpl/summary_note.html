@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Reading Note</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">Reading Note</h1>
+
+<p>
+日期: 2012-03-31 11:03
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">Reading Note</a>
+<ul>
+<li><a href="#toc_1.1">第一个程序:helloworld</a>
+<li><a href="#toc_1.2">变量</a>
+<li><a href="#toc_1.3">符号常量</a>
+<li><a href="#toc_1.4">EOF</a>
+<li><a href="#toc_1.5">函数</a>
+<ul>
+<li><a href="#toc_1.5.1">函数定义</a>
+<li><a href="#toc_1.5.2">函数声明</a>
+<li><a href="#toc_1.5.3">早期的函数定义与声明</a>
+</ul>
+<li><a href="#toc_1.6">参数－传值调用</a>
+<li><a href="#toc_1.7">自动变量</a>
+<li><a href="#toc_1.8">外部变量与作用域</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">第一个程序:helloworld</h2>
+<pre  class="brush:c">
+    #include&lt;stdio.h&gt;
+
+	main(){
+		printf("Hello  World\n");
+	}
+</pre>
+  
+<ul>
+<li>
+compile
+<pre  class="brush:bash">
+  gcc helloworld.c
+</pre>
+
+<li>
+运行
+<pre  class="brush:bash">
+  ./a.out
+</pre>
+
+</ul>
+  
+<h2 id="toc_1.2">变量</h2>
+<ul>
+<li>
+变量必須先声明再使用
+
+<li>
+声明往往放在函数的开始处
+
+<li>
+变量声明由变量类型、变量名组成
+<pre  class="brush:c">
+  int i, j, k;
+</pre>
+
+</ul>
+  
+<h2 id="toc_1.3">符号常量</h2>
+<ul>
+<li>
+语法: <code>#define 名字 替换文本</code>
+
+<li>
+只是进行简单的文本替换，以后出现名字的地方会用替换文本替换
+
+<li>
+语句后没有分号
+
+<li>
+名字往往大写，用于与普通变量区分
+<pre  class="brush:c">
+  #define EMAIL "wangxingchao@gmail.com"
+</pre>
+
+</ul>
+  
+<h2 id="toc_1.4">EOF</h2>
+<ul>
+<li>
+end of file
+
+<li>
+没有输入时返回
+
+<li>
+它是一个常量，定义在<code>stdio.h</code>里
+
+<li>
+它是一个int, 比char大，这一点要注意。
+<pre  class="brush:c">
+  //c 必须声明成int,而不是char,因为EOF比char大
+  int c;
+  while((c=getchar())!=EOF){
+    putchar(c);
+  }
+</pre>
+
+</ul>
+  
+<h2 id="toc_1.5">函数</h2>
+<h3 id="toc_1.5.1">函数定义</h3>
+<pre  class="brush:c">
+  int power(int base, int n){
+     int i, p;
+     p=1;
+	 for(i=0;i&lt;n;i++){
+	    p=p*base;
+	 }
+	 return p;
+  }
+</pre>
+
+<ul>
+<li>
+函数定义可以以任意次序出现在一个源文件或多个源文件中
+
+<li>
+同一个函数的定义不能分割出现在多个文件中
+
+</ul>
+
+<h3 id="toc_1.5.2">函数声明</h3>
+<ul>
+<li>
+使用函数声明, 当声明与定义或使用的地方不一致时就会报错
+
+<li>
+对于调用而言，函数声明只对它后面的函数的调用起作用
+<pre  class="brush:c">
+  int power(int m, int n);
+</pre>
+
+<li>
+函数声明中的参数名可以和函数定义中的不一致，甚至可以不写。
+<pre  class="brush:c">
+  int power(int, int);
+</pre>
+
+</ul>
+
+<h3 id="toc_1.5.3">早期的函数定义与声明</h3>
+<pre  class="brush:c">
+  int power(base, n)
+  int base,n;
+  {
+     int i, p;
+     p=1;
+	 for(i=0;i&lt;n;i++){
+	    p=p*base;
+	 }
+	 return p;
+  }
+</pre>
+<ul>
+<li>
+函数参数放在括号里
+
+<li>
+参数类型声明放在花括号前
+
+</ul>
+
+<pre  class="brush:c">
+  int power();
+</pre>
+<ul>
+<li>
+函数声明不允许写参数名
+
+</ul>
+
+<h2 id="toc_1.6">参数－传值调用</h2>
+<ul>
+<li>
+c里面的函数参数是通过“值传递”的
+
+<li>
+即：参数值存在形式参数的变量里，而不是原来的变量里
+
+<li>
+也就是在这里改变参数，不会影响到原来的变量
+
+<li>
+被调用函数不能改变主调函数的变量值，只能改变自己所拥有副本的值
+
+<li>
+而java是通过引用传递的
+
+<li>
+<b>当以数组名为参数时，并不会复制整个数组，它只是把一个元素的位置或地址传过去</b>
+
+<li>
+<b>以字符数组存储字符串时，<code>'\0'</code>代表字符串的结束</b>
+
+</ul>
+ 
+<h2 id="toc_1.7">自动变量</h2>
+<ul>
+<li>
+函数中的私有或局部变量称之为自动变量
+
+</ul>
+ 
+<h2 id="toc_1.8">外部变量与作用域</h2>
+<ul>
+<li>
+定义位于所有函数之外的变量。
+<pre  class="brush:c">
+  #include&lt;stdio.h&gt;
+  int globalV;
+  ...
+</pre>
+
+<li>
+所有函数都可以通过变量名访问这种类型的变量
+
+<li>
+外部变量在程序执行期间一直存在
+
+<li>
+只能定义一次, 定义后编译程序为它分配存储单元
+
+<li>
+函数如果要使用外部变量，必须要声明相应的外部变量，有隐式声明和显示声明。
+
+<ul>
+<li>
+使用external进行显示声明
+<pre  class="brush:c">
+  external int globalV;
+</pre>
+
+<li>
+如果外部变量在要使用它的函数之前就定义了，可以不声明，这时是隐式声明
+
+</ul>
+<li>
+人们经常把外部变量定义和external声明放在一个专门的文件中，通常称之为头文件
+
+<li>
+定义与声明的区别
+
+<ul>
+<li>
+定义创建变量并为之分配存储
+
+<li>
+声明用于说明变量的性质，在定义之后
+
+</ul>
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+ =知识库 =
+==Linux==
+* [[linux/bash|BASH]]
+* [[linux/ssh|SSH]]
+* [[linux/nfs|NFS]]
+* [[linux/frq|常用的设置技巧 ]]
+* [[linux/software|我安装的软件 ]]
+* [[linux/system|System]]
+==Vim==
+* [[vim/vim|vim]]
+==Java==
+* [[java/nio|Nio]]
+* [[java/frq|杂 ]]
+==C ==
+* [[c/cpl|C Programming Language]]
+==Perl ==
+* [[perl/basic|Perl Basic]]
+* [[perl/perl_programming|Perl语言编程]]
+==Css==
+* [[css/css|Css]]
+==Git==
+* [[git/git|git]]
+==Basic==
+* [[basic/basic|Basic]]
+==Android==
+* [[android/command|command]]
+==数据库 ==
+* [[mysql/mysql|MySql]]
+==性能==
+* [[performance/performance|性能 ]]
+ 
+

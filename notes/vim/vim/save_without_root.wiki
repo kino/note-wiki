@@ -1,0 +1,8 @@
+%title 保存一个拥有root权限的文件
+=保存一个拥有root权限的文件=
+日期: 2012-06-18 16:06
+
+{{{ class="brush:bash"
+   :w !sudo tee %
+  }}}
+  

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>控制流</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">控制流</h1>
+
+<p>
+日期: 2012-05-09 17:05
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">控制流</a>
+<ul>
+<li><a href="#toc_1.1">if-else</a>
+<li><a href="#toc_1.2">switch</a>
+<li><a href="#toc_1.3">while &amp; for</a>
+<li><a href="#toc_1.4">do while</a>
+<li><a href="#toc_1.5">break &amp; continue</a>
+<li><a href="#toc_1.6">goto</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">if-else</h2>
+
+<p>
+无花括号时：
+</p>
+
+<ul>
+<li>
+每个else与最近的前一个没有else配对的if进行匹配
+<pre  class="brush:c">
+  if(n&gt;0)
+if(a&gt;b)
+	z=a;
+else
+	a=b;
+</pre>
+
+<li>
+容易产生歧义,缩进并不能解决问题
+<pre  class="brush:c">
+
+if (n &gt; 0)
+	for (i = 0; i &lt; n; i++)
+		if (s[i] &gt; 0) {
+			printf("...");
+			return i;
+		}
+else
+	/* WRONG */
+	printf("error -- n is negative\n");
+</pre>
+
+</ul>
+	
+<h2 id="toc_1.2">switch</h2>
+
+<pre  class="brush:c">
+	switch (表达式) {
+		case 常量表达式: 语句序列
+		case 常量表达式: 语句序列
+		default: 语句序列
+	}
+</pre>
+  
+<ul>
+<li>
+常量表达式必须是整数值
+
+</ul>
+ 
+<h2 id="toc_1.3">while &amp; for</h2>
+
+<ul>
+<li>
+for 中的三个表达式都可以省略
+<pre  class="brush:c">
+ for(;;){
+    ...
+ }
+ //中间的表达式省略，认为条件永远为真，是一个“无限循环”
+</pre>
+
+<li>
+<code>,</code> 逗号运算符,
+
+<ul>
+<li>
+C中优先级最低的运算符
+
+<li>
+被其分隔的两个表达式按照从左到右的方向求值
+
+<li>
+运算符右边的操作数的类型和值作为运算结果的类型和值
+
+<li>
+for循环中常用的逗号为逗号运算符
+
+<li>
+函数参数分隔中的逗号，变量声明中的用于分隔的逗号，并不是逗号运算符, 这些逗号并不保证各表达式按照从左至右的顺序求值。
+
+<li>
+一个逗号运算符的例子：
+<pre  class="brush:c">
+for (i = 0, j = strlen(s)-1; i &lt; j; i++, j--)
+	c = s[i], s[i] = s[j], s[j] = c;
+</pre>
+
+</ul>
+</ul>
+	   
+<h2 id="toc_1.4">do while</h2>
+
+<p>
+程序块至少执行一次
+</p>
+
+<h2 id="toc_1.5">break &amp; continue</h2>
+
+<h2 id="toc_1.6">goto</h2>
+
+<ul>
+<li>
+不建议使用goto，代码会难以维护
+
+<li>
+使用goto的代码都可以不用goto的代码代替
+
+<li>
+但有些场合也可以使用一下，比如跳出深层嵌套循环。
+
+<li>
+标号：
+
+<ul>
+<li>
+标号的命名和变量命名形式相同
+
+<li>
+标号可以位于goto所在函数的任何位置
+
+<li>
+标号的作用域是整个函数
+
+</ul>
+<li>
+一个例子，查看两个数组中是否存在相同的元素：
+<pre  class="brush:c">
+for (i = 0; i &lt; n; i++)
+	for (j = 0; j &lt; m; j++)
+		if (a[i] == b[j])
+			goto found;
+/* didn't find any common element */
+...
+found:
+/* got one: a[i] == b[j] */
+...
+</pre>
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

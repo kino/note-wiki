@@ -1,0 +1,148 @@
+%title 输入与输出
+
+=输入与输出=
+
+日期: 2012-05-28 10:05
+
+%toc
+
+==标准输入输出==
+# 函数：`getchar, putchar, printf`
+# 需要引入：`#include <stdio.h>`
+
+==格式化输出：printf==
+# `printf`函数描述, 返回输出的字符数： 
+  {{{ class="brush:c"
+     int printf(char *format, argv1, argv2, ...);
+	}}}
+# `sprintf`同`printf`一样，只是将输出保存到一个字符串中
+  {{{ class="brush:c"
+     int sprintf(char *string, char *format, argv1, argv2, ...);
+	}}}
+	
+==变长参数==
+# `printf`的正确声明方式：
+  {{{ class="brush:c"
+     int printf(char *fmt,  ...);
+	}}}
+  * 三个点代表参数量的参数和类型是可变的
+  * 三个点只能出现在参数列表的尾部
+# 解析可变参数
+  * 引入头文件：`#include <stdarg.h>`
+  * *va_list*:一种变量类型，依次引用各参数。比如我们声明变量名为 _*ap*_
+  * *va_star*:函数，初始化工作，将 _*ap*_ 指向第一个无名参数。但必须有一个有名参数，因为`va_start`以最后一个有名参数为起点
+  * *va_arg*:函数，返回一个参数，且将 _*ap*_ 指向下一个参数。
+  * *va_end*:函数，执行清理工作。
+  {{{ class="brush:c"
+     #include <stdarg.h>
+     void onefunc(int first_arg, ...){
+         va_list ap;
+         int a1,a2;
+         char c1,c2;
+         
+         va_start(first_arg, ap);
+         
+         a1 = va_arg(ap, int);
+         a2 = va_arg(ap, int);
+         c1 = va_arg(ap, char);
+         c2 = va_arg(ap, char);
+         
+         va_end(ap);
+     }
+	}}}
+	
+==格式化输入scanf函数==
+  {{{ class="brush:c"
+     int scanf(char *format, ...)
+	}}}
+* 从标准输入中读取字符序列，按照format中的格式说明对字符序列进行解释，
+  并把结果保存到其余参数中。
+* 其他参数必须是指针
+* 碰到某些输入无法与格式控制说明匹配的情况时，函数中止。
+* 成功匹配并赋值的输入项的个数作为返回值
+* 但如果到达文件末尾返回EOF
+* `sccanf`用于从一个字符串读取字符：
+  {{{ class="brush:c"
+     int scanf(char *string, char *format, ...)
+	}}}
+
+
+==文件访问==
+`FILE fopen getc putc fclose`
+
+* _*FILE*_: 通过`typedef`定义，文件信息结构，包括：
+  * 缓冲区位置
+  * 缓冲区当前字符的位置
+  * 文件读或写的状态
+  * 是否出错或已到达文件末尾等
+* _*fopen*_: 
+  * `FILE *fopen(char *name, char *mode)`
+  * 返回一个`FILE`结构的指针
+  * 第一个参数文件名
+  * 第二个参数访问模式：读`r`、写`w`、追加`a`
+    # 有些系统还区别文本文件和二进制文件，后者访问加`b`:`rb`、`wb`、`ab` 
+    # 如果以`w`或`a`打开一个不存在的文件，该文件将被创建(如果可能)
+    # 如果以`w`打开一个文件，内容被覆盖
+    # 如果以`a`打开一个文件，文件原来的内容保持不变
+    # 读一个不存在的文件，会报一个错误
+  * 如果发生错误，返回`NULL`
+* _*getc*_: 
+  * `int getc(FILE *fp)`
+  * `fp`指向输入流中的下一个字符
+  * 如果到达末尾或发生错误，返回`EOF`
+* _*putc*_: 
+  * `int putc(int c, FILE *fp)`
+  * 将字符`c`写入`fp`指向的文件中
+  * 返回写入的字符
+  * 发生错误，返回`EOF`
+* _*fclose*_: 
+  * `int fclose(FILE *fp)`
+  * 与`fopen`相反的操作
+  * 断开由`fopen`建立的文件指针与外部之间的连接
+  * 释放文件指针供其他文件使用
+  * 将缓冲区中由`putc`正在收集的输出写入文件中
+  * 程序正常终止时，程序会自动为每个打开的文件调用`fclose`
+* _*ferror*_: 
+  * `int ferror(FILE *fp)`
+  * 如果`fp`中出现错误，返回一个非0值
+* _*feof*_: 
+  * `int feof(FILE *fp)`
+  * 与`ferror`类似，如果`fp`指定的文件到达文件末尾，返回一个非0值
+* _*fgets*_: 
+  * `char *fgets(char *line, int maxline, FILE *fp)`
+  * 行输入，从`fp`指向的文件中读取一下输入行,存到`line`中
+  * 最多读取`maxline-1`个字符
+  * 一般情况下返回`line`
+  * 遇到文件末尾或发生错误，返回`NULL`
+* _*fputs*_: 
+  * `int fputs(char *line, FILE *fp)`
+  * 行输出，将字符串`line`写入由`fp`指向的文件中
+  * 出错返回`EOF`,否则返回一个非负值
+  
+===系统负责打开的三个文件：stdin stdout stderr===
+* c程序启动进，会打开这三个文件
+* 这时三个文件指针，在`<stdio.h>`中声明
+* 通常`stdin`指向键盘，`stdout stderr`指向屏幕
+* `getchar()`与`putchar()`的定义：
+  {{{ class="brush:c"
+      #define getchar()  getc(stdin)
+      #define putchar(c) putc((c), stdin)
+	}}}
+	
+===fscanf与fprintf===
+  {{{ class="brush:c"
+      int fscanf(FILE *fp, char *format, ...)
+      int fprintf(FILE *fp, char *format, ...)
+	}}}
+	
+==stderr与exit==
+* _*stderr*_
+  * 建议错误信息输出到这
+  * 在标准输出被重定向时(比如使用管道)，屏幕上也可以看到错误消息
+* _*exit(n)*_
+  * 终止调用程序的执行
+  * 任何调用该程序的进程都可以获得`exit`的参数值
+  * `0`表示一切正常
+  * `非0`往往表示出现了异常
+  * 在main中:`return expr;`等价于`exit(expr);`
+  * 但`exit(expr);` 可以在 _*其他*_ 函数中调用

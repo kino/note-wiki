@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>指针与数组</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">指针与数组</h1>
+
+<p>
+日期: 2012-05-16 21:05
+<div class="toc">
+<ul>
+<li><a href="#toc_1">指针与数组</a>
+<ul>
+<li><a href="#toc_1.1">指针与地址</a>
+<ul>
+<li><a href="#toc_1.1.1">指针</a>
+<li><a href="#toc_1.1.2">取址运算符&amp;</a>
+<li><a href="#toc_1.1.3">间接寻址/引用运算符*</a>
+<li><a href="#toc_1.1.4">指针的声明</a>
+<li><a href="#toc_1.1.5">指针也可以运算</a>
+</ul>
+<li><a href="#toc_1.2">指针与函数参数</a>
+<li><a href="#toc_1.3">指针与数组</a>
+<ul>
+<li><a href="#toc_1.3.1">数组</a>
+<li><a href="#toc_1.3.2">指针借鉴数组的访问方法</a>
+</ul>
+<li><a href="#toc_1.4">地址算术运算</a>
+<ul>
+<li><a href="#toc_1.4.1">特殊的指针值０</a>
+<li><a href="#toc_1.4.2">指针可以和整数进行相加或相减的运算</a>
+<li><a href="#toc_1.4.3">有效与非法的指针运算</a>
+<ul>
+<li><a href="#toc_1.4.3.1">有效指针运算</a>
+<li><a href="#toc_1.4.3.2">其他的指针运算都是非法的</a>
+</ul>
+</ul>
+<li><a href="#toc_1.5">字符指针与函数</a>
+<li><a href="#toc_1.6">指针数组及指向指针的的指针</a>
+<li><a href="#toc_1.7">多维数组</a>
+<li><a href="#toc_1.8">指针数组的初始化</a>
+<li><a href="#toc_1.9">指针与多维数组</a>
+<li><a href="#toc_1.10">命令行参数</a>
+<li><a href="#toc_1.11">指向函数的指针</a>
+</ul>
+</ul>
+</div>
+</p>
+
+<h2 id="toc_1.1">指针与地址</h2>
+
+<h3 id="toc_1.1.1">指针</h3>
+<ol>
+<li>
+指针是一类变量.
+
+<li>
+这类变量用于存储变量的地址.
+
+</ol>
+
+<h3 id="toc_1.1.2">取址运算符&amp;</h3>
+<pre  class="brush:c">
+  &amp;c;
+  //用于取得变量c的内存地址.
+</pre>
+<ol>
+<li>
+只能用于内存中的对象.
+
+<li>
+不能用于表达式,常量,寄存器变量.
+
+<li>
+它返回一个指针类型的变量.
+
+<ol>
+<li>
+其实它返回一个地址类型的值,这个值只能赋值给接受地址为值的对象
+
+<li>
+比如指针,数组名
+
+<li>
+指针是有类型,比如存储整型变量的指针,存储char型变量的指针.
+
+<li>
+如果将char型变量的地址赋给用于存储整型变量的指针,编译器会警告信息.
+
+</ol>
+</ol>
+ 
+<h3 id="toc_1.1.3">间接寻址/引用运算符*</h3>
+<pre  class="brush:c">
+  *ip;
+  //用于访问ip这个地址指向的对象.
+  //ip可能是指针，也可能是数组名
+  //也就是说不一定只有指针存储地址。
+</pre>
+<ol>
+<li>
+当它作用于指针时,用于访问指针所指向的对象.
+
+</ol>
+ 
+<h3 id="toc_1.1.4">指针的声明</h3>
+<pre  class="brush:c">
+  int *ip;
+</pre>
+<ol>
+<li>
+上面的语句表明表达式<code>*ip</code>的结果是int型,但<code>ip</code>才是变量名，才是一个指针。
+
+<li>
+和函数的声明类似.
+
+<li>
+<em><strong>指针只能指向特定类型的对象</strong></em> ，也就是指向某种特定的数据类型。
+
+<ol>
+<li>
+<em><strong>一个例外是指向void类型的指针可以存放指向任何类型的指针. 但不能间接引用其自身</strong></em>
+
+</ol>
+</ol>
+  
+<h3 id="toc_1.1.5">指针也可以运算</h3>
+<ol>
+<li>
+指针<code>pa</code>指向一个特定的元素
+
+<li>
+指针<code>pa+1</code>指向下一个元素
+
+<li>
+指针<code>pa+i</code>指向<code>pa</code>指向元素后的第i个元素
+
+<li>
+指针<code>pa-i</code>指向<code>pa</code>指向元素前的第i个元素
+
+<li>
+<em><strong>指针指向的地址是可以加减运算的，只是运算的单位是指针所指向数据类型的地址单位，比如char是一个字节，short是两个字节等</strong></em>
+
+</ol>
+
+  
+<h2 id="toc_1.2">指针与函数参数</h2>
+<ol>
+<li>
+函数的参数是值传递
+
+<li>
+可以传递指针参数实现类似java中的引用传递。
+
+</ol>
+ 
+<h2 id="toc_1.3">指针与数组</h2>
+
+<h3 id="toc_1.3.1">数组</h3>
+<pre  class="brush:c">
+  int a[10];
+  //声明一个长度为10的int型数组。
+</pre>
+<ol>
+<li>
+<em><strong>数组名a是一个指向数组a第一个元素的地址。</strong></em>
+<pre  class="brush:c">
+   a==&amp;a[0];//为true
+   //所以
+   int *pa;
+   pa=&amp;a[0];
+   //等价于
+   pa=a;
+</pre>
+
+<li>
+<em><strong>元素a[i]的多种方法</strong></em>
+<pre  class="brush:c">
+   int *pa;
+   pa=a;
+   //a[i]的表示方法：
+   a[i];
+   *(pa+i);
+   *(a+i);
+</pre>
+
+<ul>
+<li>
+<em><strong>在c中a[i]就是转换为</strong></em> <code>*(a+i)</code> <em><strong>访问的</strong></em>
+
+</ul>
+<li>
+<em><strong>数组名a不是变量，所以它和指针是不同的，也不能对它进行赋值, 它只是代表一个地址</strong></em>
+
+<li>
+<em><strong>数组名传给函数时，实际上传进去的是第一个元素的地址</strong></em>
+
+<ul>
+<li>
+所以形式参数可以是指针，也可以是这种形式：<code>a[]</code>
+
+</ul>
+<li>
+<em><strong>数组结下标实际是没有限制的，可以是负值a[-2],也可大于长度a[12]</strong></em>
+
+<ol>
+<li>
+int a[10]只是说明初始化时，分配了连续的10个int型内存。
+
+<li>
+<em><strong>负值下标或大于长度的下标，只要内存是有效的就可以了，无效时会报内存错误.</strong></em>
+
+</ol>
+</ol>
+   
+<h3 id="toc_1.3.2">指针借鉴数组的访问方法</h3>
+<ol>
+<li>
+如果<code>pa</code>是个指针
+
+<li>
+<code>pa[i]</code>与<code>*(pa+i)</code>是等价的。
+
+</ol>
+ 
+<h2 id="toc_1.4">地址算术运算</h2>
+ 
+<h3 id="toc_1.4.1">特殊的指针值０</h3>
+<ol>
+<li>
+指针和整数之前不能相互转换
+
+<li>
+但<code>0</code>是唯一的例外
+
+<li>
+常量０可以赋值给指针，指针也可以和常量０进行比较
+
+<li>
+Ｃ中常用符号常量NULL表求０
+
+</ol>
+
+<h3 id="toc_1.4.2">指针可以和整数进行相加或相减的运算</h3>
+<pre  class="brush:c">
+   p+n;
+</pre>
+<ol>
+<li>
+p为指针，p+n指向p当前所指对象之后第n个对象的地址。
+
+<li>
+计算p+n时，n会根据p指向的对象长度按比例缩放：
+
+<ol>
+<li>
+p指向对象的长度取决于p的声明
+
+<li>
+如果是int，占４个字节的存储空间
+
+<li>
+n按４的倍数计算
+
+</ol>
+<li>
+p与q为指向数组中的指针，　p&lt;q, 则q-p+1为p与q间的元素个数
+
+</ol>
+ 
+<h3 id="toc_1.4.3">有效与非法的指针运算</h3>
+
+<h4 id="toc_1.4.3.1">有效指针运算</h4>
+<ul>
+<li>
+同类型指针间的赋值运算
+
+<li>
+指针同整数间的加减运算
+
+<li>
+指向 <em><strong>同一数组元素</strong></em> 间的 <em><strong>减法</strong></em> 运算 
+
+<li>
+将指针赋值为0的运算
+
+<li>
+指针与0比较的运算
+
+</ul>
+ 
+<h4 id="toc_1.4.3.2">其他的指针运算都是非法的</h4>
+<ul>
+<li>
+两个指针间的加法减法乘法除法移位或屏蔽运算
+
+<li>
+指针同float double的加法运算
+
+<li>
+不经强制转换,一种类型指针赋值给另一种类型的指针　void *类型除外
+
+</ul>
+
+<h2 id="toc_1.5">字符指针与函数</h2>
+<ol>
+<li>
+传给函数的字符串，实际上传的是每一个字符的指针，所以函数形参可以是字符指针也可以是字符数组
+
+<li>
+字符指针可以直接通过字符串赋值
+<pre  class="brush:c">
+  char *p;
+  p = "hello world!";
+</pre>
+
+<li>
+C语言没有提供将整个字符串作为一个整体的运算符
+
+<li>
+字符数组定义与字符指针定义的区别
+<pre  class="brush:c">
+  char amessage[] = "nw is the time"; /* 定义一个数组 */
+  char *pmessage = "now is the time"; /* 定义一个指针 */
+  
+  //amessage是一个数组，数组中的单个字符可以修改
+  //但amessage始终指向同一个存储位置
+
+  //pmessage是一个指针，指向一个字符串常量
+  //但它可以修改指向另一个地址
+</pre>
+
+</ol>
+	
+<h2 id="toc_1.6">指针数组及指向指针的的指针</h2>
+
+<ul>
+<li>
+指针本身也是变量，所以它们也可以存储在数组中
+
+<li>
+注意这里的数组变量 lineptr 可以改变值
+<pre  class="brush:c">
+/* writelines: write output lines */
+void writelines(char *lineptr[], int nlines)
+{
+	while (nlines-- &gt; 0)
+		printf("%s\n", *lineptr++);
+}
+</pre>
+
+</ul>
+	
+<h2 id="toc_1.7">多维数组</h2>
+
+<ol>
+<li>
+二维数组是一种特殊的一维数组，它的每个元素是一个一维数组
+
+<li>
+二维数组的行数没太大关系，但要指明列数
+
+<li>
+二级数组作业函数参数时，形参可以声明为：
+<pre  class="brush:c">
+  f(int daytab[2][13]){...}
+  f(int daytab[][13]){...}
+  f(int (*daytab)[13]){...}
+  //声明参数是一个指针，指向具有13个元素的一维数组
+  //[]优先级高于*
+</pre>
+
+</ol>
+	
+<h2 id="toc_1.8">指针数组的初始化</h2>
+
+<h2 id="toc_1.9">指针与多维数组</h2>
+<pre  class="brush:c">
+int a[10][20];
+int *b[10]
+</pre>
+<p>
+<strong>上面两者的区别</strong>
+</p>
+<ul>
+<li>
+<code>a[3][4]</code>与<code>b[3][4]</code>语法上是合法的
+
+<li>
+对于a:
+
+<ol>
+<li>
+a是一二维数组，它分配了一个200个int型的存储空间
+
+<li>
+通过常规矩阵计算下标：<code>row*20+col</code>
+
+</ol>
+<li>
+对于b:
+
+<ol>
+<li>
+b是一个指针数组，未初始化
+
+<li>
+必须显示初始化：静态初始化或代码初始化
+
+<li>
+如果b的每个元素都指向一个具有20元素的数组
+
+<li>
+会分配200个int型的存储空间和10个指针的存储空间
+
+</ol>
+<li>
+b的优点： <strong>每个元素可以指向不同长度的数组</strong>
+
+<li>
+存储空间比较
+
+<ol>
+<li>
+指针数组
+<pre  class="brush:c">
+  char *name[]={"Illegal manth", "Jan", "Feb", "Mar"};
+</pre>
+    <img src="p59.png" />
+
+<li>
+二维数组
+<pre  class="brush:c">
+  char aname[][15] = { "Illegal month", "Jan", "Feb", "Mar" };
+</pre>
+    <img src="p10.png" />
+
+</ol>
+</ul>
+
+
+<h2 id="toc_1.10">命令行参数</h2>
+
+<ul>
+<li>
+可通过命令行将参数传递给程序
+
+<li>
+调用主函数main时带有两个参数
+
+<ul>
+<li>
+<code>argc</code>:表示参数个数
+
+<li>
+<code>argv</code>: 是一个指向字符串指针数组的指针，每个字符串对应一个参数
+<pre  class="brush:c">
+  char *argv[]
+</pre>
+
+</ul>
+<li>
+C语言约定，<code>argv[0]</code>的值是启动该程序的程序名，因此<code>argc</code>至少为1
+
+<li>
+解析以<code>-</code>开头的可选参数
+<pre  class="brush:c">
+   while(--argc&gt;0 &amp;&amp; (*++argv)[0]=='-')
+ while(c=*++argv[0])
+  switch(c){
+             case: 'x'
+             ...
+  }
+//(*++argv)[0]可用**++argv代替
+</pre>
+
+</ul>
+
+<h2 id="toc_1.11">指向函数的指针</h2>
+
+<ul>
+<li>
+函数本身不是变量，但可以定义指向函数的指针
+
+<li>
+这种类型的指针可以被赋值、存放在数组中，传递给函数及作为函数返回值等等
+
+<ol>
+<li>
+函数声明，接受一个函数指针参数
+<pre  class="brush:c">
+    void qsort(void *lineptr[], int left, int right,
+               int (*comp)(void *, void *));
+    //comp是一个接受两个指针作为参数，并返回一个整型的函数指针
+    //参数声明为void *型，这样qsort就可以处理任何类型的排序了
+</pre>
+
+<li>
+传递函数名作为参数
+<pre  class="brush:c">
+    qsort((void**) lineptr, 0, nlines-1,
+              (int (*)(void*,void*))(numeric ? numcmp : strcmp));
+    //numcmp、strcamp本身代表了函数的地址，所以前面不需要取址符，同样的原因，数组名也不需要
+</pre>
+
+<li>
+使用作为参数的函数指针
+<pre  class="brush:c">
+    if ((*comp)(v[i], v[left]) &lt; 0)
+        swap(v, ++last, i);
+    //comp是一个指向函数的指针，*comp代表一个函数
+</pre>
+
+</ol>
+<li>
+<em><strong>任何指针类型都可以转换为</strong></em> <code>void *</code> <em><strong>类型的指针，并把它转换回原先的类型时，不丢失信息</strong></em>
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

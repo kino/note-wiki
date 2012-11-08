@@ -1,0 +1,37 @@
+%title 变量内插
+=变量内插=
+
+日期: 2012-06-03 17:06
+%toc
+
+在一个双引号字符串中，如果包含一个变量名，这个部分将会被 替换成该变量的值。这就叫做变量内插。
+
+# 一个例子：
+  {{{ class="brush:perl"
+      $name = kino;
+      print "My name is $name"; #执行结果是"My name is kino"
+	}}}
+# 变量内插只对双引号字符串有效，对单引号字符串是无效的。
+  {{{ class="brush:perl"
+      print 'My name is $name';#$name并无特殊意义
+	}}}
+# 如果双引号字符串中有一个未定义的变量，将以空值替换
+  {{{ class="brush:perl"
+      print "Your name is $yourname"#执行结果是"Your name is  "
+	}}}
+# 识别变量名时，将取那个字符串中最长的有意义的那个：
+  {{{ class="brush:perl"
+      $what = "people";
+      print "There are many $whats" #它将$whats作为变量名,而我们没定义这个变量，
+		                            #所以执行结果是"There are many  "。这显然不是我们想要的结果
+	}}}
+# 可以用{}明确指定变量名：
+  {{{ class="brush:perl"
+      $what = "people";
+      print "There are many ${what}s"#执行结果"There are many peoples",这就是我们想要的结果
+	}}}
+# 当我们想输入$时，而不是作为变量名的一部分，可以用\转义：
+  {{{ class="brush:perl"
+      print "There are many \$whats" #结果就是"There are many $whats"
+	}}}
+

@@ -1,0 +1,32 @@
+%title 我css的组织方式
+
+= 我css的组织方式=
+
+
+日期: 2012-03-30 14:03
+
+我会把css按功能分成几个编写，然后在共同import到一个css里。
+* 页面中只需要引用一个css文件
+* 但css还是分开维护的，有助于模块化，容易维护
+
+我的main.css, 也就是引入的那个：
+{{{ class="brush:css"
+	@import "reset.css";
+	@import "typography.css";
+	@import "layout.css";
+  }}}
+  
+<b>我固定的几个css</b>
+
+<b>reset.css</b>
+* 用于重置css的默认值
+
+<b>typography.css</b>
+* 根据需要设置项目的全局属性
+* 比如：字体，段落样式，链接样式，各级标题，等等
+
+<b>layout.css</b>
+* 项目的布局样式
+* 比如头，内容，底部，导航等一级布局
+
+<b>接下来的就是公用组件及模块样式的设置</b>

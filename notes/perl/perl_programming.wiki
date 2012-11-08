@@ -1,0 +1,9 @@
+%title Perl语言编程
+=Perl语言编程=
+
+* [[perl_programming/c1|note]]
+* [[perl_programming/c2|集腋成裘]]
+* [[perl_programming/c3|一元和二元操作符]]
+* [[perl_programming/c4|语句和声明]]
+* [[perl_programming/c5|模式匹配]]
+* [[perl_programming/c6|子例程]]

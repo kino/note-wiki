@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>perl数组</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">perl数组</h1>
+<p>
+日期: 2012-06-03 16:06
+<div class="toc">
+<ul>
+<li><a href="#toc_1">perl数组</a>
+</ul>
+</div>
+</p>
+
+<pre  class="brush:perl">
+    $hello[0] = "hello"';
+    $helllo[1] = " ";
+    $hello[2] = "world";
+</pre>
+
+<ol>
+<li>
+数组和列表的区别，列表是指的值，和标量对应。而数组是一种变量，和标量变量对应，它引用了一个列表值，但列表不一定存储在数组中。
+
+<li>
+在perl中可以有同名的标量变量和数组变量，大家可以理解为它们的命名空间不同，但不见意这样用。
+
+<li>
+和其他语言不同的是，列表中的每个元素必须是标量。
+
+<li>
+当通过下标访问数组元素时，
+
+<ul>
+<li>
+当下标为非整数时，则转换为小于它的整数：如
+<pre  class="brush:perl">
+   $hello[2.9] #等同于$hello[2]
+</pre>
+
+<li>
+当下标超出数组范围时，返回undef,如$hello[45];
+
+</ul>
+<li>
+数组没有长度限制。
+
+<li>
+数组最后一个元素的索引可用<code>$#</code>指定，如
+<pre  class="brush:perl">
+  $#hello #为2,比元素个数少1. 
+</pre>
+
+<li>
+数组的索引可以为负数，-1代表最后一个元素的索引，如
+<pre  class="brush:perl">
+    $hello[-1] #和$hello[$#hello]和$hello[2]是一样的，
+    $hello[-3] #代表$hello[0],
+    #但$hello[-4]会产生严重错误，所以大家一般只会使用-1.
+</pre>
+
+<li>
+列表的形式：
+<pre  class="brush:perl">
+    （1，2，3）          #含有1，2，3 的列表
+    （1，2，3，）        #同上，最后一个逗号被忽略
+    （）                  #空列表-0 个元素
+    （1 ．．100）        #包含100 个整数的列表
+</pre>
+
+<ul>
+<li>
+．．是范围操作符（range operator），它创建了从左值到右值之间所有值的列表
+<pre  class="brush:perl">
+    （1 ．．5）               #同（1，2，3，4，5）
+    （1．7．．5．7）         #同上— 最小值和最大值被转换成整数
+    （5 ．．1）               #空列表— ．．中的左值应小于右值，否则为空
+    （0，2 ．． 6，10，12） #同（0，2，3，4，5，6，10，12）
+    
+    （$m ．．$n）            #由$m 和$n 的值决定
+    （0 ．． $#rocks）       #上节中有$#rocks 的介绍 
+</pre>
+
+</ul>
+<li>
+用qw创建字符串列表
+
+<ul>
+<li>
+可以用qw简化字符串列表
+<pre  class="brush:perl">
+    qw(hello world)       #等同于("hello"," ","world")
+</pre>
+
+<li>
+qw中被当作单引号，而不是双引号，所以不能用\n等
+
+<li>
+其中的括号()被称为分界符，可以使用任何标点符号作为分界符
+<pre  class="brush:perl">
+    qw ! hello world !
+    qw# hello world # #有些像注释
+    qw( hello world )
+    qw{ hello world }
+    qw[ hello world ]
+    qw&lt; hello world &gt;
+</pre>
+
+<li>
+当想使用分界符时，可以用\转义
+<pre  class="brush:perl">
+    qw!Yahoo\! Google excite lycos ! #其中一个元素为：字符串yahoo!
+</pre>
+
+</ul>
+<li>
+列表赋值
+
+<ul>
+<li>
+可用通过列表同时为标量赋值
+<pre  class="brush:perl">
+   ($hello,$space,$world)=("hello"," ","world");
+   ($fred, $barney) = ($barney, $fred)                 #交换两个变量
+   ($betty[0],$betty[1]) = ($betty[1],$betty[0]);
+</pre>
+
+<li>
+当两边数量不等时
+<pre  class="brush:perl">
+    ($fred, $barney) = qw &lt;flintstone rubble slate granite&gt;; #两个值被忽略了
+    ($wilma,$dino) = qw[flintstone];                         #$dino 为undef
+</pre>
+
+<li>
+为数组赋值
+<pre  class="brush:perl">
+    ($hello[0],$hello[1],$hello[2])=qw/ hello world /;
+</pre>
+
+</ul>
+<li>
+用@引用整个数组，其实$和@可以分别读做$calar(scalar)和@rry(array)
+<pre  class="brush:perl">
+    @rocks = qw / bedrock slate lava /;
+    @tiny = ();                         #空表
+    @giant = 1..1e5;                    #包含100，000 个元素的表
+    @stuff = (@giant, undef, @giant);   #包含200，001 个元素的表
+</pre>
+
+<ul>
+<li>
+<em><strong>注意：</strong></em> 其中数组名称被其列表值代替，因为列表规定其元素只能是标量
+
+</ul>
+<li>
+将数组加入字符串，数组元素会以空格分开，但头和尾不会加空格
+<pre  class="brush:perl">
+    @hello = qw/ hello world /;
+    print "yahoo,@hello";             #打印：yahoo,hello world
+</pre>
+
+<li>
+一些例子
+<pre  class="brush:perl">
+    #目的：我们将打印“this is right[3]”
+    @fred = qw(eating rocks is wrong);
+    $fred = “right”;                               
+    print “this is $fred[3]\n”;              #打印出“wrong”使用$fred[3]
+    print “this is ${fred}[3]\n”;            #打印出“right”（由花括号分开）
+    print “this is $fred”. “[3]\n”;          #正确（两个字符串，右. 分开）
+    print “this is $fred\[3]\n”;             #正确(利用反斜线转义)
+</pre>
+
+<li>
+pop,push,shift,unshift.
+<pre  class="brush:perl">
+ @array = 5..9;
+ $fred = pop(@array); #$fred 得到9，@array 现在为（5，6，7，8）
+ $barney = pop @array; #$barney gets 8, @array 现在为（5,6,7）
+ pop @array; #@array 现在为（5，6）(7 被丢弃了)
+
+ push(@array,0); #@array 现在为(5,6,0)
+ push @array,8; #@array 现在为（5，6，0，8）
+ push @array,1．．10; #@array 现在多了10 个元素
+ @others =qw/9 0 2 1 0 /;
+ push @array,@others; #@array 现在又多了5 个元素（共有19 个）
+
+ @array = qw# dino fred barney #;
+ $m = shift (@array); #$m 得到“dino”, @array 现在为(“fred”, “barney”)
+ $n = shift @array; #$n 得到”fred”, @array 现在为（“barney”）
+ shift @array; #@array 现在为空
+ $o = shift @array; #$o 得到undef, @arry 仍为空
+ unshift(@array,5); #@array 现在为（5）
+ unshift @array,4; #@array 现在为(4,5)
+ @others = 1..3;
+ unshift @array, @others; #array 现在为（1,2,3,4,5）
+</pre>
+
+<li>
+foreach函数，用于遍历列表
+<pre  class="brush:perl">
+    $name = "hello!";
+    foreach $name(qw/ red yellow green white black /){
+            print "list element:$name\n";
+    }
+    print "xx:$name";
+</pre>
+
+<ul>
+<li>
+在foreach中的$name被称为控制变量，它用来循环引用列表中的每一个元素
+
+<li>
+控制变量是可以和变量同名的，并不会产生冲突，perl会识别它们，foreach内部的就会识别为控制变量
+
+<li>
+控制变量是列表元素本身，如果你改变了控制变量，列表中对应的元素也改变了
+
+</ul>
+<li>
+默认变量$_ ,在perl中，如果一个需要变量的地方没有指定变量，大多数情况下，会使用$_
+<pre  class="brush:perl">
+    foreach (qw/ red yellow green white black /){
+            print;
+    }
+</pre>
+
+<ul>
+<li>
+在上例中没有指定控制变量，则就把$_作为控制变量
+
+<li>
+print也没指定变量，则打印$_
+
+</ul>
+<li>
+reverse函数，反转列表。它会返回一个反转后的列表，但不会改变原列表，一些例子：
+<pre  class="brush:perl">
+    @fred = 6 ．．10;
+    @barney = reverse (@fred); #得到10，9，8，7，6
+    @wilma = reverse 6 ．．10; #同上，没有使用额外的数组
+    @fred = reverse @fred; #将逆转过的字符串存回去
+    reverse @fred; #错误，没有改变@fred 的值
+    @fred = reverse @fred; #改变了@fred 的值
+</pre>
+
+<li>
+sort函数，按字符串顺序对列表进行排序。
+<pre  class="brush:perl">
+    @rocks = qw/ bedrock slate rubble granite /;
+    @sorted = sort(@rocks); #得到bedrock, granite, rubble, slate
+    @back = reverse sort @rocks; #为slate 到bedrock
+    @rocks = sort @rocks; #将排序的值写回@rocks
+    @numbers = sort 97 ．．102; #得到100，101，102，97，98，99
+    sort @rocks; #错误，不会修改@rocks
+    @rocks = sort @rocks; #现在@rocks 值是经过排序的
+</pre>
+
+<li>
+两个主要的上下文：标量上下文，列表上下文。
+
+<ul>
+<li>
+任何表达式都可以产生标量值和列表值，
+
+<li>
+比如一个数组@colors,它引用了一个列表，在列表上下文就是列表，
+
+<li>
+但它也有标量值，如果将它使用在一个标量上下文中，则返回列表的元素个数，是一个标量。
+
+<li>
+根据上下文来决定使用标量值或列表值。
+
+</ul>
+<li>
+标量上下文中的reverse，会返回一个反转的字符串
+<pre  class="brush:perl">
+    $backwards = reverse qw/ yabba dabba doo /;
+    #返回oodabbadabbay
+</pre>
+
+<li>
+如果在列表上下文中使用标量，会生成一个只有一个元素的列表，而这个标量就是元素。
+<pre  class="brush:perl">
+    @fred = 6*7;
+    @barney = “hello”. ‘’. “world”;
+    @wilma = undef; #OOPS！得到一个元素的列表(undef)，不同于下面的例子
+    @betty = (); #将数组置空的正确方法
+</pre>
+
+<li>
+使用函数scalar强制转换为标量上下文，但对于列表上下文没有相应的操作.
+
+<ul>
+<li>
+打印一个数组的长度：print scalar @arrary_demo
+
+</ul>
+<li>
+标量上下文中的&lt;STDIN&gt;,前面已经讲了。
+
+<li>
+列表上下文中的&lt;STDIN&gt;,会所文件的剩余部分全部读入，每一行作为一个元素。
+
+<ul>
+<li>
+@lines=&lt;STDIN&gt;
+
+<li>
+在控制台中，ctrl+d结束输入，windows中使用ctrl+z结束输入。
+
+<li>
+去除每个元素的换行符
+
+<li>
+chomp(@lines=&lt;STDIN&gt;)
+
+</ul>
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

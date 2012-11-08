@@ -1,0 +1,34 @@
+%title /ab/rule-types/{ruleTypeId} DELETE 删除一个RuleType
+
+=/ab/rule-types/{ruleTypeId} DELETE=
+
+==功能 ==
+删除一个 `RuleType` 
+
+==URL==
+/ab/rule-types/{ruleTypeId}
+
+==HTTP请求方式==
+DELETE
+
+==请求参数==
+| 参数名     | 参数类型 | 值     | 描述                       |
+|------------|----------|--------|----------------------------|
+| ruleTypeId | 路径参数 | 数字型 | 要删除的 `RuleType` 的id号 |
+
+
+==返回格式==
+无
+
+==测试==
+{{{ class="brush:bash"
+curl -v -X delete https://baseurl/rule-types/6
+  }}}
+
+==返回结果==
+| 状态 | 结果     |
+|------|----------|
+| 200  | 删除成功 |
+
+
+

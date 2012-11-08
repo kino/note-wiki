@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>perl输入输出</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">perl输入输出</h1>
+<p>
+日期: 2012-06-04 16:06
+<div class="toc">
+<ul>
+<li><a href="#toc_1">perl输入输出</a>
+</ul>
+</div>
+</p>
+
+<ol>
+<li>
+标准输入&lt;STDIN&gt;
+
+<li>
+用户自定义输入&lt;&gt;
+
+<li>
+@ARGV是一个特殊的数组，其中包含了调用参数的列表。
+
+<ul>
+<li>
+其实它和普通数组没什么两样，只是在程序开始的时候，调用参数被存进了@ARGV中。
+
+</ul>
+<li>
+&lt;&gt;操作查看@argv 来决定使用哪些文件。如果表为空，则使用标准输入流；否则，使用其找到的相应文件。
+<pre  class="brush:perl">
+   @argv = qw# larry mor curly #; #强制使用这三个文件
+   while(&lt;&gt;){
+   	chomp;
+   	print “It was $_ that I saw in some stooge-like file!\n”;
+   }
+</pre>
+
+<li>
+标准输出print
+<pre  class="brush:perl">
+    print @array; #打印出元素的列表
+    print “@array”； #打印一个字符串(包含一个内插的数组)
+</pre>
+
+<ul>
+<li>
+第一个例子输出为：fredbarneybetty，而第二个例子输出为fred barney betty（由空格分开）。
+
+<li>
+如果@array 为一个unchomped 的输入列。也就是说，每一个字符串都有一个换行符作为后缀。
+
+<li>
+现在第一个print 语句输出为fred, barney, betty，分别在三行中。第二个print 语句输出为:
+<pre>
+   fred
+   barney
+   betty
+</pre>
+
+</ul>
+<li>
+格式化输出printf
+<pre  class="brush:perl">
+ printf “Hello, %s; your password expires in %d days!\n”,
+ $user, $days_to_die;
+
+ my @items = qw( wilma dino pebbles );
+ my $format = “The items are:\n”. (“%10s\n”x @items);
+ ## print“the format is &gt;&gt;$format&lt;&lt;\n”; #用于调试
+ printf $format, @items;
+</pre>
+
+<li>
+文件句柄（filehandle）是Perl 程序I/O 连接的名字，是Perl 和外界的纽带。
+
+<li>
+Perl 自身有六个文件句柄：STDIN，STDOUT，STDERR，DATA，ARGV，ARGVOUT。
+
+<li>
+打开文件句柄：
+<pre  class="brush:perl">
+    open CONFIG, "dino";
+    open CONFIG, "&lt;dino";
+    open BEDROCK, "&gt;fred";
+    open LOG,"&gt;&gt;logfile";
+</pre>
+
+<li>
+当结束一个文件句柄时，你可以如下这样关闭它：
+<pre  class="brush:perl">
+    close BEDROCK;
+</pre>
+
+<li>
+可以利用die 函数来创建我们自己的严重错误。
+
+<ul>
+<li>
+die 函数将打印出你给它的消息（利用标准错误流），
+
+<li>
+并确保程序退出时为非零（nonzero）的退出状态（exit status）。
+
+</ul>
+<li>
+每一个Unix（以及许多当代的操作系统）上的程序均有一个退出状态，来表明是否成功。运行程序的
+
+<ul>
+<li>
+程序（如make 工具程序）通过查看退出状态来分析程序的运行状况。
+
+<li>
+退出状态是一个单字节，不能说明什么问题；
+
+<li>
+传统上，0 表示成功，非0 表示失败。
+
+<li>
+可能1 是指命令行中命令参数的语法错误，2 指运行错误，3 指没有找到配置文件；具体情况和具体程序相关。
+
+<li>
+但0 通常是指一切正常。当退出状态表明失败时，像make 一类的程序就停止进行下一步处理。
+
+</ul>
+<li>
+$!是指什么呢？
+
+<ul>
+<li>
+它是系统产生的一些可读的信息。
+
+<li>
+通常，当系统拒绝了我们的请求（如打开文件），$!将告诉你原因
+
+<li>
+（可能是“权限不够(permission denied)”或者“(文件不存在)file not found”，针对本例）。
+
+<li>
+这个字符串和你在C 或者类似的语言中通过perror 得到的是一样的。在Perl中，你可以通过$!得到。
+
+<li>
+但如果使用die 来表明错误，但此错误不是系统请求失败引起的，则不要使用$!，因为其包含的信息和实际的问题无关。
+
+<li>
+它所包含的信息，仅对系统请求失败时有效。
+
+</ul>
+<li>
+在Windows 或者VMS 中，变量$^E 还有额外的诊断信息
+
+<li>
+程序的名字在Perl 的特殊变量$0 中
+
+<li>
+warn和die类似，但不退出程序
+
+<li>
+通过select改变默认的输出句柄：
+<pre  class="brush:perl">
+    select BEDROCK;
+    print “I hope Mr. Slate doesn’t find out about this.\n”;
+    print “Wilma!\n”;
+</pre>
+
+<li>
+默认情况，输出到文件句柄的内容会被缓存起来。
+
+<ul>
+<li>
+将变量$|设置为１，将会在输出操作结束时会立刻清空文件句柄。
+<pre  class="brush:perl">
+    select LOG;
+    $| = 1; #don’t keep LOG entries sitting in the buffer
+    select STDOUT;
+    #...time passes, babies learn to work, tectonic plates shift, and then … .
+    print LOG “This gets written to the LOG at once!\n”;
+</pre>
+
+</ul>
+</ol>
+
+<ol>
+<li>
+重新打开一个文件句柄
+
+<ul>
+<li>
+（例如，打开一个文件句柄FRED，但之前已经打开了一个名为FRED 的句柄）
+
+<li>
+前一个句柄将被自动关闭。
+
+</ul>
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

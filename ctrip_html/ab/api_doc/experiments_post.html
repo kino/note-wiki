@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>/ab/experiments POST 新建一个的测试</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">/ab/experiments POST</h1>
+<div class="toc">
+<ul>
+<li><a href="#toc_1">/ab/experiments POST</a>
+<ul>
+<li><a href="#toc_1.1">功能</a>
+<li><a href="#toc_1.2">URL</a>
+<li><a href="#toc_1.3">HTTP请求方式</a>
+<li><a href="#toc_1.4">请求类型</a>
+<li><a href="#toc_1.5">请求参数</a>
+<ul>
+<li><a href="#toc_1.5.1">XML参数</a>
+<li><a href="#toc_1.5.2">JSON 参数</a>
+</ul>
+<li><a href="#toc_1.6">返回结果</a>
+<li><a href="#toc_1.7">测试</a>
+<li><a href="#toc_1.8">Examples</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">功能</h2>
+<p>
+新建一<code>Experiment</code>实例
+</p>
+
+<h2 id="toc_1.2">URL</h2>
+<p>
+/ab/experiments
+</p>
+
+<h2 id="toc_1.3">HTTP请求方式</h2>
+<p>
+POST
+</p>
+
+<h2 id="toc_1.4">请求类型</h2>
+<p>
+JSON XML
+</p>
+
+<h2 id="toc_1.5">请求参数</h2>
+
+<p>
+传输一个 <code>Experiment</code> 完整的XML或JSON的描述
+</p>
+
+
+<h3 id="toc_1.5.1">XML参数</h3>
+<pre  class="brush:xml">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;experiment&gt;
+   &lt;url&gt;http://localhost:8080/ab-service/experiments/HOTEL_HOME_PAGE_BANNER906453e3-5f86-48d3-a093-de8dee183e74&lt;/url&gt;
+   &lt;code&gt;HOTEL_HOME_PAGE_BANNER906453e3-5f86-48d3-a093-de8dee183e74&lt;/code&gt;
+   &lt;name&gt;Test of the login page.&lt;/name&gt;
+   &lt;description&gt;Test of the login page.&lt;/description&gt;
+   &lt;startDate&gt;2012-10-25 00:00&lt;/startDate&gt;
+   &lt;endDate&gt;2012-10-25 00:00&lt;/endDate&gt;
+   &lt;isActive&gt;true&lt;/isActive&gt;
+   &lt;ruleType&gt;
+      &lt;url&gt;http://localhost:8080/ab-service/rule-types/PERSENT&lt;/url&gt;
+      &lt;code&gt;PERSENT&lt;/code&gt;
+      &lt;description&gt;The users fork by percentage&lt;/description&gt;
+   &lt;/ruleType&gt;
+   &lt;properties&gt;
+      &lt;property&gt;
+         &lt;name&gt;a&lt;/name&gt;
+         &lt;value&gt;a&lt;/value&gt;
+      &lt;/property&gt;
+      &lt;property&gt;
+         &lt;name&gt;b&lt;/name&gt;
+         &lt;value&gt;b&lt;/value&gt;
+      &lt;/property&gt;
+      &lt;property&gt;
+         &lt;name&gt;c&lt;/name&gt;
+         &lt;value&gt;c&lt;/value&gt;
+      &lt;/property&gt;
+      &lt;property&gt;
+         &lt;name&gt;d&lt;/name&gt;
+         &lt;value&gt;d&lt;/value&gt;
+      &lt;/property&gt;
+   &lt;/properties&gt;
+   &lt;alternatives&gt;
+      &lt;alternative&gt;
+         &lt;code&gt;A_A&lt;/code&gt;
+         &lt;name&gt;A1&lt;/name&gt;
+         &lt;description&gt;A1 desp.&lt;/description&gt;
+         &lt;isActive&gt;true&lt;/isActive&gt;
+         &lt;ruleParams&gt;
+            &lt;param1&gt;a1p1&lt;/param1&gt;
+         &lt;/ruleParams&gt;
+         &lt;properties&gt;
+            &lt;property&gt;
+               &lt;name&gt;a&lt;/name&gt;
+               &lt;value&gt;a&lt;/value&gt;
+            &lt;/property&gt;
+         &lt;/properties&gt;
+      &lt;/alternative&gt;
+      &lt;alternative&gt;
+         &lt;code&gt;A_B&lt;/code&gt;
+         &lt;name&gt;B1&lt;/name&gt;
+         &lt;description&gt;B1 desp.&lt;/description&gt;
+         &lt;isActive&gt;true&lt;/isActive&gt;
+         &lt;ruleParams&gt;
+            &lt;param1&gt;a2p1&lt;/param1&gt;
+         &lt;/ruleParams&gt;
+         &lt;properties&gt;
+            &lt;property&gt;
+               &lt;name&gt;a&lt;/name&gt;
+               &lt;value&gt;a&lt;/value&gt;
+            &lt;/property&gt;
+         &lt;/properties&gt;
+      &lt;/alternative&gt;
+   &lt;/alternatives&gt;
+&lt;/experiment&gt;
+
+</pre>
+  
+<h3 id="toc_1.5.2">JSON 参数</h3>
+<pre  class="brush:js">
+{
+   "url": "http://localhost:8080/ab-service/experiments/HOTEL_HOME_PAGE_BANNER906453e3-5f86-48d3-a093-de8dee183e74",
+   "code": "HOTEL_HOME_PAGE_BANNER906453e3-5f86-48d3-a093-de8dee183e74",
+   "name": "Test of the login page.",
+   "description": "Test of the login page.",
+   "startDate": "2012-10-25 00:00",
+   "endDate": "2012-10-25 00:00",
+   "isActive": true,
+   "ruleType": {
+      "url": "http://localhost:8080/ab-service/rule-types/PERSENT",
+      "code": "PERSENT",
+      "description": "The users fork by percentage"
+   },
+   "properties": [
+      {
+         "name": "a",
+         "value": "a"
+      },
+      {
+         "name": "b",
+         "value": "b"
+      },
+      {
+         "name": "c",
+         "value": "c"
+      },
+      {
+         "name": "d",
+         "value": "d"
+      }
+   ],
+   "alternatives": [
+      {
+         "code": "A_A",
+         "name": "A1",
+         "description": "A1 desp.",
+         "isActive": true,
+         "ruleParams": {
+            "param1": "a1p1",
+            "param2": null,
+            "param3": null,
+            "param4": null,
+            "param5": null,
+            "param6": null,
+            "param7": null,
+            "param8": null,
+            "param9": null
+         },
+         "properties": [
+            {
+               "name": "a",
+               "value": "a"
+            }
+         ]
+      },
+      {
+         "code": "A_B",
+         "name": "B1",
+         "description": "B1 desp. ",
+         "isActive": true,
+         "ruleParams": {
+            "param1": "a2p1",
+            "param2": null,
+            "param3": null,
+            "param4": null,
+            "param5": null,
+            "param6": null,
+            "param7": null,
+            "param8": null,
+            "param9": null
+         },
+         "properties": [
+            {
+               "name": "a",
+               "value": "a"
+            }
+         ]
+      }
+   ]
+}
+</pre>
+
+<h2 id="toc_1.6">返回结果</h2>
+<table>
+<tr>
+<th>
+状态 
+</th>
+<th>
+结果
+</th>
+</tr>
+<tr>
+<td>
+201
+</td>
+<td>
+创建成功，Header Location里存放新资源的地址
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.7">测试</h2>
+<pre  class="brush:bash">
+curl -v -X post -HContent-type:application/xml --data "&lt;xml data&gt;" https://baseurl/experiments
+curl -v -X post -HContent-type:application/json --data "&lt;json data&gt;" https://baseurl/experiments
+</pre>
+  
+<h2 id="toc_1.8">Examples</h2>
+<pre>
+&gt; post /ab-service/experiments HTTP/1.1
+&gt; User-Agent: curl/7.23.1 (x86_64-pc-win32) libcurl/7.23.1 OpenSSL/0.9.8r zlib/1.2.5
+&gt; Host: localhost:8080
+&gt; Accept: */*
+&gt; Content-Type:application/xml
+&gt; Content-Length: 283
+&gt;
+* upload completely sent off: 283 out of 283 bytes
+&lt; HTTP/1.1 201 Created
+&lt; Location: http://localhost:8080/ab-service/experiments/HOTEL_HOME_PAGE_BANNER906453e3-5f86-48d3-a093-de8dee183e74
+&lt; Content-Length: 0
+&lt; Server: Jetty(6.1.24)
+&lt;
+* Connection #0 to host localhost left intact
+* Closing connection #0
+</pre>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

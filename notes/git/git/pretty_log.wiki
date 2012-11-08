@@ -1,0 +1,19 @@
+%title 漂亮的日志
+=漂亮的日志=
+日期: 2012-07-04 20:07
+%toc
+
+==git命令==
+* 漂亮的日志
+{{{ class="brush:bash"
+    #日志命令
+    git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
+  }}}
+* 定义短命令
+{{{ class="brush:bash"
+    #定义短命令
+    git config --global alias.lg "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --"
+  }}}
+  
+==使用tig==
+

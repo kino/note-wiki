@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>perl执行外部命令</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">perl执行外部命令</h1>
+<p>
+日期: 2012-07-10 18:07
+参考整理自：<a href="http://hi.baidu.com/develop_skill/blog/item/d69bc0cbf010da4ff31fe72b.html">http://hi.baidu.com/develop_skill/blog/item/d69bc0cbf010da4ff31fe72b.html</a>
+<a href="http://blog.waterlin.org/articles/在perl中用system、exec、readpipe函数来执行系统命令.html">http://blog.waterlin.org/articles/在perl中用system、exec、readpipe函数来执行系统命令.html</a>
+</p>
+            
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">perl执行外部命令</a>
+<ul>
+<li><a href="#toc_1.1">1. <code>system("command")</code></a>
+<li><a href="#toc_1.2">2. <code>exec("command")</code></a>
+<li><a href="#toc_1.3">3. `<code>command</code>`</a>
+<li><a href="#toc_1.4">4. <code>readpipe("command")</code></a>
+<li><a href="#toc_1.5">5. 带管道的文件句柄</a>
+<li><a href="#toc_1.6">6. exec和fork结合使用</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">1. <code>system("command")</code></h2>
+<ul>
+<li>
+使用该命令将开启一个子进程执行引号中的命令，父进程将等待子进程结束并继续执行下面的代码。
+
+<li>
+它会返回执行后的状态，比如说
+<pre  class="brush:perl">
+
+      @args = (“command”, “arg1″, “arg2″);
+      system(@args) == 0 or die “system @args failed: $?”
+      
+      #当然，你也可以用类似于下面的语句来检查出错的原因：
+      if ($? == -1) {
+          print “failed to execute: $!\n”;
+      }elsif ($? &amp; 127) {
+          printf “child died with signal %d, %s coredump\n”, ($? &amp; 127),  ($? &amp; 128) ? ‘with’ : ‘without’;
+      } else {
+          printf “child exited with value %d\n”, $? &gt;&gt; 8;
+      }
+</pre>
+
+</ul>
+
+<h2 id="toc_1.2">2. <code>exec("command")</code></h2>
+<ul>
+<li>
+效果同system命令类似，区别是不会开启子进程，而是取代父进程，因此执行完引号中的命令后进程即结束。一般和fork配合使用。
+
+<li>
+仅仅是执行一个系统的命令，一般情况下并没有返回值。exec只有在系统没有你要执行的命令的情况下，才会返回false值。
+<pre  class="brush:perl">
+      exec (‘foo’)   or print STDERR “couldn’t exec foo: $!”;
+      { exec (‘foo’) }; print STDERR “couldn’t exec foo: $!”;
+</pre>
+
+</ul>
+
+<h2 id="toc_1.3">3. `<code>command</code>`</h2>
+<p>
+使用反引号调用外部命令能够捕获其标准输出，并按行返回且每行结束处附带一个回车。反引号中的变量在编译时会被内插为其值。
+</p>
+
+<h2 id="toc_1.4">4. <code>readpipe("command")</code></h2>
+<ul>
+<li>
+返回系统命令运行的结果。例如：
+<pre  class="brush:perl">
+    @result = readpipe( “ls -l /tmp” );
+    print “@result”;
+</pre>
+
+</ul>
+
+<h2 id="toc_1.5">5. 带管道的文件句柄</h2>
+<pre  class="brush:perl">
+    open LIST "ls -l|";
+    open MORE "|more";
+    @list=&lt;LIST&gt;;
+    print MORE @list;
+    close(LIST);
+    close(MORE);
+</pre>
+<p>
+使用带管道的文件句柄来执行外部命令，使用方式与读写文件类似。可以从外部命令的输出读取数据，也可以将数据输出到外部命令作为输入。
+</p>
+
+<h2 id="toc_1.6">6. exec和fork结合使用</h2>
+<pre  class="brush:perl">
+    defined(my $pid=fork) or die "Can not fork: $!\n";
+        unless ($pid) {
+            exec ("date");
+        }
+    waitpid ($pid,0);
+</pre>
+<p>
+使用fork将会开启子进程与父进程同时执行之后的代码，其中父进程中fork会返回一个非零的数，而子进程中将返回零。
+上面的代码完成和system("date")相同的功能。比起system单纯地调用外部命令，fork可以完成更加复杂的进程操作。
+</p>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Git笔记</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">Git笔记</h1>
+
+<h4 id="toc_1.0.0.1">四种对象：Blob Tree Tag Commit</h4>
+
+<h4 id="toc_1.0.0.2">所有的对象都是通过 40 个字符的“对象名”进行索引的</h4>
+<ul>
+<li>
+对象名通过对对象内容进行SHA1进行哈希计算所得
+
+<li>
+通过对象名比较，就可以知道两个对象是否相同
+
+<li>
+通过对象名和对象内容算出的哈希值比较，就可以知道对象内容是否正确
+
+</ul>
+
+<h4 id="toc_1.0.0.3">所有的对象都是通过 40 个字符的“对象名”进行索引的</h4>
+<ul>
+<li>
+查看blob: <code>git show 6ff87c4664</code>
+
+<li>
+查看tree: <code>git ls-tree 6ff87c4664</code> 
+
+<li>
+查看commit:  <code>git show -s --pretty=raw 2be7fcb47</code>
+
+<li>
+查看tag: <code>git cat-file tag v1.5.0</code>
+
+</ul>
+
+<h4 id="toc_1.0.0.4">.git 目录结构</h4>
+<pre>
+  $&gt;tree -L 1
+  .
+  |-- HEAD         # 这个git项目当前处在哪个分支里
+  |-- config       # 项目的配置信息，git config命令会改动它
+  |-- description  # 项目的描述信息
+  |-- hooks/       # 系统默认钩子脚本目录
+  |-- index        # 索引文件
+  |-- logs/        # 各个refs的历史信息
+  |-- objects/     # Git本地仓库的所有对象 (commits, trees, blobs, tags)
+  `-- refs/        # 标识你项目里的每个分支指向了哪个提交(commit)。
+</pre>
+
+<h4 id="toc_1.0.0.5">git索引是你的工作目录和仓库之间的一个暂存区</h4>
+<ul>
+<li>
+在工作区做的修改，必须加进暂存区，在commit时，才会提交到仓库
+
+<li>
+通过<code>git add, git rm</code>将修改加进暂存区。
+
+<li>
+对一个文件做第一次修改，将修改加进暂存区，这时对这个文件进行第二次修改，
+
+<li>
+提交修改,这时只有第一次的修改会被提交进仓库，
+
+<li>
+如果想要提交第二次修改，需要在提交前,将第二次的修改也加进暂存区
+
+</ul>
+
+<h4 id="toc_1.0.0.6">基本用法</h4>
+<ol>
+<li>
+<code>git clone</code>
+
+<li>
+<code>git init</code>
+
+<li>
+哪些文件将被提交
+		 <code>git diff</code> 比较工作区和暂存区
+		 <code>git diff --cached</code>    比较暂存区和HEAD
+
+<li>
+$ <code>git commit -a</code>
+	   这会把自动所有内容被修改的文件(不包括新创建的文件)都添加到索引中，并且同时把它们提交
+
+<li>
+分支
+
+<ul>
+<li>
+创建新分支： <code>git branch newbranchname</code>
+
+<li>
+分支列表： <code>git branch</code>
+
+<li>
+切换分支： <code>git checkout branchname</code>
+
+<li>
+创建并切换分支： <code>git checkout -b branchname</code>
+
+<li>
+合并分支： <code>git merge branchname</code>
+
+<li>
+删除分支： <code>git branch -d  branchname</code> //只能删除被当前分支合并过的分支
+	               <code>git branch -D  branchname</code> //强制删除 
+
+</ul>
+<li>
+<code>git pull</code>命令执行两个操作: 它从远程分支(remote branch)抓取修改 的内容，然后把它合并进当前的分支。
+
+<ul>
+<li>
+<code>git pull remote_repository_name remote_branch_name</code>
+
+</ul>
+<li>
+如果你要经常操作远程分支(remote branch),你可以定义它们的缩写:
+
+<ul>
+<li>
+<code><code>git remote add bob /home/bob/myrep</code></code>
+
+</ul>
+<li>
+用"git fetch"" 来执行"git pull"前半部分的工作， 但是这条命令并不会把抓下来的修改合并到当前分支里。
+
+<ul>
+<li>
+<code>$ git fetch bob</code>
+
+</ul>
+<li>
+<code>git config --get remote.origin.url</code>  用于<code>git pull</code>的默认地址         
+
+<li>
+<code>config:branch.&lt;name&gt;.remote</code> 告诉分支当它<code>git push</code> 或 <code>git fetch</code> 时，操作哪个远程库
+
+<li>
+<code>git push</code> 将本地更改推送到远程库
+
+<ul>
+<li>
+<code>git push remote_repository_name local_branch_name:remote_branch_name</code>
+
+</ul>
+<li>
+快速向前合并 <br>
+
+<ul>
+<li>
+还有一种需要特殊对待的情况，在前面没有提到。通常，一个合并会产生一个合并提交(commit), 把两个父分支里的每一行内容都合并进来。
+
+<li>
+但是，如果当前的分支和另一个分支没有内容上的差异，就是说当前分支的每一个提交(commit)都已经存在另一个分支里了，git 就会执行一个“快速向前"(fast forward)操作；git 不创建任何新的提交(commit),只是将当前分 支指向合并进来的分支。
+
+</ul>
+<li>
+如果推送(push)结果不是"快速向前"(fast forward),可能会报错，应该先<code>git pull</code> <br>
+
+<ul>
+<li>
+你可以强制git-push在上传修改时先更先，只要分支名前面加一个加号。<br>
+
+<li>
+<code>$ git push ssh://yourserver.com/~you/proj.git +maste</code>
+
+</ul>
+<li>
+打标签<code>git tag -s stable-1 1b2e1d63ff</code>
+
+<li>
+<code>git remote update (&lt;group&gt;|&lt;remote&gt;)</code>
+
+<ul>
+<li>
+ <code>git remote update</code>
+
+<li>
+ fetch 指定的远程库，group可以在配置里定义
+
+<li>
+ 不带参数默认fetch remotes.default指定的库，
+
+<li>
+ 如果没有配置该项，fetch所有的远程库,但会受到remote.&lt;name&gt;.skipDefaultUpdate的影响
+
+</ul>
+</ol>
+<h4 id="toc_1.0.0.7">忽略文件，在顶层工作目录添加一个 <code>.gitignore</code> 文件</h4>
+<h4 id="toc_1.0.0.8">git rebase</h4>
+<ul>
+<li>
+你从一个分支打了一个新分支，此后，如果两个分支都修改了，就会出现分叉，有了两个线
+<pre>
+   b1 -&gt; b2 -&gt; b3 -&gt; b4 -&gt; b5
+         c1 -&gt; c2 -&gt; c3 -&gt; c4 -&gt; bc45(merge) 
+</pre>
+
+<li>
+上面分支c在c4 b5的地方merge.
+
+<li>
+rebase就是把c1到c4间的所有修改取消并保存一个补丁文件在.git/rebase里，
+
+<li>
+然后分支c从b5创建，然后再把原先保存的补丁应用到分支c上。
+<pre>
+   b1 -&gt; b2 -&gt; b3 -&gt; b4 -&gt; b5
+                           c1' -&gt; c2'(这里有原先c1到c4的修改) 
+</pre>
+
+<li>
+运行垃圾回收时(<code>git gc --prune</code>), 那些丢弃的提交会被删除(c1到c4)
+
+<ol>
+<li>
+git rebase b
+
+<li>
+遇到冲突后会让你停下来解决冲突，然后运行git rebase --continue
+
+<li>
+在任何时候，你可以用--abort参数来终止rebase的行动，并且"mywork" 分支会回到rebase开始前的状态。
+
+<li>
+rebase可以让资源库清晰干净
+
+<li>
+交互式
+
+<ul>
+<li>
+<code>git rebase -i origin/maste</code>
+
+</ul>
+</ol>
+</ul>
+      
+<h4 id="toc_1.0.0.9">git stash</h4>
+<ul>
+<li>
+<code>git stash</code>
+
+<li>
+<code>git stash apply</code>
+
+<li>
+<code>git stash list</code>
+
+</ul>
+   
+<h4 id="toc_1.0.0.10">你可以使用分支,remote或标签名来代替SHA串名</h4>
+<ul>
+<li>
+它们只是指向某个对象的指针. 假设你的master分支目前在在
+
+<li>
+提交(commit):'980e3'上, 现在把它推送(push)到origin上并把它命名为标签'v1.0', 那么下面的串都会被git视为等价的:
+<pre>
+		980e3ccdaac54a0d4de358f3fe5d718027d96aae
+		origin/master
+		refs/remotes/origin/master
+		master
+		refs/heads/master
+		v1.0
+		refs/tags/v1.0
+</pre>
+
+<li>
+这意味着你执行下面的两条命令会有同样的输出:
+
+<ul>
+<li>
+$ git log master
+
+<li>
+$ git log refs/tags/v1.0
+
+</ul>
+</ul>
+	 
+<h4 id="toc_1.0.0.11">标示符</h4>
+<ul>
+<li>
+  <code>master@{yesterday}</code>
+
+<li>
+  <code>master@{1 month ago}</code>
+
+<li>
+  <code>master@{5}</code>  //前面的第五个提交
+
+<li>
+多个父对象，如果master是由a与b两个分支合并的，
+
+<ul>
+<li>
+<code>master^1</code> 指a  ; <code>master^2</code> 指 b
+
+</ul>
+<li>
+第N级父对象
+
+<ul>
+<li>
+  <code>master~2</code> 父对象的父对象 等价于 master^^
+
+</ul>
+<li>
+下面的表达式等价
+
+<ul>
+<li>
+<code>master^^^^^^</code>
+
+<li>
+<code>master~3^~2</code>
+
+<li>
+<code>master~6</code>
+
+</ul>
+<li>
+master指向的树
+
+<ul>
+<li>
+<code>git ls-tree master^{tree}</code>
+
+</ul>
+<li>
+二进制标识符, 得到二进制对象的Sha名
+
+<ul>
+<li>
+<code>master:/path/file</code>
+
+</ul>
+</ul>
+
+<h4 id="toc_1.0.0.12">在Git中‘追踪分支’是用与联系本地分支和远程分支的</h4>
+<ul>
+<li>
+如果你在’追踪分支'(Tracking Branches)上执行推送(push)或拉取(pull)时,　它会自动推送(push)或拉取(pull)到关联的远程分支上. 
+
+<li>
+<code>git branch --track experimental origin/experimental</code>
+
+</ul>
+
+<h4 id="toc_1.0.0.13">用<code>git grep</code> 命令查找Git库里面的某段文字是很方便的</h4>
+<ul>
+<li>
+当然, 你也可以用unix下的'grep'命令进行搜索, 
+
+<li>
+ 但是'git grep'命令能让你不用签出(checkout)历史文件, 就能查找它们.
+
+<li>
+ 现在, 如果我们要查找git仓库里某个特定版本里的内容, 
+
+<li>
+ 我们可以像下面一样在命令行末尾加上标签名(tag reference):
+
+<li>
+ <code>git grep xmmap v1.5.0  </code>
+
+</ul>
+
+<h4 id="toc_1.0.0.14">撤消 恢复</h4>
+<h5 id="toc_1.0.0.14.1">修复未提交文件中的错误(重置)</h5>
+<ul>
+<li>
+让工作目录回到上次提交时的状态(last committed state):
+
+<ul>
+<li>
+<code>git reset --hard HEAD</code>
+
+<li>
+你这条件命令会把你所以工作目录中所有未提交的内容清空(当然这不包括未置于版控制下的文件 untracked files). 
+
+<li>
+从另一种角度来说, 这会让"<code>git diff</code>" 和"<code>git diff --cached</code>"命令的显示法都变为空.
+
+</ul>
+<li>
+如果你只是要恢复一个文件,如"hello.rb", 你就要使用 <code>git checkout</code>
+
+<ul>
+<li>
+<code>$ git checkout -- hello.rb</code>
+
+<li>
+这条命令把hello.rb从HEAD中签出并且把它恢复成未修改时的样子
+
+</ul>
+</ul>
+<h5 id="toc_1.0.0.14.2">修复已提交的错误</h5>
+<ul>
+<li>
+创建一个新的提交(commit), 在新的提交里撤消老的提交所作的修改. 
+
+<ul>
+<li>
+这种作法在你已经把代码发布的情况下十分正确.
+
+<li>
+创建一个新的，撤消(revert)了前期修改的提交(commit)是很容易的; 只要把出错的提交(commit)的名字
+
+<ul>
+<li>
+  <code>git revert HEAD</code>   //撤消最近一次提交
+
+<li>
+  <code>git revert HEAD^</code>  //撤消上上次提交
+
+</ul>
+<li>
+<code>git revert</code> 其实不会直接创建一个提交(commit), 把撤消扣的文件内容放到索引(index)里,
+	 你需要再执行<code>git commit</code>命令，它们才会成为真正的提交(commit)
+
+</ul>
+<li>
+你也可以去修改你的老提交(old commit). 但是如果你已经把代码发布了,那么千万别这么做; 
+
+<ul>
+<li>
+git不会处理项目的历史会改变的情况,如果一个分支的历史被改变了那以后就不能正常的合并.
+
+<li>
+<code>git commit --amend -a -m "msg"</code>
+
+<li>
+如果你刚刚做了某个提交(commit), 但是你这里又想来马上修改这个提交; 
+	<code>git commit</code> 现在支持一个叫 --amend 的参数，你能让修改刚才的这个提交(HEAD commit). 
+	这项机制能让你在代码发布前,添加一些新的文件或是修改你的提交注释(commit message).
+	如果你在老提交(older commit)里发现一个错误, 但是现在还没有发布到代码服务器上. 
+	你可以使用 <code>git rebase</code>命令的交互模式, "<code>git rebase -i</code>"会提示你在编辑中做相关的修改. 
+	这样其实就是让你在rebase的过程来修改提交.
+
+</ul>
+</ul>
+<h5 id="toc_1.0.0.14.3"><code>git reset</code>的三种模式，回退提交, 有三个地方需要修改，三种模式依次升级</h5>
+
+<table>
+<tr>
+<th>
+&nbsp;
+</th>
+<th>
+仓库(HEAD)
+</th>
+<th>
+暂存区(index)
+</th>
+<th>
+工作区
+</th>
+</tr>
+<tr>
+<td>
+--soft
+</td>
+<td>
+回退
+</td>
+<td>
+aaa将仓库撤消的更改加进暂存区
+</td>
+<td>
+不回退(和执行命令前保持不变）
+</td>
+</tr>
+<tr>
+<td>
+--mixed
+</td>
+<td>
+回退
+</td>
+<td>
+回退(清空)
+</td>
+<td>
+不回退(和执行命令前保持不变）
+</td>
+</tr>
+<tr>
+<td>
+--hard
+</td>
+<td>
+回退
+</td>
+<td>
+回退(清空)
+</td>
+<td>
+回退(代码修改丢失)
+</td>
+</tr>
+</table>
+		 
+<h4 id="toc_1.0.0.15">维护git</h4>
+<ul>
+<li>
+在大的仓库中, git靠压缩历史信息来节约磁盘和内存空间. 压缩操作并不是自动进行的, 你需要手动执行 git gc:
+
+<ul>
+<li>
+<code>$ git gc</code>
+
+</ul>
+<li>
+git fsck 运行一些仓库的一致性检查, 如果有任何问题就会报告.  这项操作也有点耗时, 通常报的警告就是“悬空对象"(dangling objects).
+
+<ul>
+<li>
+<code>$ git fsck</code>
+
+</ul>
+</ul>
+
+<h4 id="toc_1.0.0.16"><code>git format-patch</code>与<code>git am</code>的使用</h4>
+<pre>
+	git format-patch经验
+	A:
+	git log
+	commit c
+	commit b
+	commit a
+	commit init
+
+
+	B:
+	git log
+	commit init
+
+	==========
+	A,B两人代码共有commit init
+	现在A改动到a=&gt;b=&gt;c
+
+	B想用补丁来升级
+
+
+	A:
+	git format-patch init..c  ==&gt;产生三个补丁
+	001-commit-a.patch 对应从commit init出发升到a
+	002-commit-b.patch 对应从commit a出发升到b
+	003-commit-c.patch 对应从commit b出发升到c
+
+	即git format-patch x..y
+	是从共有的x出发一路一个一个升到y
+	(x,y]
+
+	=============
+	B:
+	git am *.patch git会自动按文件名一级级升上去的
+
+</pre>
+	
+<h4 id="toc_1.0.0.17">git cherry-pick</h4>
+<blockquote>
+从已存在的commit中引入修改
+</blockquote>
+    
+<h4 id="toc_1.0.0.18">配置</h4>
+<h5 id="toc_1.0.0.18.1">branch.&lt;branchname&gt;.name</h5>
+<blockquote>
+:在该分支时，git push git fetch应该操作哪一个远程库 
+</blockquote>
+<h5 id="toc_1.0.0.18.2">branch.&lt;branchname&gt;.merge</h5>
+<blockquote>
+:在该分支时，git pull时应该合并远程的哪一个分支
+</blockquote>
+<h5 id="toc_1.0.0.18.3">push.default</h5>
+<blockquote>
+:定义git push无参数时的行为，默认情况是把本地的[所有]分支push到远程库的同名分支中（如果存在的话）<br>
+</blockquote>
+<p>
+	  :四个可选值：
+</p>
+<ul>
+<li>
+<code>nothing</code>:什么都不做
+
+<li>
+<code>matching</code>:push[所有]同名分支，也是默认值
+
+<li>
+<code>upstream</code>:push当前分支到它的上游分支，也就是branch.&lt;branchname&gt;.merge配置的
+
+<li>
+<code>tracking</code>:
+
+<li>
+<code>current</code>:只是把当前分支push到远程库的同名分支中
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

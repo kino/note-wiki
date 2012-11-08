@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>/ab/rule-types/{ruleTypeId} GET 获取指定的RuleType</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">/ab/rule-types/{ruleTypeId} GET</h1>
+<div class="toc">
+<ul>
+<li><a href="#toc_1">/ab/rule-types/{ruleTypeId} GET</a>
+<ul>
+<li><a href="#toc_1.1">功能</a>
+<li><a href="#toc_1.2">URL</a>
+<li><a href="#toc_1.3">HTTP请求方式</a>
+<li><a href="#toc_1.4">请求参数</a>
+<ul>
+<li><a href="#toc_1.4.1">路径参数</a>
+</ul>
+<li><a href="#toc_1.5">返回格式</a>
+<li><a href="#toc_1.6">测试</a>
+<li><a href="#toc_1.7">返回结果</a>
+<ul>
+<li><a href="#toc_1.7.1">XML Reslut</a>
+<li><a href="#toc_1.7.2">Json Reslut</a>
+</ul>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">功能</h2>
+<p>
+查询指定的 <code>RuleType</code> 信息
+</p>
+
+<h2 id="toc_1.2">URL</h2>
+<p>
+/ab/rule-types/{code}
+</p>
+
+<h2 id="toc_1.3">HTTP请求方式</h2>
+<p>
+GET
+</p>
+
+<h2 id="toc_1.4">请求参数</h2>
+
+<h3 id="toc_1.4.1">路径参数</h3>
+<table>
+<tr>
+<th>
+参数名 
+</th>
+<th>
+值 
+</th>
+<th>
+描述
+</th>
+</tr>
+<tr>
+<td>
+code
+</td>
+<td>
+数字型 
+</td>
+<td>
+要查询的 <code>RuleType</code> 的code
+</td>
+</tr>
+</table>
+
+
+<h2 id="toc_1.5">返回格式</h2>
+<p>
+JSON XML
+</p>
+
+<h2 id="toc_1.6">测试</h2>
+<pre  class="brush:bash">
+curl -Hacccept:application/xml https://baseurl/ab/rule-types/6
+curl -Hacccept:application/json https://baseurl/ab/rule-types/6
+</pre>
+
+<h2 id="toc_1.7">返回结果</h2>
+
+<h3 id="toc_1.7.1">XML Reslut</h3>
+<pre  class="brush:xml">
+    &lt;ruleType&gt;
+        &lt;url&gt;http://localhost:8080/ab-service/rule-types/1&lt;/url&gt;
+        &lt;code&gt;PERCENT&lt;/code&gt;
+        &lt;description&gt;group the user by percent.&lt;/description&gt;
+    &lt;/ruleType&gt;
+</pre>
+<h3 id="toc_1.7.2">Json Reslut</h3>
+<pre  class="brush:js">
+        {
+            "url": "http://localhost:8080/ab-service/rule-types/1",
+            "code": "PERCENT",
+            "description": "group the user by percent."
+        }
+</pre>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

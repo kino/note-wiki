@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>变量内插</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">变量内插</h1>
+
+<p>
+日期: 2012-06-03 17:06
+<div class="toc">
+<ul>
+<li><a href="#toc_1">变量内插</a>
+</ul>
+</div>
+</p>
+
+<p>
+在一个双引号字符串中，如果包含一个变量名，这个部分将会被 替换成该变量的值。这就叫做变量内插。
+</p>
+
+<ol>
+<li>
+一个例子：
+<pre  class="brush:perl">
+    $name = kino;
+    print "My name is $name"; #执行结果是"My name is kino"
+</pre>
+
+<li>
+变量内插只对双引号字符串有效，对单引号字符串是无效的。
+<pre  class="brush:perl">
+    print 'My name is $name';#$name并无特殊意义
+</pre>
+
+<li>
+如果双引号字符串中有一个未定义的变量，将以空值替换
+<pre  class="brush:perl">
+    print "Your name is $yourname"#执行结果是"Your name is  "
+</pre>
+
+<li>
+识别变量名时，将取那个字符串中最长的有意义的那个：
+<pre  class="brush:perl">
+    $what = "people";
+    print "There are many $whats" #它将$whats作为变量名,而我们没定义这个变量，
+                            #所以执行结果是"There are many  "。这显然不是我们想要的结果
+</pre>
+
+<li>
+可以用{}明确指定变量名：
+<pre  class="brush:perl">
+    $what = "people";
+    print "There are many ${what}s"#执行结果"There are many peoples",这就是我们想要的结果
+</pre>
+
+<li>
+当我们想输入$时，而不是作为变量名的一部分，可以用\转义：
+<pre  class="brush:perl">
+    print "There are many \$whats" #结果就是"There are many $whats"
+</pre>
+
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

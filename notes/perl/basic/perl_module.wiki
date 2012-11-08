@@ -1,0 +1,9 @@
+%title perl使用模块
+=perl使用模块=
+日期: 2012-06-04 17:06
+%toc
+
+# 使用模块：
+  {{{ class="brush:perl"
+      use File::Basename
+	}}}

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>    /ab/logs POST 增加一条日志记录  </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">/ab/logs POST</h1>
+
+<h2 id="toc_1.1">功能</h2>
+<p>
+新增一条日志记录
+</p>
+
+<h2 id="toc_1.2">URL</h2>
+<p>
+/ab/logs
+</p>
+
+<h2 id="toc_1.3">HTTP请求方式</h2>
+<p>
+POST
+</p>
+
+<h2 id="toc_1.4">请求类型</h2>
+<p>
+JSON XML FROM
+</p>
+
+<h2 id="toc_1.5">请求参数</h2>
+<ul>
+<li>
+Form 类型
+
+</ul>
+<table>
+<tr>
+<th>
+参数名 
+</th>
+<th>
+值 
+</th>
+<th>
+描述
+</th>
+</tr>
+<tr>
+<td>
+experimentId
+</td>
+<td>
+String
+</td>
+<td>
+关于哪个 <code>Experiment</code> 日志
+</td>
+</tr>
+<tr>
+<td>
+alternativeId
+</td>
+<td>
+String
+</td>
+<td>
+与哪个 <code>Alternative</code> 相关
+</td>
+</tr>
+<tr>
+<td>
+guid
+</td>
+<td>
+String
+</td>
+<td>
+关联的用户 
+</td>
+</tr>
+<tr>
+<td>
+content
+</td>
+<td>
+String
+</td>
+<td>
+日志内容
+</td>
+</tr>
+</table>
+
+<ul>
+<li>
+XML 类型
+<pre  class="brush:xml">
+ &lt;log&gt;
+    &lt;experimentId&gt;1&lt;/experimentId&gt;
+    &lt;alternativeId&gt;2&lt;/alternativeId&gt;
+    &lt;guid&gt;xxxxxxxxxxxxxxxxxx&lt;/guid&gt;
+    &lt;content&gt;xxxxxxxxxxxxxxxxxx&lt;/content&gt;
+&lt;/log&gt;
+</pre>
+
+</ul>
+  
+<ul>
+<li>
+JSON 类型
+<pre  class="brush:js">
+{
+    "experimentId": 1,
+    "alternativeId": 2,
+    "guid": "xxxxxxxxxxxxxxx",
+    "content": "xxxxx"
+}
+</pre>
+
+</ul>
+
+<h2 id="toc_1.6">返回结果</h2>
+<table>
+<tr>
+<th>
+状态 
+</th>
+<th>
+结果
+</th>
+</tr>
+<tr>
+<td>
+201
+</td>
+<td>
+添加成功
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.7">测试</h2>
+<pre  class="brush:bash">
+curl -F experimentId=1 -F alternativeId=2 -F content=""  https://baseurl/logs
+curl -v -X post -HContent-type:application/xml --data "&lt;xml data&gt;" https://baseurl/logs
+curl -v -X post -HContent-type:application/json --data "&lt;json data&gt;" https://baseurl/logs
+</pre>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

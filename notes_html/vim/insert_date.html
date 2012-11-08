@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>在vim中插入日期</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../style.css">
+<link rel="Stylesheet" type="text/css" href="../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">在vim中插入日期</h1>
+
+<p>
+日期: 2012-03-30 14:03
+</p>
+
+<p>
+在vi中插入日期,可以使用下列命令：
+</p>
+<blockquote>
+<code>:r!date \+"\%Y-\%m-\%d"</code>
+</blockquote>
+     
+<p>
+上面的<code>\</code>用于转义。
+</p>
+
+<p>
+也可定义好一个命令别名，将日期格式化好，后面可以直接使用：
+</p>
+<blockquote>
+<code>alias datef='date +"%Y-%m-%d"'</code>
+</blockquote>
+     
+<p>
+vi中可以直接用
+</p>
+<blockquote>
+<code>:r!datef</code>
+</blockquote>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

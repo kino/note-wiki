@@ -1,0 +1,99 @@
+%title 用diff和patch工具维护源码(转)
+=用diff和patch工具维护源码(转)=
+转自: http://www.ibm.com/developerworks/cn/linux/l-diffp/
+日期: 2012-07-04 21:07
+%toc
+
+在Unix系统下，维护源码版本可以使用很多方法，其中最常用的当然是大名鼎鼎的CVS，但实际上，简单的版本维护工作并没有必要使用复杂的CVS等专门的版本维护工具，Unix标配中的diff和patch工具就完全可以完成代码的简单备份和升级工作。
+
+diff以"行"为单位比较两个文本文件（也可以是目录比较），并将不同之处以某种格式输出到标准输出上；patch可以读入这种输出，并按照一定指令使源文件（目录）按照目标文件（目录）更新。Linux内核源码就是按照这种方式保持更新的，我们在www.kernel.org上可以下载到最新内核的patch文件的bzip2包。本文以gnudiffutils 2.7和patch 2.5为例介绍diff和patch工具的使用。
+
+==1．diff==
+
+diff既可以用来比较两个文件，也可以用来比较两个目录中每个文件。使用-r（--recursive）参数时还可以在目录中嵌套比较。比较目录时除比较同名文件外，对不同名的文件当成新文件处理。对于比较C程序文件，diff还提供了专门的参数（-p，--show-c-function）来标识不同之处所在的函数名。
+
+diff的输出格式有三种：列举方式、命令模式和上下文模式，其中命令模式有分为两种：ed命令格式和RCS（Revision Control System，版本控制系统）命令格式，上下文模式也按格式分为老版和新版两种。看下面的例子就能基本清楚各个格式的区别：
+
+ [diff_and_patch_1.jpg]
+ 
+命令格式记录的是从test1更新到test2所需要执行的命令，而上下文模式通常可读性更好一些，它所记录的主要是二者的差异，通常还记录所需修改部分的上下几行（可配置）内容以供比较。见下面的例子：
+
+ [diff_and_patch_2.jpg]
+
+ 
+新版格式较之老版要紧凑一些，Linux内核源码的升级就是按照新版上下文格式用diff组织的，比如patch-2.4.16中所用的具体命令为：
+
+{{{ class="brush:bash"
+    diff -Nur linux-2.4.15 linux
+  }}}
+
+参数N表示如果某个文件仅在一个目录中出现，则假定其在另一个目录中为空文件；u表示unified格式，r表示在目录中嵌套使用，linux-2.4.15显然是老核的目录名，而linux则为新核的目录名。
+
+==2．patch==
+
+尽管并没有指定patch和diff的关系，但通常patch都使用diff的结果来完成打补丁的工作，这和patch本身支持多种diff输出文件格式有很大关系。patch通过读入patch命令文件（可以从标准输入），对目标文件进行修改。通常先用diff命令比较新老版本，patch命令文件则采用diff的输出文件，从而保持原版本与新版本一致。
+
+patch的标准格式为
+{{{ class="brush:bash"
+    patch [options] [originalfile] [patchfile]
+  }}}
+
+如果patchfile为空则从标准输入读取patchfile内容；如果originalfile也为空，则从patchfile（肯定来自标准输入）中读取需要打补丁的文件名。因此，如果需要修改的是目录，一般都必须在patchfile中记录目录下的各个文件名。绝大多数情况下，patch都用以下这种简单的方式使用：
+{{{ class="brush:bash"
+    patch -p[num] <patchfile
+  }}}
+
+patch命令可以忽略文件中的冗余信息，从中取出diff的格式以及所需要patch的文件名，文件名按照diff参数中的"源文件"、"目标文件"以及冗余信息中的"Index："行中所指定的文件的顺序来决定。也就是说，对于如下diff结果文件（Linux内核源码2.4.16升级包，部分）：
+ 
+{{{ class="brush:bash"
+    diff -Nur linux-2.4.15/Makefile linux/Makefile
+    --- linux-2.4.15/Makefile       Thu Nov 22 17:22:58 2001
+    +++ linux/Makefile      Sat Nov 24 16:21:53 2001
+    @@ -1,7 +1,7 @@
+     VERSION = 2
+     PATCHLEVEL = 4
+    -SUBLEVEL = 15
+    -EXTRAVERSION =-greased-turkey
+    +SUBLEVEL = 16
+    +EXTRAVERSION =
+     KERNELRELEASE=$(VERSION).$(PATCHLEVEL).$(SUBLEVEL)$(EXTRAVERSION)
+    ……
+  }}}
+
+patch首先尝试当前目录（或者-d参数指定的目录）下的linux-2.4.15/Makefile文件是否存在，如果不存在则试图对linux/Makefile文件操作，仅当两者都不存在时（或者设置了POSIXLY_CORRECT环境变量）才会读取Index:的内容（此文件中没有标识）。
+
+前面提到的-p参数决定了是否使用读出的源文件名的前缀目录信息，不提供-p参数，则忽略所有目录信息，-p0（或者-p 0）表示使用全部的路径信息，-p1将忽略第一个"/"以前的目录，依此类推。如/usr/src/linux-2.4.15/Makefile这样的文件名，在提供-p3参数时将使用linux-2.4.15/Makefile作为所要patch的文件。
+
+对于刚才举的Linux内核源码2.4.16升级包的例子，假定源码目录位于/usr/src/linux中，则在当前目录为/usr/src时使用"patch -p0 <patch-2.4.16"可以工作，在当前目录为/usr/src/linux时，"patch -p1<patch-2.4.16"也可以正常工作。
+
+patch可以直接操作上下文格式以及混合ed格式的diff输出文件，而将ed格式文件通过管道提交给ed程序操作（暂时不知RCS格式的文件如何处理）。
+
+==3．配合使用diff和patch升级源码==
+
+在此仅举一个简单的例子来说明如何用diff/patch工具维护源码升级。
+
+假设program-1.0目录中为老版，现开发完成的新版位于program-2.0目录中，将两个目录置于同一父目录下，然后在该父目录上执行：
+
+{{{ class="brush:bash"
+    diff -Nur program-1.0 program-2.0 >program-2.0.patch
+  }}}
+
+将生成一个program-2.0.patch的补丁文件，发布该补丁文件（当然可以先压缩成bzip2格式）。
+
+假设拿到的是program-2.0.patch.bz2文件，则在program-1.0目录同级执行：
+{{{ class="brush:bash"
+    bzcat program-2.0.patch.bz2 | patch -p0
+  }}}
+
+如此即完成了从1.0到2.0的升级。
+
+如果希望恢复到原版本，可以使用-R（--reverse）参数，但仅对上下文格式的diff文件有效。还有一个备份参数也可以使用，但简单应用中，整个目录备份可能更方便一些。
+
+==参考资料==
+
+* Patch手册页
+* Diff手册页
+
+==关于作者==
+
+杨沙洲，目前在国防科技大学计算机学院攻读软件方向博士学位。您可以通过 pubb@163.net与他联系。

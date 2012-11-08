@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Buffer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<p>
+=简介=
+日期: 2012-10-22 19:07
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_0.1">类层次结构 </a>
+<li><a href="#toc_0.2">Buffer</a>
+<li><a href="#toc_0.3">Buffer 属性 </a>
+<ul>
+<li><a href="#toc_0.3.0.1">容量（Capacity） </a>
+</ul>
+<li><a href="#toc_0.3.1">上界（Limit） </a>
+<li><a href="#toc_0.3.2">位置（Position） </a>
+<li><a href="#toc_0.3.3">标记（Mark） </a>
+</ul>
+<li><a href="#toc_0.4">Buffer Api</a>
+<ul>
+<li><a href="#toc_0.4.1">get 读取</a>
+<li><a href="#toc_0.4.2">put 填充</a>
+<li><a href="#toc_0.4.3">flip 翻转</a>
+<li><a href="#toc_0.4.4">draining 释放(hasRemaining() remaining() clear() )</a>
+<li><a href="#toc_0.4.5">compact 压缩</a>
+<li><a href="#toc_0.4.6">mark 标记（mark(), reset())</a>
+<li><a href="#toc_0.4.7">比较 （equals(), compareTo())</a>
+<li><a href="#toc_0.4.8">批量移动</a>
+<li><a href="#toc_0.4.9">创建</a>
+<li><a href="#toc_0.4.10">复制缓冲区 </a>
+<li><a href="#toc_0.4.11">字节顺序</a>
+<li><a href="#toc_0.4.12">直接缓冲区 </a>
+<li><a href="#toc_0.4.13">缓冲区视图 </a>
+<li><a href="#toc_0.4.14">映射缓冲区 </a>
+</ul>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_0.1">类层次结构 </h2>
+<p>
+<img src="nio_buffer_hierarchy.png" />
+</p>
+
+<h2 id="toc_0.2">Buffer</h2>
+<ul>
+<li>
+缓冲区是包在一个对象内的基本数据元素数组。
+
+<li>
+Buffer类相比一个简单数组的优点是它将关于数据的数据内容和信息包含在一个单一的对象中。
+
+<li>
+Buffer类以及它专有的子类定义了一个用于处理数据缓冲区的API。
+
+</ul>
+ 
+<h2 id="toc_0.3">Buffer 属性 </h2>
+<ul>
+<li>
+所有的缓冲区都具有四个属性来提供关于其所包含的数据元素的信息。它们是： 
+
+</ul>
+
+<h4 id="toc_0.3.0.1">容量（Capacity） </h4>
+<ul>
+<li>
+缓冲区能够容纳的数据元素的最大数量。这一容量在缓冲区创建时被设定，并且永远不能被改变。
+
+</ul>
+<h3 id="toc_0.3.1">上界（Limit） </h3>
+<ul>
+<li>
+缓冲区的第一个不能被读或写的元素。或者说，缓冲区中现存元素的计数。
+
+</ul>
+<h3 id="toc_0.3.2">位置（Position） </h3>
+<ul>
+<li>
+下一个要被读或写的元素的索引。位置会自动由相应的get( )和put( )函数更新。
+
+</ul>
+<h3 id="toc_0.3.3">标记（Mark） </h3>
+<ul>
+<li>
+一个备忘位置。调用mark( )来设定mark = postion。调用reset( )设定position = mark。标记在设定前是未定义的(undefined)。
+
+</ul>
+
+<p>
+这四个属性之间总是遵循以下关系： 
+</p>
+<ul>
+<li>
+0 &lt;= mark &lt;= position &lt;= limit &lt;= capacity
+
+<li>
+一个新建的Buffer:
+
+</ul>
+<p>
+<img src="nio_buffer_properties.png" />
+</p>
+
+<h2 id="toc_0.4">Buffer Api</h2>
+<ul>
+<li>
+下面一些方法返回Buffer本身，可以实现级联调用
+
+<li>
+所有缓冲区都是可读的，但不一定可写
+
+<li>
+通过<code>isReadOnly</code>来判定是否可写
+<pre  class="brush:java">
+package java.nio; 
+public abstract class Buffer { 
+    public final int capacity( ) 
+    public final int position( ) 
+    public final Buffer position (int newPositio 
+
+    public final int limit( ) 
+    public final Buffer limit (int newLimit) 
+
+    public final Buffer mark( ) 
+    public final Buffer reset( ) 
+
+    public final Buffer clear( ) 
+    public final Buffer flip( ) 
+
+    public final Buffer rewind( ) 
+    public final int remaining( ) 
+
+    public final boolean hasRemaining( ) 
+    public abstract boolean isReadOnly( ); 
+}
+</pre>
+
+</ul>
+<h3 id="toc_0.4.1">get 读取</h3>
+<ul>
+<li>
+从缓冲区读取
+
+<li>
+相对调用<code>get()</code>
+
+<ol>
+<li>
+每次返回，position前进1
+
+<li>
+position不能大于limit,否则抛异常
+
+</ol>
+<li>
+绝对调用，指定位置：<code>get(index)</code>
+
+<ol>
+<li>
+不会影响position 
+
+<li>
+位置不能大于limit,否则抛异常
+
+</ol>
+</ul>
+  
+<h3 id="toc_0.4.2">put 填充</h3>
+<ul>
+<li>
+向缓冲区填充
+
+<li>
+相对调用<code>put(x)</code>
+
+<ol>
+<li>
+每次position前进1
+
+<li>
+position不能大于limit,否则抛异常
+
+</ol>
+<li>
+绝对调用，指定位置：<code>put(index, x)</code>
+
+<ol>
+<li>
+不会影响position
+
+<li>
+位置不能大于limit,否则抛异常
+
+</ol>
+<li>
+填充完
+
+</ul>
+<p>
+<img src="nio_buffer_put.png" />
+</p>
+
+<h3 id="toc_0.4.3">flip 翻转</h3>
+<ul>
+<li>
+position 置0
+
+<li>
+limit 指向原先postion的位置上
+
+<li>
+通常将一个填充状态的buffer转换为可读状态
+
+<li>
+连着两次flip调用，postion和limit都会指向0
+
+<li>
+flip后
+
+</ul>
+<p>
+<img src="nio_buffer_flip.png" />
+</p>
+
+<h3 id="toc_0.4.4">draining 释放(hasRemaining() remaining() clear() )</h3>
+<ul>
+<li>
+<code>hasRemaining()</code> 检查`postion<code> 就否到达</code>limit` 
+
+<li>
+<code>remaining()</code> 返回<code>postion</code>到达<code>limit</code>距离
+
+<li>
+<code>clear()</code> 重置buffer, <code>postion</code>设为0, <code>limit</code>设为<code>capacity</code>
+
+</ul>
+ 
+<h3 id="toc_0.4.5">compact 压缩</h3>
+<ol>
+<li>
+一个buffer读了部分数据后
+
+<li>
+将剩余数据压到前端 
+
+<li>
+<code>position</code>指向剩余数据的长度
+
+<li>
+<code>limit</code>指向<code>compacity</code>
+
+<li>
+可以继续写
+
+<li>
+例子
+
+<ul>
+<li>
+一个被读了部分数据的buffer
+
+</ul>
+</ol>
+<blockquote>
+<img src="nio_buffer_before_compact.png" />
+</blockquote>
+    
+<ul>
+<li>
+执行<code>compact</code>后
+
+</ul>
+<blockquote>
+<img src="nio_buffer_after_compact.png" />
+</blockquote>
+    
+<ul>
+<li>
+它只是移动数据，并没有清空4 5 的数据，因为他们在postion之后，所以已经是死的了
+
+</ul>
+  
+<h3 id="toc_0.4.6">mark 标记（mark(), reset())</h3>
+<ul>
+<li>
+<code>mark()</code>为当前`postion`指定一个标记
+
+<li>
+<code>reset()</code>可以使`position`回到标记的地方
+
+<li>
+初始标记是未定义的
+
+<li>
+调用<code>reset()</code>, 若标记未定义，抛异常
+
+<li>
+一些操作为清掉设的标记：
+
+<ul>
+<li>
+<code>rewind()</code>
+
+<li>
+<code>clear()</code>
+
+<li>
+<code>flip()</code>
+
+<li>
+<code>limit(index)</code>, 如果index小于标记
+
+<li>
+<code>position(index</code>, 如果index小于标记
+
+</ul>
+</ul>
+   
+<h3 id="toc_0.4.7">比较 （equals(), compareTo())</h3>
+<ul>
+<li>
+<code>equals()</code> :
+
+<ul>
+<li>
+比较两个缓冲区剩余的数据是否相同，相同返回true，反之false
+
+<li>
+实际上比较的是position到limit之间的数据
+
+<li>
+哪怕缓冲区类型不一样
+
+</ul>
+<li>
+<code>compareTo()</code> :
+
+<ul>
+<li>
+也是比较的position到limit之间的数据, 如果到达limit还没比较完，短的小
+
+<li>
+但类型一定一样
+
+</ul>
+</ul>
+ 
+<h3 id="toc_0.4.8">批量移动</h3>
+<pre  class="brush:java">
+public abstract class CharBuffer extends Buffer implements CharSequence, Comparable { 
+
+    // This is a partial API listing 
+    public CharBuffer get (char [] dst) 
+    public CharBuffer get (char [] dst, int offset, int length) 
+
+    public final CharBuffer put (char[] src) 
+    public CharBuffer put (char [] src, int offset, int length) 
+    public CharBuffer put (CharBuffer src) 
+
+    public final CharBuffer put (String src) 
+    public CharBuffer put (String src, int start, int end) 
+}
+</pre>
+  
+<ul>
+<li>
+get填充数组，如果缓冲区中的数据不够(position到limit之间，也是remaining()的返回值），则会报异常。
+
+<li>
+put从数组取数据填充buffer，如果缓冲区中的空间不够(position到limit之间，也是remaining()的返回值），则会报异常。
+
+</ul>
+
+<h3 id="toc_0.4.9">创建</h3>
+<ul>
+<li>
+七类Buffer: <code>ByteBuffer, CharBuffer, IntBuffer, ShortBuffer, LongBuffer, FloatBuffer, DoubleBuffer</code>
+
+<li>
+以`CharBuffer` 示例，其他类似
+<pre  class="brush:java">
+public abstract class CharBuffer extends Buffer implements CharSequence, Comparable{ 
+    // This is a partial API listing 
+    public static CharBuffer allocate (int capacity) 
+    public static CharBuffer wrap (char [] array) 
+    public static CharBuffer wrap (char [] array, int offset, int length) 
+    public final boolean hasArray( ) 
+    public final char [] array( ) 
+    public final int arrayOffset( ) 
+    }
+</pre>
+
+<li>
+wrap操作会直接使用数组，所以对buffer的操作，会影响原数组
+
+<li>
+
+<pre  class="brush:java">
+ CharBuffer charbuffer = CharBuffer.wrap (myArray, 12, 42);
+</pre>
+
+<ul>
+<li>
+创建了一个position值为12，limit值为54，容量为myArray.length的缓冲区。
+
+<li>
+并不是创建了一个只占用了一个数组子集的缓冲区。
+
+<li>
+这个缓冲区可以存取这个数组的全部范围；offset和length参数只是设置了初始的状态。
+
+</ul>
+<li>
+上面创建的都间接buffer,使用备份数组
+
+<li>
+ <code>hasArray()</code>返回buffer是否有一一个备份数组
+
+</ul>
+
+<h3 id="toc_0.4.10">复制缓冲区 </h3>
+<pre  class="brush:java">
+public abstract class CharBuffer extends Buffer implements CharSequence, Comparable { 
+    // This is a partial API listing 
+    public abstract CharBuffer duplicate( ); 
+    public abstract CharBuffer asReadOnlyBuffer( ); 
+    public abstract CharBuffer slice( ); 
+}
+</pre>
+<ul>
+<li>
+不创建新的buffer
+
+<li>
+不复制数据
+
+<li>
+操纵同样的数据元素
+
+</ul>
+
+<h3 id="toc_0.4.11">字节顺序</h3>
+<pre  class="brush:java">
+package java.nio; 
+public final class ByteOrder { 
+    public static final ByteOrder BIG_ENDIAN 
+    public static final ByteOrder LITTLE_ENDIAN 
+    public static ByteOrder nativeOrder( ) //返回硬件平台的字节顺序
+    public String toString( ) 
+}
+</pre>
+<h3 id="toc_0.4.12">直接缓冲区 </h3>
+<pre  class="brush:java">
+public abstract class ByteBuffer extends Buffer implements Comparable { 
+    // This is a partial API listing 
+    public static ByteBuffer allocate (int capacity) 
+    public static ByteBuffer allocateDirect (int capacity) 
+    public abstract boolean isDirect( ); }
+</pre>
+<ul>
+<li>
+用于I/O channel
+
+<li>
+如果使用间接buffer进行本地i/o, 会隐含的创建临时直接buffer
+
+</ul>
+
+<h3 id="toc_0.4.13">缓冲区视图 </h3>
+<pre  class="brush:java">
+ 
+public abstract class ByteBuffer extends Buffer implements Comparable { 
+    // This is a partial API listing 
+    public abstract CharBuffer asCharBuffer( ); 
+    public abstract ShortBuffer asShortBuffer( ); 
+    public abstract IntBuffer asIntBuffer( ); 
+    public abstract LongBuffer asLongBuffer( ); 
+    public abstract FloatBuffer asFloatBuffer( ); 
+    public abstract DoubleBuffer asDoubleBuffer( ); 
+}
+</pre>
+  
+<h3 id="toc_0.4.14">映射缓冲区 </h3>
+<ul>
+<li>
+MappedByteBuffer
+
+<li>
+只能通过 FileChannel创建
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

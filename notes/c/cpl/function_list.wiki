@@ -1,0 +1,10 @@
+%title Functions List
+
+=Functions List=
+日期: 2012-03-31 19:03
+
+==I/O==
+* `printf`
+* `getchar():int`
+* `putchar(char)`
+

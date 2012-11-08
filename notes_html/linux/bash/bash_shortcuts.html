@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Bash 快捷键(转)</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">Bash 快捷键(转)</h1>
+
+<p>
+日期: 2012-03-30 14:03
+</p>
+
+<p>
+<strong><em>转自:</em></strong> <a href="http://linuxtoy.org/archives/bash-shortcuts.html">http://linuxtoy.org/archives/bash-shortcuts.html</a> 
+</p>
+
+<p>
+生活在 Bash shell 中，熟记以下快捷键，将极大的提高你的命令行操作效率。
+</p>
+
+<h2 id="toc_1.1">编辑命令</h2>
+
+<ul>
+<li>
+Ctrl + a ：移到命令行首
+
+<li>
+Ctrl + e ：移到命令行尾
+
+<li>
+Ctrl + f ：按字符前移（右向）
+
+<li>
+Ctrl + b ：按字符后移（左向）
+
+<li>
+Alt + f ：按单词前移（右向）
+
+<li>
+Alt + b ：按单词后移（左向）
+
+<li>
+Ctrl + xx：在命令行首和光标之间移动
+
+<li>
+Ctrl + u ：从光标处删除至命令行首
+
+<li>
+Ctrl + k ：从光标处删除至命令行尾
+
+<li>
+Ctrl + w ：从光标处删除至字首
+
+<li>
+Alt + d ：从光标处删除至字尾
+
+<li>
+Ctrl + d ：删除光标处的字符
+
+<li>
+Ctrl + h ：删除光标前的字符
+
+<li>
+Ctrl + y ：粘贴至光标后
+
+<li>
+Alt + c ：从光标处更改为首字母大写的单词
+
+<li>
+Alt + u ：从光标处更改为全部大写的单词
+
+<li>
+Alt + l ：从光标处更改为全部小写的单词
+
+<li>
+Ctrl + t ：交换光标处和之前的字符
+
+<li>
+Alt + t ：交换光标处和之前的单词
+
+<li>
+Alt + Backspace：与 Ctrl + w 相同类似，分隔符有些差别 [感谢 rezilla 指正]
+
+</ul>
+
+<h2 id="toc_1.2">重新执行命令</h2>
+<ul>
+<li>
+Ctrl + r：逆向搜索命令历史
+
+<li>
+Ctrl + g：从历史搜索模式退出
+
+<li>
+Ctrl + p：历史中的上一条命令
+
+<li>
+Ctrl + n：历史中的下一条命令
+
+<li>
+Alt + .：使用上一条命令的最后一个参数
+
+</ul>
+
+<h2 id="toc_1.3">控制命令</h2>
+<ul>
+<li>
+Ctrl + l：清屏
+
+<li>
+Ctrl + o：执行当前命令，并选择上一条命令
+
+<li>
+Ctrl + s：阻止屏幕输出
+
+<li>
+Ctrl + q：允许屏幕输出
+
+<li>
+Ctrl + c：终止命令
+
+<li>
+Ctrl + z：挂起命令
+
+</ul>
+
+<h2 id="toc_1.4">Bang (!) 命令</h2>
+<ul>
+<li>
+* !!：执行上一条命令
+
+<li>
+* !blah：执行最近的以 blah 开头的命令，如 !ls
+
+<li>
+!blah:p：仅打印输出，而不执行
+
+<li>
+!$：上一条命令的最后一个参数，与 Alt + . 相同
+
+<li>
+!$:p：打印输出 !$ 的内容
+
+<li>
+!*：上一条命令的所有参数
+
+<li>
+!<strong>:p：打印输出 !</strong> 的内容
+
+<li>
+^blah：删除上一条命令中的 blah
+
+<li>
+<sup><small>blah</small></sup>foo：将上一条命令中的 blah 替换为 foo
+
+<li>
+<sup><small>blah</small></sup>foo^：将上一条命令中所有的 blah 都替换为 foo
+
+</ul>
+
+
+<p>
+友情提示：
+</p>
+
+<ol>
+<li>
+以上介绍的大多数 Bash 快捷键仅当在 emacs 编辑模式时有效，若你将 Bash 配置为 vi 编辑模式，那将遵循 vi 的按键绑定。Bash 默认为 emacs 编辑模式。如果你的 Bash 不在 emacs 编辑模式，可通过 set -o emacs 设置。
+
+<li>
+<sup><small>S、</small></sup>Q、<sup><small>C、</small></sup>Z 是由终端设备处理的，可用 stty 命令设置。
+
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

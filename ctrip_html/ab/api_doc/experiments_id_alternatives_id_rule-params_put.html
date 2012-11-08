@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>/ab/experiments/{experimentId}/alternatives/{alternativeId}/rule-params PUT 更新一个Alternative的规则参数  </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">/ab/experiments/{experimentId}/alternatives/{alternativeId}/rule-params PUT</h1>
+
+<h2 id="toc_1.1">功能</h2>
+<p>
+更新一个候选方案 <code>Alternative</code> 的规则参数
+</p>
+
+<h2 id="toc_1.2">URL</h2>
+<p>
+/ab/experiments/{experimentId}/alternatives/{alternativeId}/rule-params
+</p>
+
+<h2 id="toc_1.3">HTTP请求方式</h2>
+<p>
+PUT
+</p>
+
+<h2 id="toc_1.4">请求类型</h2>
+<p>
+XML JSON
+</p>
+
+<h2 id="toc_1.5">请求参数</h2>
+<ul>
+<li>
+路径参数
+
+</ul>
+<table>
+<tr>
+<th>
+参数名 
+</th>
+<th>
+值 
+</th>
+<th>
+描述
+</th>
+</tr>
+<tr>
+<td>
+experimentId
+</td>
+<td>
+String
+</td>
+<td>
+要更新的 <code>Alternative</code> 所属的 <code>Experiment</code>
+</td>
+</tr>
+<tr>
+<td>
+alternativeId
+</td>
+<td>
+String
+</td>
+<td>
+要更新的 <code>Alternative</code>
+</td>
+</tr>
+</table>
+
+<ol>
+<li>
+XML :
+<pre  class="brush:xml">
+&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+                &lt;ruleParams&gt;
+                    &lt;param1&gt;30&lt;/param1&gt;
+                &lt;/ruleParams&gt;
+</pre>
+
+</ol>
+  
+<ol>
+<li>
+Json:
+<pre  class="brush:js">
+
+                {
+                    "param1": "30",
+                    "param2": null,
+                    "param3": null,
+                    "param4": null,
+                    "param5": null,
+                    "param6": null,
+                    "param7": null,
+                    "param8": null,
+                    "param9": null
+                }
+</pre>
+
+</ol>
+ 
+
+<h2 id="toc_1.6">返回结果</h2>
+<table>
+<tr>
+<th>
+状态 
+</th>
+<th>
+结果
+</th>
+</tr>
+<tr>
+<td>
+200
+</td>
+<td>
+更新成功
+</td>
+</tr>
+</table>
+
+
+<h2 id="toc_1.7">测试</h2>
+<pre  class="brush:bash">
+curl -v -X put -HContent-type:application/xml --data "&lt;xml data&gt;" https://baseurl/experiments/{experimentId}/alternatives
+curl -v -X put -HContent-type:application/json --data "&lt;json data&gt;" https://baseurl/experiments/{experimentId}/alternatives
+</pre>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

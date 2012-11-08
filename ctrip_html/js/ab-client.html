@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf8"/>
+    <title>Ab Test Api Test Client</title>
+    <script type="text/javascript" src="jquery-1.6.4.js"></script>
+    <script type="text/javascript">
+        var baseUrl = "http://localhost:8080/ab"
+        $(document).ready(function(){
+                $("#ab_experiments").click(function(){
+
+                $.ajax( {
+                            type:"GET",
+                            url: baseUrl+"/experiments",
+                            dataType: "xml",
+                            contentType:"application/json",
+                            data:{},
+                            cache:false,
+                            success: function (data) {
+                            alert(data);
+                            },
+                            error: function (msg, url, line) {
+                                alert('error trapped in error: function(msg, url, line)');
+                                alert('msg = ' + msg + ', url = ' + url + ', line = ' + line);
+                            }
+                        });
+                    });
+
+        });
+    </script>
+
+</head>
+<body>
+    <h2>AB Test API </h2>
+    <div>
+        <ul style="float:left;width:300px;">
+            <li><a id="ab_experiments" href="javascript:void(0)">/ab/experiments</a></li>
+        </ul>
+        <div style="float:left">
+        </div>
+
+        <div id="content" style="clear:both;height:1px"></div>
+    </div>
+</body>
+</html>

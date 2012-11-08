@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>A/B Test Framework API 文档</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../style.css">
+<link rel="Stylesheet" type="text/css" href="../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">A/B Test Framework API 文档</h1>
+
+<h2 id="toc_1.1">概要</h2>
+<ol>
+<li>
+<a href="api_doc/api_summary.html">API概要</a>
+
+<li>
+<a href="api_doc/api_system_design.html">API服务端设计 </a>
+
+<li>
+<a href="api_doc/domains.html">域模型 </a>
+
+</ol>
+<h2 id="toc_1.2"><code>RuleType</code>查询添加</h2>
+<ol>
+<li>
+<a href="api_doc/rule-types_post.html">/ab/rule-types POST</a> 新建一个 <code>RupeType</code>
+
+<li>
+<a href="api_doc/rule-types_get.html">/ab/rule-types GET</a> 列出所有的<code>RupeType</code>
+
+<li>
+<a href="api_doc/rule-types_id_get.html">/ab/rule-types/{ruleTypeId} GET</a> 获取指定的 <code>RupeType</code>
+
+<li>
+<a href="api_doc/rule-types_id_post.html">/ab/rule-types/{ruleTypeId} POST</a> 部分修改<code>RupeType</code>
+
+<li>
+<a href="api_doc/rule-types_id_put.html">/ab/rule-types/{ruleTypeId} PUT</a> 刷新整个<code>RupeType</code>
+
+<li>
+<a href="api_doc/rule-types_id_delete.html">/ab/rule-types/{ruleTypeId} DELETE</a> 删除一个 <code>RupeType</code>
+
+</ol>
+<h2 id="toc_1.3">添加管理<code>Experiment</code></h2>
+<ol>
+<li>
+<a href="api_doc/experiments_post.html">/ab/experiments POST</a> 新建一个 <code>Experiment</code>
+
+<li>
+<a href="api_doc/experiments_get.html">/ab/experiments GET</a> 列出所有的<code>Experiment</code>
+
+<li>
+<a href="api_doc/experiments_id_get.html">/ab/experiments/{experimentId} GET</a> 获取指定的 <code>Experiment</code>
+
+<li>
+<a href="api_doc/experiments_id_post.html">/ab/experiments/{experimentId} POST</a> 部分修改<code>Experiment</code>
+
+<li>
+<a href="api_doc/experiments_id_put.html">/ab/experiments/{experimentId} PUT</a> 刷新整个<code>Experiment</code>
+
+<li>
+<a href="api_doc/experiments_id_delete.html">/ab/experiments/{experimentId} DELETE</a> 删除一个 <code>Experiment</code>
+
+</ol>
+<h2 id="toc_1.4">添加管理<code>Alternative</code></h2>
+<ol>
+<li>
+<a href="api_doc/experiments_id_alternativespost.html">/ab/experiments/{experimentId}/alternatives POST</a> 新建一个 <code>Alternative</code>
+
+<li>
+<a href="api_doc/experiments_id_alternativesget.html">/ab/experiments/{experimentId}/alternatives GET</a> 列出所有的<code>Alternative</code>
+
+<li>
+<a href="api_doc/experiments_id_alternatives_id_get.html">/ab/experiments/{experimentId}/alternatives/{alternativeId} GET</a> 获取指定的 <code>Alternative</code>
+
+<li>
+<a href="api_doc/experiments_id_alternatives_id_post.html">/ab/experiments/{experimentId}/alternatives/{alternativeId} POST</a> 部分修改<code>Alternative</code>
+
+<li>
+<a href="api_doc/experiments_id_alternatives_id_put.html">/ab/experiments/{experimentId}/alternatives/{alternativeId} PUT</a> 刷新整个<code>Alternative</code>
+
+<li>
+<a href="api_doc/experiments_id_alternatives_id_delete.html">/ab/experiments/{experimentId}/alternatives/{alternativeId} DELETE</a> 删除一个 <code>Alternative</code>
+
+</ol>
+<h2 id="toc_1.5">获取修改<code>Alternative</code>的参数 </h2>
+<ol>
+<li>
+<a href="api_doc/experiments_id_alternatives_id_rule-params-get.html">/ab/experiments/{experimentId}/alternatives/{alternativeId}/rule-params GET</a> 获取指定的 <code>Alternative</code>的规则参数。
+
+<li>
+<a href="api_doc/experiments_id_alternatives_id_rule-params_post.html">/ab/experiments/{experimentId}/alternatives/{alternativeId}/rule-params POST</a> 部分修改<code>Alternative</code>的规则参数。
+
+<li>
+<a href="api_doc/experiments_id_alternatives_id_rule-params_put.html">/ab/experiments/{experimentId}/alternatives/{alternativeId}/rule-params PUT</a> 刷新整个<code>Alternative</code>的规则参数。
+
+</ol>
+<h2 id="toc_1.6">回传日志</h2>
+<ol>
+<li>
+<a href="api_doc/logs.html">/ab/logs POST</a> 回传日志。
+
+</ol>
+ 
+
+<ol>
+<li>
+创建更新一次性的 /experiments 为了验证
+
+<li>
+包装Exception 返回堆栈
+
+<li>
+Experiment name unique String
+
+<li>
+参数验证
+
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

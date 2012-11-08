@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>我css的组织方式</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">我css的组织方式</h1>
+
+
+<p>
+日期: 2012-03-30 14:03
+</p>
+
+<p>
+我会把css按功能分成几个编写，然后在共同import到一个css里。
+</p>
+<ul>
+<li>
+页面中只需要引用一个css文件
+
+<li>
+但css还是分开维护的，有助于模块化，容易维护
+
+</ul>
+
+<p>
+我的main.css, 也就是引入的那个：
+</p>
+<pre  class="brush:css">
+	@import "reset.css";
+	@import "typography.css";
+	@import "layout.css";
+</pre>
+  
+<p>
+<b>我固定的几个css</b>
+</p>
+
+<p>
+<b>reset.css</b>
+</p>
+<ul>
+<li>
+用于重置css的默认值
+
+</ul>
+
+<p>
+<b>typography.css</b>
+</p>
+<ul>
+<li>
+根据需要设置项目的全局属性
+
+<li>
+比如：字体，段落样式，链接样式，各级标题，等等
+
+</ul>
+
+<p>
+<b>layout.css</b>
+</p>
+<ul>
+<li>
+项目的布局样式
+
+<li>
+比如头，内容，底部，导航等一级布局
+
+</ul>
+
+<p>
+<b>接下来的就是公用组件及模块样式的设置</b>
+</p>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

@@ -1,0 +1,69 @@
+%title /ab/experiments/{experimentId}/alternatives/{alternativeId}/rule-params GET 返回一个指定Alternative的分配规则参数  
+
+=/ab/experiments/{experimentId}/alternatives/{alternativeId}/rule-params GET=
+
+==功能 ==
+返回一个指定的候选方案 `Alternative` 的分配规则参数
+
+==URL==
+/ab/experiments/{experimentId}/alternatives/{alternativeId}/rule-params
+
+==HTTP请求方式==
+GET
+
+==请求类型==
+无
+
+==请求参数==
+* 路径参数
+| 参数名        | 值     | 描述                  |
+|---------------|--------|-----------------------|
+| experimentId  | String | 要查询的 `Experiment` |
+| alternativeId | String | 对应的 `Alternative`  |
+ 
+==返回格式==
+JSON XML
+
+==返回结果==
+| 状态 | 结果     |
+|------|----------|
+| 200  | 查询成功 |
+
+# XML Reslut:
+{{{ class="brush:xml"
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                <ruleParams>
+                    <url>http://localhost:8080/ab-service/experiments/2/alternatives/7/rule-params</url>
+                    <param1>30</param1>
+                </ruleParams>
+  }}}
+# Json Reslut:
+
+{{{ class="brush:js"
+
+                {
+                    "url": "http://localhost:8080/ab-service/experiments/2/alternatives/7/rule-params",
+                    "param1": "30",
+                    "param2": null,
+                    "param3": null,
+                    "param4": null,
+                    "param5": null,
+                    "param6": null,
+                    "param7": null,
+                    "param8": null,
+                    "param9": null
+                }
+  }}}
+
+==测试==
+{{{ class="brush:bash"
+curl  -HAcccept:application/xml  https://baseurl/experiments/{experimentId}/alternatives/{alternativeId}/rule-params
+curl  -HAcccept:application/json https://baseurl/experiments/{experimentId}/alternatives/{alternativeId}/rule-params
+  }}}
+  
+
+
+
+
+
+

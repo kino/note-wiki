@@ -1,0 +1,29 @@
+%title 测试数据
+
+=测试数据 =
+
+%toc
+
+==FileChannel ==
+#  建立文件hello.txt
+#  进程A逐条写入100万条
+#  进程B一条条读出
+#  进程A,B同时启动, 一个写，一个读
+#  读写期间, 重命名：mv hello.txt world.txt; 
+#  读写期间，重建新的hello.txt: echo “hello” > hello.txt
+ 
+结果：
+* 总数据量：2.1G
+* 进程A写耗时：297427ms
+* 进程B写耗时：297599ms
+通过 文件+Rotate+FileChannel 快算交换数据也许不错。
+
+
+
+
+
+
+
+
+
+

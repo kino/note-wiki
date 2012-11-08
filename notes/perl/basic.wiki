@@ -1,0 +1,20 @@
+%title Perl Basic
+
+=Perl Basic=
+
+# [[basic/first_line|perl文件中的第一行]]
+# [[basic/numbers|perl中的数字]]
+# [[basic/string|perl中的字符串]]
+# [[basic/number_string_convert|数字与字符串自动转换]]
+# [[basic/varailble_in_string|变量内插]]
+# [[basic/something|杂]]
+# [[basic/perl_structure|perl程序结构]]
+# [[basic/perl_array|perl数组]]
+# [[basic/perl_hash|perl哈希]]
+# [[basic/perl_pattern|perl正则表达式]]
+# [[basic/perl_io|perl输入输出]]
+# [[basic/perl_sub|perl函数]]
+# [[basic/perl_directory|perl目录操作]]
+# [[basic/perl_advanced|perl向点高级特性]]
+# [[basic/perl_module|perl使用模块]]
+# [[basic/perl_execute_command|perl执行外部命令]]

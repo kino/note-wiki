@@ -1,0 +1,100 @@
+%title perl目录操作
+=perl目录操作=
+日期: 2012-06-04 16:06
+%toc
+
+# 改变工作目录chdir
+  * 如果省略参数，将尝试将主目录设为工作目录。
+  * 这是少数几种在忽略掉参数而不使用变量$_的情形之一。
+# 使用glob
+  {{{ class="brush:perl"
+      my @file_names = glob "*";
+	}}}
+# 用<>替换glob
+  {{{ class="brush:perl"
+     my @all_files = <*>; ##基本上同@all_files = glob “*”一样；
+     #或：
+     my $dir = “/etc”;
+     my @dir_files = <$dir/* $dir/.*>;
+	}}}
+# 尖括号的含义可以指从文件句柄读入或globbing
+  * Perl 怎么判断使用哪一个操作呢？
+  * 如果尖括号之间是一个严格意义上的标识符，则其为文件句柄读入操作
+  * 否则，为globbing 操作。如下例：
+  {{{ class="brush:perl"
+     my @files = <FRED/*>; ##glob
+     my @lines = <FRED>; ##文件句柄读入
+     my $name = “FRED”;
+     my @files = <$name/*> ##glob
+	}}}
+  * 一个例外情况是，如果尖括号中是一个简单的标量变量（不是hash 或数组中的一个元素）
+  * 它就是一个间接的文件句柄读入操作（indirect filehandle read），变量的内容给出了要读入的文件句柄的名字
+# 可以使用readline使用间接句柄读入：
+  {{{ class="brush:perl"
+      my $name = “FRED”;
+      my @lines = readline FRED; #从FRED 读入
+      my @lines = readline $name; #从FRED 读入
+	}}}
+# 目录句柄
+  * 从给定目录得到其文件名列表的方法还可以使用目录句柄（directory handle）。
+  * 目录句柄外形及其行为都很像文件句柄。
+  * 打开（使用opendir 而非open）
+  * 从中读入（使用readdir 而非readline），
+  * 关闭（使用closedir 而非close）。
+  * 不是读入文件的内容，而是将一个目录中的文件名（以及一些其它东西）读入
+# 删除文件，unlink，返回删除文件的个数。
+  {{{ class="brush:perl"
+      foreach my $file (qw(slate bedrock lava)) {
+          unlink $file or warn “failed on $file: $!\n”;
+      }
+	}}}
+  * 不能使用unlink删除目录。删除目录使用rmdir
+  * unlink 一个文件的权限同文件本身的权限是没有关系的；它和目录所包含的文件权限有关。
+# 文件重命名，rename
+  {{{ class="brush:perl"
+      rename “old”, “new”;
+      
+      #重命名一批文件：
+      foreach my $file (glob “*.old”){
+          my $newfile = $file;
+          $newfile =~ s/\ .old$/.new/;
+          if (-e $newfile){
+              warn“can’t rename $file to $newfile: $newfile exists\n”;
+          }elsif(rename $file, $newfile){
+          ##成功，什么也不做
+          } else {
+              warn “rename $file to $newfile failed: $!\n”;
+          }
+      }
+	}}}
+# 连接相关：link symlink readlink
+# 创建目录mkdir
+  {{{ class="brush:perl"
+      mkdir “fred”, 0755 or warn “Cannot make fred directory: $!”;
+	}}}
+  * 注意第二个参数为八进制
+# oct函数，将字符串转化为八进制
+# 删除目录rmdir，保能删除空目录。
+# 修改权限chmod
+  {{{ class="brush:perl"
+      chmod 0755, “fred”, “barney”
+	}}}
+# 修改所有者：chown
+  {{{ class="brush:perl"
+      my $user = 1004;
+      my $group = 100;
+      chown $user, $group, glob “*.o”;
+      
+      #通过用户名取id：getpwnam
+      defined(my $user = getpwnam “merlyn”) or die “bad user”;
+      defined(my $group = getpwnam “users”) or die “bad group”;
+      chown $user, $group, glob “/home/Merlyn/*”
+	}}}
+# 修改文件最近修改的时间，以及被访问的时间。utime
+  {{{ class="brush:perl"
+      my $now = time;
+      my $ago = $now -24*60*60; #一天的秒数
+      utime $now, $ago, glob “*”; #设成当前访问的，一天之前修改的
+	}}}
+
+

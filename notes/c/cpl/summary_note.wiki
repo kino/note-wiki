@@ -1,0 +1,139 @@
+%title Reading Note
+
+=Reading Note=
+
+日期: 2012-03-31 11:03
+
+%toc
+
+==第一个程序:helloworld==
+{{{ class="brush:c"
+    #include<stdio.h>
+
+	main(){
+		printf("Hello  World\n");
+	}
+  }}}
+  
+* compile
+{{{ class="brush:bash"
+  gcc helloworld.c
+  }}}
+* 运行
+{{{ class="brush:bash"
+  ./a.out
+  }}}
+  
+==变量==
+* 变量必須先声明再使用
+* 声明往往放在函数的开始处
+* 变量声明由变量类型、变量名组成
+{{{ class="brush:c"
+  int i, j, k;
+  }}}
+  
+==符号常量==
+* 语法: `#define 名字 替换文本`
+* 只是进行简单的文本替换，以后出现名字的地方会用替换文本替换
+* 语句后没有分号
+* 名字往往大写，用于与普通变量区分
+{{{ class="brush:c"
+  #define EMAIL "wangxingchao@gmail.com"
+  }}}
+  
+==EOF==
+* end of file
+* 没有输入时返回
+* 它是一个常量，定义在`stdio.h`里
+* 它是一个int, 比char大，这一点要注意。
+{{{ class="brush:c"
+  //c 必须声明成int,而不是char,因为EOF比char大
+  int c;
+  while((c=getchar())!=EOF){
+    putchar(c);
+  }
+  }}}
+  
+==函数==
+===函数定义===
+{{{ class="brush:c"
+  int power(int base, int n){
+     int i, p;
+     p=1;
+	 for(i=0;i<n;i++){
+	    p=p*base;
+	 }
+	 return p;
+  }
+  }}}
+
+* 函数定义可以以任意次序出现在一个源文件或多个源文件中
+* 同一个函数的定义不能分割出现在多个文件中
+
+===函数声明===
+* 使用函数声明, 当声明与定义或使用的地方不一致时就会报错
+* 对于调用而言，函数声明只对它后面的函数的调用起作用
+{{{ class="brush:c"
+  int power(int m, int n);
+  }}}
+* 函数声明中的参数名可以和函数定义中的不一致，甚至可以不写。
+{{{ class="brush:c"
+  int power(int, int);
+  }}}
+
+===早期的函数定义与声明===
+{{{ class="brush:c"
+  int power(base, n)
+  int base,n;
+  {
+     int i, p;
+     p=1;
+	 for(i=0;i<n;i++){
+	    p=p*base;
+	 }
+	 return p;
+  }
+  }}}
+* 函数参数放在括号里
+* 参数类型声明放在花括号前
+
+{{{ class="brush:c"
+  int power();
+  }}}
+* 函数声明不允许写参数名
+
+==参数－传值调用==
+* c里面的函数参数是通过“值传递”的
+* 即：参数值存在形式参数的变量里，而不是原来的变量里
+* 也就是在这里改变参数，不会影响到原来的变量
+* 被调用函数不能改变主调函数的变量值，只能改变自己所拥有副本的值
+* 而java是通过引用传递的
+* <b>当以数组名为参数时，并不会复制整个数组，它只是把一个元素的位置或地址传过去</b>
+* <b>以字符数组存储字符串时，`'\0'`代表字符串的结束</b>
+ 
+==自动变量==
+* 函数中的私有或局部变量称之为自动变量
+ 
+==外部变量与作用域==
+* 定义位于所有函数之外的变量。
+	{{{ class="brush:c"
+	  #include<stdio.h>
+	  int globalV;
+	  ...
+	  }}}
+* 所有函数都可以通过变量名访问这种类型的变量
+* 外部变量在程序执行期间一直存在
+* 只能定义一次, 定义后编译程序为它分配存储单元
+* 函数如果要使用外部变量，必须要声明相应的外部变量，有隐式声明和显示声明。
+  * 使用external进行显示声明
+	{{{ class="brush:c"
+	  external int globalV;
+	  }}}
+  * 如果外部变量在要使用它的函数之前就定义了，可以不声明，这时是隐式声明
+* 人们经常把外部变量定义和external声明放在一个专门的文件中，通常称之为头文件
+* 定义与声明的区别
+  * 定义创建变量并为之分配存储
+  * 声明用于说明变量的性质，在定义之后
+
+
+

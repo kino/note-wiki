@@ -1,0 +1,62 @@
+%title sudo
+
+=netstat=
+
+%toc
+
+用于输出linux网络子系统的信息
+
+==第一个参数决定输出信息类型==
+* *(none)*
+ 
+    显示系统打开的socket列表
+  
+* *--rute, -r*
+ 
+    显示路由表，等同于`route e`
+  
+* *--groups,-g*
+  
+    显示ipv4和ipv5多播组成员信息
+  
+* *--interface=iface,-i*
+  
+    显示网络接口表或某个特定的接口
+  
+* *--masquerade,-M*
+  
+    显示伪链接列表
+  
+* *--statics,-s*
+  
+    显示每个协议的概要统计信息
+  
+==显示信息过滤参数==
+* *-n, --numeric*
+  
+    显示数字地址，而不是转化为符号
+    
+* *-c, --continus*
+  
+    每隔一秒持续的显示信息
+    
+* *-p, --program*
+  
+    显示socket所属的程序名和PID
+
+* *-l, --listening*
+  
+    只显示正在监听的socket
+
+* *-a, --all*
+  
+    只显示所有的socket，不仅仅是正在监听的
+
+* *-t, --tcp*
+  
+    只显示tcp
+
+* *-u, --udp*
+  
+    只显示udp
+

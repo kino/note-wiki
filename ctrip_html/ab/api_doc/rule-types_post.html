@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>    /ab/rule-types POST 新建一种分配规则  </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">/ab/rule-types POST</h1>
+
+<h2 id="toc_1.1">功能</h2>
+<p>
+新建一种分配规则`RuleType`
+</p>
+
+<h2 id="toc_1.2">URL</h2>
+<p>
+/ab/rule-types
+</p>
+
+<h2 id="toc_1.3">HTTP请求方式</h2>
+<p>
+POST
+</p>
+
+<h2 id="toc_1.4">请求类型</h2>
+<p>
+JSON XML FROM
+</p>
+
+<h2 id="toc_1.5">请求参数</h2>
+<ul>
+<li>
+Form 类型
+
+</ul>
+<table>
+<tr>
+<th>
+参数名 
+</th>
+<th>
+值 
+</th>
+<th>
+描述
+</th>
+</tr>
+<tr>
+<td>
+code
+</td>
+<td>
+String
+</td>
+<td>
+<code>RuleType</code> 编码，可以唯一标识一种分配规则 
+</td>
+</tr>
+<tr>
+<td>
+description
+</td>
+<td>
+String
+</td>
+<td>
+<code>RuleType</code>描述
+</td>
+</tr>
+</table>
+
+<ul>
+<li>
+XML 类型
+<pre  class="brush:xml">
+ &lt;ruleType&gt;
+    &lt;code&gt;PERCENT&lt;/code&gt;
+    &lt;description&gt;group the user by percent.&lt;/description&gt;
+&lt;/ruleType&gt;
+</pre>
+
+</ul>
+  
+<ul>
+<li>
+JSON 类型
+<pre  class="brush:js">
+{
+    "code": "PERCENT",
+    "description": "group the user by percent."
+}
+</pre>
+
+</ul>
+
+<h2 id="toc_1.6">返回结果</h2>
+<table>
+<tr>
+<th>
+状态 
+</th>
+<th>
+结果
+</th>
+</tr>
+<tr>
+<td>
+201
+</td>
+<td>
+创建成功，Header Location里存放新资源的地址
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.7">测试</h2>
+<pre  class="brush:bash">
+curl -F code=PERCENT -F description="description"  https://baseurl/rule-types
+curl -v -X post -HContent-type:application/xml --data "&lt;xml data&gt;" https://baseurl/rule-types
+curl -v -X post -HContent-type:application/json --data "&lt;json data&gt;" https://baseurl/rule-types
+</pre>
+  
+<h2 id="toc_1.8">Examples</h2>
+<pre>
+&gt; post /ab-service/rule-types HTTP/1.1
+&gt; User-Agent: curl/7.23.1 (x86_64-pc-win32) libcurl/7.23.1 OpenSSL/0.9.8r zlib/1.2.5
+&gt; Host: localhost:8080
+&gt; Accept: */*
+&gt; Content-Type:application/xml
+&gt; Content-Length: 283
+&gt;
+* upload completely sent off: 283 out of 283 bytes
+&lt; HTTP/1.1 201 Created
+&lt; Location: http://localhost:8080/ab-service/rule-types/74
+&lt; Content-Length: 0
+&lt; Server: Jetty(6.1.24)
+&lt;
+* Connection #0 to host localhost left intact
+* Closing connection #0
+</pre>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

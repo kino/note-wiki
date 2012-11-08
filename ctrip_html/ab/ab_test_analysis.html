@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>ab_test_analysis</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../style.css">
+<link rel="Stylesheet" type="text/css" href="../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">A/B Test Framework 分析</h1>
+
+
+<h2 id="toc_1.1">何为AB测试</h2>
+<ul>
+<li>
+针对一个功能点，我们有多套方案
+
+<li>
+我们想用事实说明那个方案更好
+
+<li>
+并行测试多个方案的实际运行结果,得出分析报告，确定最终方案。
+
+</ul>
+
+<h2 id="toc_1.2">目标用户</h2>
+<ul>
+<li>
+想要进行AB测试的App
+
+</ul>
+
+<h2 id="toc_1.3">目标</h2>
+<ul>
+<li>
+提供一个基础平台
+
+<li>
+可以方便的构建一个AB测试
+
+<li>
+可以方便的对这个测试进行管理
+
+<li>
+提供一个简便的client, 可以方便的嵌入测试点
+
+<li>
+收集相应的测试数据
+
+<li>
+分析数据，得出结论，供用户使用。
+
+</ul>
+
+<h2 id="toc_1.4">名词解释</h2>
+<h3 id="toc_1.4.1">Experiment</h3>
+<ul>
+<li>
+一次测试
+
+</ul>
+<h3 id="toc_1.4.2">Alternative</h3>
+<ul>
+<li>
+测试中的一个方案
+
+<li>
+<em><strong>[Control Alternative]</strong></em>: 目前正在使用的当前方案
+
+</ul>
+<h3 id="toc_1.4.3">Rule</h3>
+<ul>
+<li>
+分配规则
+
+<li>
+如何决定一个用户使用哪一个Alternative
+
+<li>
+一旦决定，测试期间就不能变，除非该Alternative被撤消。
+
+</ul>
+
+<h2 id="toc_1.5">测试流程</h2>
+<ul>
+<li>
+一个ExperimentX开始后，用户后第一次访问app
+
+<li>
+根据用户信息，决定Alternative
+
+<li>
+使用选定的Alternative
+
+<li>
+收集用户的操作信息
+
+<li>
+<b>该用户后续的访问都要使用相同的Alternative</b>
+
+</ul>
+ 
+<h2 id="toc_1.6">Framework 构成</h2>
+<ul>
+<li>
+<b>RESTFul Service:</b> 提供数据服务
+
+<li>
+<b>后台系统</b>
+
+<ol>
+<li>
+管理正在运行的Experiment
+
+<li>
+Experiment的报表系统
+
+</ol>
+<li>
+<b>Client Library:</b> 提供相应的client library 供app使用
+
+</ul>
+<p>
+<img src="./ab_big.png" />
+</p>
+ 
+<h2 id="toc_1.7">RESTFul Service</h2>
+<table>
+<tr>
+<td>
+/ab/experiment
+</td>
+<td>
+GET POST
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+/ab/experiment/{experimentId}
+</td>
+<td>
+GET PUT
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+/ab/experiment/{experimentId}/rule
+</td>
+<td>
+GET POST
+</td>
+<td>
+只允许创建一次，不能修改，分配规则确定后不能修改
+</td>
+</tr>
+<tr>
+<td>
+/ab/experiment/{experimentId}/alternative
+</td>
+<td>
+GET POST
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+/ab/experiment/{experimentId}/alternative/{alternativeId}
+</td>
+<td>
+GET PUT DELETE
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+/ab/experiment/{experimentId}/alternative/{alternativeId}/ruleparameter
+</td>
+<td>
+GET PUT
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+/ab/experiment/{experimentId}/log
+</td>
+<td>
+GET POST
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.8">Client Library</h2>
+<table>
+<tr>
+<td>
+<i>alternativeId</i> <b>abTest(</b><i>experimentId, userInfo</i><b>)</b>
+</td>
+<td>
+根据用户信息获取应该使用的指定的Experiment
+</td>
+</tr>
+<tr>
+<td>
+<i>void</i> <b>abLog(</b><i>experimentId, userInfo, logContent</i><b>)</b>
+</td>
+<td>
+记录Experiment的日志 
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.9">关注点、难点 </h2>
+
+<h3 id="toc_1.9.1">如何判定是同一个用户 </h3>
+<ul>
+<li>
+最完美的方式是我们任何时候都可以确定正在操作或请求的是不是同一个自然人。
+
+<li>
+但现实情况是我们大多数时候在和设备终端打交道，或者和注册用户打交道
+
+<li>
+所以有很多场景，我们是不能作出明确判定的：
+
+<ol>
+<li>
+如果一个用户有多种设备，如何保证他看到相同的Alternative，依赖用户登录信息。
+
+<li>
+对于登录前后都开放的Experiment：
+
+<ol>
+<li>
+一个用户在登录前确定了Alternative，登录后发现他已经确定过Alternative，这时就会有两套Alternative，如何决定。
+
+</ol>
+</ol>
+<li>
+简单的解决方案， 对Experiment分类
+
+<ol>
+<li>
+只对登录用户进行的Experiment，根据用户信息进行分配
+
+<li>
+其他Experiment，根据终端设备进行分配
+
+</ol>
+</ul>
+  
+<h3 id="toc_1.9.2">确定GUID</h3>
+<ul>
+<li>
+GUID追踪的实际是终端，在大多数情况下一个终端会是固定的用户在使用
+
+<li>
+如何确定GUID,可以使用UUID,一个32位的16进制数: 550e8400-e29b-41d4-a716-446655440000
+
+<li>
+如何根据GUID实现简便的按比例分配。
+
+<ol>
+<li>
+假设UUID每一位都是随机的，取最后一位或两位取模
+
+<li>
+扩展一个GUID: 
+
+<ul>
+<li>
+GUID = UUID + N位内的随机数, 如：550e8400-e29b-41d4-a716-446655440000.16
+
+<li>
+根据随机数进行取模
+
+<li>
+确定N的大小，选取一个比较安全的数字。
+
+</ul>
+</ol>
+</ul>
+
+<h3 id="toc_1.9.3">分配规则</h3>
+<ul>
+<li>
+最常用的按比例分配：10%AlternativeA， 10%AlternativeB， 剩余使用Control Alternative
+
+<li>
+特质用户：比如北京的25~40岁之间的男性用户，10% AlternativeA, 10% AlternativeB
+
+</ul>
+
+<h3 id="toc_1.9.4">分配规则引擎</h3>
+<ol>
+<li>
+简单方案
+
+<ul>
+<li>
+定义有限的几种分配类型，比如：比例分配，地区分配，比例+地区分配。
+
+<li>
+一个Experiment只能使用一种分配类型。
+
+</ul>
+<li>
+自定义多维度分配规则
+
+<ul>
+<li>
+定义出可用于分配的维度：比例/定量， IP段，地区， 性别， 年龄， 职业 etc.
+
+<li>
+用户自己定义组合出用AlternativeX的用户， 对于ExperimentX:
+
+<ul>
+<li>
+AlternativeA: 北京 男 限10000
+
+<li>
+AlternativeB: 上海 男 限10000
+
+</ul>
+<li>
+难点是可能出现没意义的分配规则，这个问题不大，任何一个Experiment肯定是经过严格申核的。
+
+</ul>
+</ol>
+  
+<h3 id="toc_1.9.5">如何保证对同一用户多次请求，Alternative一致 </h3>
+<ol>
+<li>
+方案一：算法一致
+
+<ul>
+<li>
+每次重新使用规则引擎计算出该用的Alternative
+
+<li>
+简单
+
+<li>
+只对全部人数按比例分配生效
+
+<li>
+对特质用户不生效，比如在北京的现在来上海了，或取不到地区信息。
+
+</ul>
+<li>
+方案二：记录分配信息
+
+<ul>
+<li>
+第一次分配非Control Alternative后，记录下分配信息，下次直接用。
+
+<li>
+难点，数据量大，再次查询需要时间。
+
+<li>
+变向解决方案，记入Cookie, 前提是不能有过多的experiment同时进行，不然cookie也不够用。
+
+</ul>
+</ol>
+   
+<h3 id="toc_1.9.6">我们要记录哪些信息 </h3>
+<ol>
+<li>
+通用信息：experimentId alternatimeId ip time guid uid clientType(browser) 
+
+<li>
+指标信息，转化率信息等，对于任何一个Experiment在构建之初就应该确定自己关心什么
+
+<ul>
+<li>
+比如注册转化率
+
+<li>
+当用户点击注册按钮时，就收集一条信息
+
+</ul>
+</ol>
+<h3 id="toc_1.9.7">数据分析</h3>
+<ol>
+<li>
+通用分析
+
+<li>
+每个Experiment的特有分析
+
+<li>
+分析的数据来源
+
+<ul>
+<li>
+AB Test Framework自身收集的信息
+
+<li>
+从其他系统抽取相应的信息，进行分析，比如日志信息，User Tracker信息等。
+
+</ul>
+</ol>
+  
+<h2 id="toc_1.10">对于一个要使用AB Test Fromwork用户的使用流程 </h2>
+<ol>
+<li>
+设计一个ABTest方案.
+
+<li>
+确定Alternative, 并实现相应的业务代码。
+
+<li>
+去Framework后台申请一个Experiment并建立起来, 获取一个ExperimentId.
+
+<li>
+使用相应的 Client Library, 接入AB Test Service.
+<pre  class="brush:js">
+      int alternativeId = abTest(...);
+      if(alternativeId = 1){
+         doSomething1();
+      }else if(alternativeId = 2){
+         doSomething2();
+      }else if(alternativeId = 3){
+         doSomething3();
+      }else{
+         doAsUsual();
+      }
+</pre>
+
+<li>
+在关注点加入监视代码收集信息
+<pre  class="brush:js">
+      registerBtn.click(function(){
+          abLog(....);
+      });
+</pre>
+
+<li>
+结束测试，等待分析结果
+
+<li>
+根据分析结果，确定最终Alternative, 清理代码。
+
+</ol>
+
+<h2 id="toc_1.11">模块RESTFul Service设计</h2>
+<h2 id="toc_1.12">模块Client Library设计</h2>
+<h2 id="toc_1.13">模块Management System设计</h2>
+<h2 id="toc_1.14">模块Reporter设计</h2>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

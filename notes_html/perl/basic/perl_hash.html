@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>哈希</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">哈希</h1>
+
+<p>
+日期: 2012-06-03 20:06
+<div class="toc">
+<ul>
+<li><a href="#toc_1">哈希</a>
+</ul>
+</div>
+</p>
+
+
+<ol>
+<li>
+在名字前面是美元符号($)，后面是花括号({})，则其为hash 元素。
+
+<li>
+要引用整个hash，使用百分号("%")作为前缀。前面几页中使用的hash 的名字为%family_name。
+
+<li>
+列表和hash互相赋值：
+
+<ul>
+<li>
+下面的赋值方法，元素个数必须是偶数，因为由key/value 对组成。元素个数为奇数是不可靠的，这通常会引起警告。
+<pre  class="brush:perl">
+    %some_hash = ("foo", 35, "bar", 12.4, 2.5, "hello", "wilma", 1.72e30, "betty", "bye\n");
+</pre>
+
+<li>
+下面称为：将hash 展开，并将其key/value 对返回到一个列表中。返回的key/value 顺序和存放的顺序可能不同
+<pre  class="brush:perl">
+    @array_array = %some_hash
+</pre>
+
+</ul>
+<li>
+使用=&gt;为hash赋值。在perl中，在任何地方，可以使用=&gt;代替","。
+<pre  class="brush:perl">
+    my %last_name = (
+            "fred" =&gt; "flintstone",
+            "dino" =&gt; undef,
+            "barney"=&gt; "rubble";
+            "betty"=&gt; "rubble",
+            );
+</pre>
+
+<ul>
+<li>
+任何大箭头符号(=&gt;)左侧的bareword（由字母，数字，下划线，但不是由数字开头，前面有可选的加号或减号，组成的序列）都暗含着由引号括起来了的。
+
+<li>
+因此可以省略掉大箭头符号(=&gt;)左侧bareword 上的引号。你也可以忽略掉hash的花括号中的引号，如果里面只有作为key 的bareword.
+
+</ul>
+<li>
+有用的hash函数：keys、values
+<pre  class="brush:perl">
+    my %hash = ("a"=&gt;1, "b"=&gt;2, "c"=&gt;3);
+    my @k = keys %hash;
+    my @v = values %hash;
+</pre>
+
+<li>
+each函数,返回键值列表
+<pre  class="brush:perl">
+  while (($key, $value) = each %hash){
+   print “$key =&gt; $value\n”;
+  }
+
+  foreach $key (sort keys %hash){
+   $value =$hass{$key};
+   print “$key =&gt; $value\n”;
+   #也可以不使用额外的临时变量$value
+   #print “$key =&gt; $hash{key}\n”;
+  }
+</pre>
+
+<li>
+要查看hash 中是否存在某个key（某人是否有借书卡），可以使用exists 函数，如果hash 中存在此key，则返回true，这和是否有对应的value 无关：
+<pre  class="brush:perl">
+    if(exists $books{$dino}){
+        print "Hey, there's a libaray card for dino!\n";
+    }
+</pre>
+
+<li>
+delete 函数将某个给定的key（包括其对应的value）从hash中删除。（如果不存在这个key,则什么也不做；不会有警告或者错误信息。）
+<pre  class="brush:perl">
+    my $person = "betty";
+    delete $books{$person}; #将$person 的借书卡删除掉
+</pre>
+
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

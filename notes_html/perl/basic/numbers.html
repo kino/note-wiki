@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>perl中的数字</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">perl中的数字</h1>
+
+<p>
+日期: 2012-06-03 16:06
+<div class="toc">
+<ul>
+<li><a href="#toc_1">perl中的数字</a>
+</ul>
+</div>
+</p>
+
+<ol>
+<li>
+在perl中只有双精度浮点数，也就是我们常说的<code>double</code>。
+
+<ul>
+<li>
+在perl中我们看到的整数和浮点数，只是我们看的样子和形式不同而已，其实在perl的内部它全部作为双精度浮点数来运算。
+
+</ul>
+<li>
+浮点数可以以十进制的指数来记，符号是'e'，并不区分大小写，如：
+<pre  class="brush:perl">
+    1.2e20,1.2E-23,-1.2e-50
+</pre>
+
+<li>
+整数过长，允许以下划线“_“来分隔它。如数字：6512358546，我们可以写作：
+<pre  class="brush:perl">
+  6_512_358_546  
+</pre>
+
+<li>
+非十进制数：八进制以"0"开头，十六进制以"0x"开头，二进制以"0b"开头。前置"0"只对数字有效。
+
+<li>
+当非十进制过长时，也可以以下划线"_"来分隔，如：
+<pre  class="brush:perl">
+  0x45ab_cf47,0x12_fa_5b_c3
+</pre>
+
+<li>
+数字的运算：加+、减-、乘*、除/、模%、次方**
+
+<ul>
+<li>
+%模运算，也称取余运算，当运算中的两个数字存在非整数时，会将其转换成对应的整数，再进行运算，
+
+<li>
+如 10.5%3.2，等同于10%3，而当其中存在负数时，则和perl的具体实现有关
+
+<li>
+次方**<strong>，2</strong>**3即2的3次方。但不能进行一个负数的非整数次方运算，这将产生一个复数，需要专门的数学模块进行运算。
+
+</ul>
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

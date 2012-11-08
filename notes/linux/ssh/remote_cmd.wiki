@@ -1,0 +1,9 @@
+%title 通过ssh执行远程命令
+
+=通过ssh执行远程命令=
+
+日期: 2012-04-03 15:04
+
+{{{ class="brush:bash"
+ ssh remote_addr "remote_cmd"
+  }}}

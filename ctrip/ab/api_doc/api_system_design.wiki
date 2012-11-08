@@ -1,0 +1,171 @@
+%title  AB Test Framework Restful API服务端设计 
+
+=AB Test Framework Restful API服务端设计 =
+
+%toc
+
+==AB Test Framework Big Picture==
+{{ab_big.png}}
+* <b>RESTFul Service:</b> 提供数据服务
+* <b>Admin console 管理系统:</b> 通过 `restful api service` 添加管理无数据 
+* <b>Client Library:</b> 提供相应的client library 供app使用
+* <b>Reporter 报表系统:</b> 从其他系统（比如日志系统）提出相关数据结合自身收集的数据做数据分析，得出报表，提供给相关部门。
+
+== API服务端功能 ==
+#  提供 `AB Test Framework` 相关元数据的存储
+#  开放一套 `Restful风格的Api` , 向外提供 `AB Test Framework` 数据服务
+# 供管理后台添加管理元数据
+# 供 `Client Library` 请求数据
+# 供 `Reporter` 抽取数据
+
+== 数据模型 ==
+{{ab_test.png}}
+
+== 域模型 ==
+* _*Experiment:*_   代表一个AB测试实例
+* _*RuleType:*_   分流规则，一个AB测试实例选择一种分流规则
+* _*Alternative:*_   代表一个AB测试实例的一个方案
+* _*RuleParams:*_   代表一个方案的分流参数
+== 域模型的关系 ==
+# 一个 `Experiment` 可以包含多个 `Alternative`
+# 一个 `Experiment` 指定一个 `RuleType`
+# 为每一个 `Alternative` 配置一个 `RuleParams`
+# 根据 `Experiment` 上的 _*RuleType*_ 和 `Alternative`上的 _*RuleParams*_ 就可以计算每一个 `Alternative` 的分配规则
+
+== 实现架构 ==
+{{ab_archetecture.png}}
+
+* _*Spring:*_  提供统一的对象管理 
+* _*DB:*_ 存储数据 
+* _*Domain Entities:*_ 数据模型 
+* _*MyBatis:*_ ORM框架，实现数据访问与映射 
+* _*Logic Service:*_ 业务逻辑 
+* _*Jersey:*_ Restful风格的web框架， 用于实现rest语义. 
+* _*WebResource:*_ Rest中的resource 
+
+==RESTFul Http资源 与 Domain实体==
+{{ab_resource_entity.png}}
+
+==预定义API ==
+| URL                                                                                  | Method | Request       | Response   |                                                    |
+|--------------------------------------------------------------------------------------|--------|---------------|------------|----------------------------------------------------|
+| _*/ab/experiments*_                                                                  | GET    | 无            | XML,JSON   | 获得`Experment`列表                                |
+| \/                                                                                   | POST   | XML,JSON,FORM | text/plain | 创建一个新`Experment`, 返回创建的资源地址          |
+| _*/ab/experiments*_/*{elementId}*                                                    | GET    | 无            | XML,JSON   | 获得指定的 `Experiment`                            |
+| \/                                                                                   | POST   | FORM          | 无         | 更该指定`Experment`的部分信息                      |
+| \/                                                                                   | PUT    | XML，JSON     | 无         | 更新指定`Experment`                                |
+| _*/ab/experiments*_/*{elementId}*_*/alternatives*_                                   | GET    | 无            | XML,JSON   | 获得指定的 `Experiment` 的所有 `Alternative`       |
+| \/                                                                                   | POST   | XML,JSON,FROM | text/plain | 为指定的`Experment`创建一个新 `Alternative`        |
+| _*/ab/experiments*_/*{elementId}*_*/alternatives*_/*{alternativeId}*                 | GET    | 无            | XML,JSON   | 获得指定的 `Experiment` 的一个指定的 `Alternative` |
+| \/                                                                                   | POST   | FORM          | 无         | 修改一个指定的 `Alternative`                       |
+| \/                                                                                   | PUT    | XML,JSON      | 无         | 更新一个指定的 `Alternative`                       |
+| _*/ab/experiments*_/*{elementId}*_*/alternatives*_/*{alternativeId}*_*/rule-params*_ | GET    | 无            | XML,JSON   | 获得一个指定的 `Alternative` 的 `RuleParams`       |
+| \/                                                                                   | POST   | FORM          | 无         | 修改一个指定的 `Alternative` 的 `RuleParams`       |
+| \/                                                                                   | PUT    | XML,JSON      | 无         | 修改一个指定的 `Alternative` 的 `RuleParams`       |
+| _*/ab/rule-types*_                                                                   | GET    | 无            | XML,JSON   | 获得 `RuleType` 列表                               |
+| \/                                                                                   | POST   | XML,JSON,FORM | text/plain | 新增一个新的 `RuleType` , 返回创建的资源地址       |
+| _*/ab/rule-types*_/*{ruleTypeId}*                                                    | GET    | 无            | XML,JSON   | 获得指定的 `RuleType`                              |
+| \/                                                                                   | POST   | FORM          | 无         | 更该指定 `RuleType` 的部分信息                     |
+| \/                                                                                   | PUT    | XML，JSON     | 无         | 更新指定 `RuleType`                                |
+ 
+==附录：一个 `Experiment` 实例==
+
+===Experiment的XML实例 ===
+{{{ class="brush:xml"
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <experiment>
+        <url>http://localhost:8080/ab-service/experiments/2</url>
+        <name>Test One</name>
+        <description>Test One</description>
+        <startDate>2012-11-01 00:00</startDate>
+        <endDate>2012-12-31 00:00</endDate>
+        <isActive>true</isActive>
+        <ruleType>
+            <url>http://localhost:8080/ab-service/rule-types/1</url>
+            <code>PERCENT</code>
+            <description>group the user by percent.</description>
+        </ruleType>
+        <alternatives>
+            <alternative>
+                <url>http://localhost:8080/ab-service/experiments/2/alternatives/7</url>
+                <code>A_A</code>
+                <name>Alternative a</name>
+                <description>test alternative a</description>
+                <isActive>true</isActive>
+                <ruleParams>
+                    <url>http://localhost:8080/ab-service/experiments/2/alternatives/7/rule-params</url>
+                    <param1>30</param1>
+                </ruleParams>
+            </alternative>
+            <alternative>
+                <url>http://localhost:8080/ab-service/experiments/2/alternatives/8</url>
+                <code>A_B</code>
+                <name>Alternative b</name>
+                <description>test alternative b</description>
+                <isActive>true</isActive>
+                <ruleParams>
+                    <url>http://localhost:8080/ab-service/experiments/2/alternatives/8/rule-params</url>
+                    <param1>30</param1>
+                </ruleParams>
+            </alternative>
+        </alternatives>
+    </experiment>
+  }}}
+  
+===Experiment的JSON实例 ===
+{{{ class="brush:js"
+
+    {
+        "url": "http://localhost:8080/ab-service/experiments/2",
+        "name": "Test one",
+        "description": "Test one",
+        "startDate": "2012-11-01 00:00",
+        "endDate": "2012-12-31 00:00",
+        "isActive": true,
+        "ruleType": {
+            "url": "http://localhost:8080/ab-service/rule-types/1",
+            "code": "PERCENT",
+            "description": "group the user by percent."
+        },
+        "alternatives": [
+            {
+                "code": "A_A",
+                "url": "http://localhost:8080/ab-service/experiments/2/alternatives/7",
+                "name": "Alternative a",
+                "description": "test alternative description a",
+                "isActive": true,
+                "ruleParams": {
+                    "url": "http://localhost:8080/ab-service/experiments/2/alternatives/7/rule-params",
+                    "param1": "30",
+                    "param2": null,
+                    "param3": null,
+                    "param4": null,
+                    "param5": null,
+                    "param6": null,
+                    "param7": null,
+                    "param8": null,
+                    "param9": null
+                }
+            },
+            {
+                "code": "A_B",
+                "url": "http://localhost:8080/ab-service/experiments/2/alternatives/7",
+                "name": "Alternative b",
+                "description": "test alternative description b",
+                "isActive": true,
+                "ruleParams": {
+                    "url": "http://localhost:8080/ab-service/experiments/2/alternatives/7/rule-params",
+                    "param1": "30",
+                    "param2": null,
+                    "param3": null,
+                    "param4": null,
+                    "param5": null,
+                    "param6": null,
+                    "param7": null,
+                    "param8": null,
+                    "param9": null
+                }
+            }
+        ]
+    }
+  }}}

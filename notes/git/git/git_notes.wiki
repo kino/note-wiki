@@ -1,0 +1,243 @@
+%title Git笔记
+
+=Git笔记=
+
+====四种对象：Blob Tree Tag Commit====
+
+====所有的对象都是通过 40 个字符的“对象名”进行索引的====
+ * 对象名通过对对象内容进行SHA1进行哈希计算所得
+ * 通过对象名比较，就可以知道两个对象是否相同
+ * 通过对象名和对象内容算出的哈希值比较，就可以知道对象内容是否正确
+
+====所有的对象都是通过 40 个字符的“对象名”进行索引的====
+  * 查看blob: `git show 6ff87c4664`
+  * 查看tree: `git ls-tree 6ff87c4664` 
+  * 查看commit:  `git show -s --pretty=raw 2be7fcb47`
+  * 查看tag: `git cat-file tag v1.5.0`
+
+====.git 目录结构====
+  {{{ 
+    $>tree -L 1
+    .
+    |-- HEAD         # 这个git项目当前处在哪个分支里
+    |-- config       # 项目的配置信息，git config命令会改动它
+    |-- description  # 项目的描述信息
+    |-- hooks/       # 系统默认钩子脚本目录
+    |-- index        # 索引文件
+    |-- logs/        # 各个refs的历史信息
+    |-- objects/     # Git本地仓库的所有对象 (commits, trees, blobs, tags)
+    `-- refs/        # 标识你项目里的每个分支指向了哪个提交(commit)。
+	}}}
+
+====git索引是你的工作目录和仓库之间的一个暂存区====
+   * 在工作区做的修改，必须加进暂存区，在commit时，才会提交到仓库
+   * 通过`git add, git rm`将修改加进暂存区。
+   * 对一个文件做第一次修改，将修改加进暂存区，这时对这个文件进行第二次修改，
+   * 提交修改,这时只有第一次的修改会被提交进仓库，
+   * 如果想要提交第二次修改，需要在提交前,将第二次的修改也加进暂存区
+
+====基本用法====
+   # `git clone`
+   # `git init`
+   # 哪些文件将被提交
+		 `git diff` 比较工作区和暂存区
+		 `git diff --cached`    比较暂存区和HEAD
+   # $ `git commit -a`
+	   这会把自动所有内容被修改的文件(不包括新创建的文件)都添加到索引中，并且同时把它们提交
+   # 分支
+      * 创建新分支： `git branch newbranchname`
+	  * 分支列表： `git branch`
+	  * 切换分支： `git checkout branchname`
+	  * 创建并切换分支： `git checkout -b branchname`
+	  * 合并分支： `git merge branchname`
+	  * 删除分支： `git branch -d  branchname` //只能删除被当前分支合并过的分支
+	               `git branch -D  branchname` //强制删除 
+   # `git pull`命令执行两个操作: 它从远程分支(remote branch)抓取修改 的内容，然后把它合并进当前的分支。
+	  * `git pull remote_repository_name remote_branch_name`
+   # 如果你要经常操作远程分支(remote branch),你可以定义它们的缩写:
+      * <code>`git remote add bob /home/bob/myrep`</code>
+   # 用"git fetch"" 来执行"git pull"前半部分的工作， 但是这条命令并不会把抓下来的修改合并到当前分支里。
+	  * `$ git fetch bob`
+   # `git config --get remote.origin.url`  用于`git pull`的默认地址         
+   # `config:branch.<name>.remote` 告诉分支当它`git push` 或 `git fetch` 时，操作哪个远程库
+   # `git push` 将本地更改推送到远程库
+      * `git push remote_repository_name local_branch_name:remote_branch_name`
+   # 快速向前合并 <br>
+	 * 还有一种需要特殊对待的情况，在前面没有提到。通常，一个合并会产生一个合并提交(commit), 把两个父分支里的每一行内容都合并进来。
+	 * 但是，如果当前的分支和另一个分支没有内容上的差异，就是说当前分支的每一个提交(commit)都已经存在另一个分支里了，git 就会执行一个“快速向前"(fast forward)操作；git 不创建任何新的提交(commit),只是将当前分 支指向合并进来的分支。
+   # 如果推送(push)结果不是"快速向前"(fast forward),可能会报错，应该先`git pull` <br>
+	 * 你可以强制git-push在上传修改时先更先，只要分支名前面加一个加号。<br>
+	 * `$ git push ssh://yourserver.com/~you/proj.git +maste`
+   # 打标签`git tag -s stable-1 1b2e1d63ff`
+   # `git remote update (<group>|<remote>)`
+	 *  `git remote update`
+	 *  fetch 指定的远程库，group可以在配置里定义
+	 *  不带参数默认fetch remotes.default指定的库，
+	 *  如果没有配置该项，fetch所有的远程库,但会受到remote.<name>.skipDefaultUpdate的影响
+====忽略文件，在顶层工作目录添加一个 `.gitignore` 文件====
+==== git rebase====
+  * 你从一个分支打了一个新分支，此后，如果两个分支都修改了，就会出现分叉，有了两个线
+{{{ 
+   b1 -> b2 -> b3 -> b4 -> b5
+         c1 -> c2 -> c3 -> c4 -> bc45(merge) 
+  }}}
+  * 上面分支c在c4 b5的地方merge.
+  * rebase就是把c1到c4间的所有修改取消并保存一个补丁文件在.git/rebase里，
+  * 然后分支c从b5创建，然后再把原先保存的补丁应用到分支c上。
+{{{ 
+   b1 -> b2 -> b3 -> b4 -> b5
+                           c1' -> c2'(这里有原先c1到c4的修改) 
+  }}}
+  * 运行垃圾回收时(`git gc --prune`), 那些丢弃的提交会被删除(c1到c4)
+   # git rebase b
+   # 遇到冲突后会让你停下来解决冲突，然后运行git rebase --continue
+   # 在任何时候，你可以用--abort参数来终止rebase的行动，并且"mywork" 分支会回到rebase开始前的状态。
+   # rebase可以让资源库清晰干净
+   # 交互式
+     * `git rebase -i origin/maste`
+      
+====git stash ====
+  * `git stash`
+  * `git stash apply`
+  * `git stash list`
+   
+==== 你可以使用分支,remote或标签名来代替SHA串名==== 
+  * 它们只是指向某个对象的指针. 假设你的master分支目前在在
+  * 提交(commit):'980e3'上, 现在把它推送(push)到origin上并把它命名为标签'v1.0', 那么下面的串都会被git视为等价的:
+   {{{ 
+		980e3ccdaac54a0d4de358f3fe5d718027d96aae
+		origin/master
+		refs/remotes/origin/master
+		master
+		refs/heads/master
+		v1.0
+		refs/tags/v1.0
+  }}}
+  * 这意味着你执行下面的两条命令会有同样的输出:
+	* $ git log master
+	* $ git log refs/tags/v1.0
+	 
+==== 标示符====
+	*   `master@{yesterday}`
+	*   `master@{1 month ago}`
+	*   `master@{5}`  //前面的第五个提交
+	* 多个父对象，如果master是由a与b两个分支合并的，
+	  * `master^1` 指a  ; `master^2` 指 b
+	* 第N级父对象
+	  *   `master~2` 父对象的父对象 等价于 master^^
+	* 下面的表达式等价
+	  * `master^^^^^^`
+	  * `master~3^~2`
+	  * `master~6`
+	* master指向的树
+	  * `git ls-tree master^{tree}`
+	* 二进制标识符, 得到二进制对象的Sha名
+	  * `master:/path/file`
+
+==== 在Git中‘追踪分支’是用与联系本地分支和远程分支的==== 
+ * 如果你在’追踪分支'(Tracking Branches)上执行推送(push)或拉取(pull)时,　它会自动推送(push)或拉取(pull)到关联的远程分支上. 
+ * `git branch --track experimental origin/experimental`
+
+====用`git grep` 命令查找Git库里面的某段文字是很方便的==== 
+* 当然, 你也可以用unix下的'grep'命令进行搜索, 
+*  但是'git grep'命令能让你不用签出(checkout)历史文件, 就能查找它们.
+*  现在, 如果我们要查找git仓库里某个特定版本里的内容, 
+*  我们可以像下面一样在命令行末尾加上标签名(tag reference):
+*  `git grep xmmap v1.5.0  `
+
+====撤消 恢复====
+=====修复未提交文件中的错误(重置)=====
+* 让工作目录回到上次提交时的状态(last committed state):
+  * `git reset --hard HEAD`
+  * 你这条件命令会把你所以工作目录中所有未提交的内容清空(当然这不包括未置于版控制下的文件 untracked files). 
+  * 从另一种角度来说, 这会让"`git diff`" 和"`git diff --cached`"命令的显示法都变为空.
+* 如果你只是要恢复一个文件,如"hello.rb", 你就要使用 `git checkout`
+  * `$ git checkout -- hello.rb`
+  * 这条命令把hello.rb从HEAD中签出并且把它恢复成未修改时的样子
+=====修复已提交的错误=====
+* 创建一个新的提交(commit), 在新的提交里撤消老的提交所作的修改. 
+  * 这种作法在你已经把代码发布的情况下十分正确.
+  * 创建一个新的，撤消(revert)了前期修改的提交(commit)是很容易的; 只要把出错的提交(commit)的名字
+	*   `git revert HEAD`   //撤消最近一次提交
+	*   `git revert HEAD^`  //撤消上上次提交
+  * `git revert` 其实不会直接创建一个提交(commit), 把撤消扣的文件内容放到索引(index)里,
+	 你需要再执行`git commit`命令，它们才会成为真正的提交(commit)
+* 你也可以去修改你的老提交(old commit). 但是如果你已经把代码发布了,那么千万别这么做; 
+  * git不会处理项目的历史会改变的情况,如果一个分支的历史被改变了那以后就不能正常的合并.
+  * `git commit --amend -a -m "msg"`
+  * 如果你刚刚做了某个提交(commit), 但是你这里又想来马上修改这个提交; 
+	`git commit` 现在支持一个叫 --amend 的参数，你能让修改刚才的这个提交(HEAD commit). 
+	这项机制能让你在代码发布前,添加一些新的文件或是修改你的提交注释(commit message).
+	如果你在老提交(older commit)里发现一个错误, 但是现在还没有发布到代码服务器上. 
+	你可以使用 `git rebase`命令的交互模式, "`git rebase -i`"会提示你在编辑中做相关的修改. 
+	这样其实就是让你在rebase的过程来修改提交.
+=====`git reset`的三种模式，回退提交, 有三个地方需要修改，三种模式依次升级=====
+
+|         | 仓库(HEAD) | 暂存区(index)                 | 工作区                        |
+|---------+------------+-------------------------------+-------------------------------|
+| --soft  | 回退       | aaa将仓库撤消的更改加进暂存区 | 不回退(和执行命令前保持不变） |
+| --mixed | 回退       | 回退(清空)                    | 不回退(和执行命令前保持不变） |
+| --hard  | 回退       | 回退(清空)                    | 回退(代码修改丢失)            |
+		 
+====维护git====
+* 在大的仓库中, git靠压缩历史信息来节约磁盘和内存空间. 压缩操作并不是自动进行的, 你需要手动执行 git gc:
+  * `$ git gc`
+* git fsck 运行一些仓库的一致性检查, 如果有任何问题就会报告.  这项操作也有点耗时, 通常报的警告就是“悬空对象"(dangling objects).
+  * `$ git fsck`
+
+====`git format-patch`与`git am`的使用====
+{{{ 
+	git format-patch经验
+	A:
+	git log
+	commit c
+	commit b
+	commit a
+	commit init
+
+
+	B:
+	git log
+	commit init
+
+	==========
+	A,B两人代码共有commit init
+	现在A改动到a=>b=>c
+
+	B想用补丁来升级
+
+
+	A:
+	git format-patch init..c  ==>产生三个补丁
+	001-commit-a.patch 对应从commit init出发升到a
+	002-commit-b.patch 对应从commit a出发升到b
+	003-commit-c.patch 对应从commit b出发升到c
+
+	即git format-patch x..y
+	是从共有的x出发一路一个一个升到y
+	(x,y]
+
+	=============
+	B:
+	git am *.patch git会自动按文件名一级级升上去的
+
+	}}}
+	
+====git cherry-pick====
+    从已存在的commit中引入修改
+    
+====配置====
+=====branch.<branchname>.name=====
+      :在该分支时，git push git fetch应该操作哪一个远程库 
+=====branch.<branchname>.merge=====
+      :在该分支时，git pull时应该合并远程的哪一个分支
+=====push.default=====
+      :定义git push无参数时的行为，默认情况是把本地的[所有]分支push到远程库的同名分支中（如果存在的话）<br>
+	  :四个可选值：
+	 * `nothing`:什么都不做
+	 * `matching`:push[所有]同名分支，也是默认值
+	 * `upstream`:push当前分支到它的上游分支，也就是branch.<branchname>.merge配置的
+	 * `tracking`:
+	 * `current`:只是把当前分支push到远程库的同名分支中
+
+

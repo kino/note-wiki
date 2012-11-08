@@ -1,0 +1,88 @@
+%title /ab/experiments/{experimentId}/alternatives POST 为一个Experiment添加一个Alternative
+
+=/ab/experiments/{experimentId}/alternatives POST=
+
+==功能 ==
+为一个测试 `Experiment` 实例添加一个候选方案 `Alternative`
+
+==URL==
+/ab/experiments/{experimentId}/alternatives
+
+==HTTP请求方式==
+POST
+
+==请求类型==
+JSON XML FORM
+
+==请求参数==
+* 路径参数
+| 参数名       | 值     | 描述                                 |
+|--------------|--------|--------------------------------------|
+| experimentId | String | 要添加 `Alternative` 的 `Experiment` |
+ 
+* Form 类型
+| 参数名      | 值                                 |          | 描述                                  |
+|-------------|------------------------------------|----------|---------------------------------------|
+| code        | String，但取值范围对应一个枚举类型 | required | 为 `Alternative` 选定一个编码，标识它 |
+| name        | String                             | required | `Alternative` 名称                    |
+| description | String                             |          | `Alternative`描述                     |
+| isActive    | boolean:true/false                 |          | 是否被激活                            |
+| ruleParam1  | String                             |          | 分配参数一                            |
+| ruleParam2  | String                             |          | 分配参数二                            |
+| ruleParam3  | String                             |          | 分配参数三                            |
+| ruleParam4  | String                             |          | 分配参数四                            |
+| ruleParam5  | String                             |          | 分配参数五                            |
+| ruleParam6  | String                             |          | 分配参数六                            |
+| ruleParam7  | String                             |          | 分配参数七                            |
+| ruleParam8  | String                             |          | 分配参数八                            |
+| ruleParam9  | String                             |          | 分配参数九                            |
+
+* XML 类型
+{{{ class="brush:xml"
+            <alternative>
+                <code>A_A</code>
+                <name>Alternative a</name>
+                <description>test alternative a</description>
+                <isActive>true</isActive>
+                <ruleParams>
+                    <param1>30</param1>
+                </ruleParams>
+            </alternative>
+  }}}
+  
+* JSON 类型
+{{{ class="brush:js"
+            {
+                "code": "A_A",
+                "name": "Alternative a",
+                "description": "test alternative description a",
+                "isActive": true,
+                "ruleParams": {
+                    "param1": "30",
+                    "param2": null,
+                    "param3": null,
+                    "param4": null,
+                    "param5": null,
+                    "param6": null,
+                    "param7": null,
+                    "param8": null,
+                    "param9": null
+                }
+            }
+  }}}
+
+==返回结果==
+| 状态 | 结果                                        |
+|------|---------------------------------------------|
+| 201  | 创建成功，Header Location里存放新资源的地址 |
+
+==测试==
+{{{ class="brush:bash"
+curl -v -X post -HContent-type:application/xml --data "<xml data>" https://baseurl/experiments/{experimentId}/alternatives
+curl -v -X post -HContent-type:application/json --data "<json data>" https://baseurl/experiments/{experimentId}/alternatives
+  }}}
+  
+
+
+
+

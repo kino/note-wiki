@@ -1,0 +1,4 @@
+%title sudo
+=sudo=
+
+[https://wiki.archlinux.org/index.php/Sudo]

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>UNIX系统接口</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">UNIX系统接口</h1>
+
+<p>
+日期: 2012-05-30 22:05
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">UNIX系统接口</a>
+<ul>
+<li><a href="#toc_1.1">文件描述符</a>
+<li><a href="#toc_1.2">低级I/O</a>
+<li><a href="#toc_1.3">open、creat、close、unlink</a>
+<ul>
+<li><a href="#toc_1.3.1">error函数</a>
+<li><a href="#toc_1.3.2">将变长参数再次传递</a>
+</ul>
+</ul>
+</ul>
+</div>
+
+<ul>
+<li>
+上一章说的输入／输出，是标准库函数，对任何操作系统都一样。
+
+<li>
+但标准库函数的实现要通过宿主系统提供的功能来实现。
+
+<li>
+下面是UNIX系统中用于输入输出的系统调用。
+
+</ul>
+
+<h2 id="toc_1.1">文件描述符</h2>
+<ul>
+<li>
+unix中所有外围设备被看作文件系统中的文件
+
+<li>
+所有的输入／输出是通过读文件或写文件完成。
+
+<li>
+读写文件前需要通知系统，该过程叫 <em><strong>打开文件</strong></em> 。
+
+<li>
+如果成功，系统返回一个非负的整数，称为 <em><strong>文件描述符</strong></em>
+
+<li>
+任何输入／输出都是通过 <em><strong>文件描述符</strong></em> 标识文件的，而不是通过文件名。
+
+<li>
+系统负责维护文件信息， <em><strong>用户程序只能通过文件描述符引用文件</strong></em>
+
+<li>
+<em><strong>三个文件:</strong></em>
+
+<ul>
+<li>
+当命令解释程序（shell）运行程序时会打开三个文件
+
+<li>
+文件描述符为：0，1，2
+
+<li>
+分别代表标准输入 标准输出 标准错误
+
+</ul>
+</ul>
+  
+<h2 id="toc_1.2">低级I/O</h2>
+<p>
+输入／输出是通过系统调用read和write实现的。
+C语言中通过函数<code>read</code>和<code>write</code>访问两个系统调用。
+</p>
+<pre  class="brush:c">
+   int n_read = read(int fd, char *buf, int n);
+   int n_write = write(int fd, char *buf, int n);
+</pre>
+
+<ul>
+<li>
+<em><strong>read</strong></em>
+
+<ul>
+<li>
+返回实际传输的字节数
+
+<li>
+返回<code>0</code>, 文件已到末尾
+
+<li>
+返回<code>-1</code>, 发生错误
+
+</ul>
+<li>
+<em><strong>write</strong></em>
+
+<ul>
+<li>
+返回实际写入的字节数
+
+<li>
+如果返回值与请求写入的字节数不等, 发生错误
+
+</ul>
+</ul>
+ 
+<p>
+系统调用的函数原型集放在头文件<code>syscalls.h</code>中，但文件名字不是标准的。
+</p>
+ 
+<h2 id="toc_1.3">open、creat、close、unlink</h2>
+<ul>
+<li>
+<em><strong>open</strong></em>
+
+<ul>
+<li>
+<code>int open(char *name, int flags, int perms)</code>
+
+<li>
+与<code>fopen</code>类似
+
+<li>
+返回一个文件描述符
+
+<li>
+参数
+
+<ul>
+<li>
+<code>name</code>包含文件名的字符串
+
+<li>
+<code>flags</code>一个int型值
+
+<ul>
+<li>
+<code>O_RDONLY</code> 只读
+
+<li>
+<code>O_WRONLY</code> 只写
+
+<li>
+<code>O_RDWR</code> 读写
+
+</ul>
+</ul>
+<li>
+打开不存在的文件报错
+
+</ul>
+<li>
+<em><strong>create</strong></em>
+
+<ul>
+<li>
+<code>int create(char *name, int perms)</code>
+
+<li>
+创建文件
+
+<li>
+成功创建，返回一个文件描述符,否则返回-1
+
+<li>
+若要创建的文件已存在，将该文件截断为0,丢弃文件原先的内容
+
+<li>
+所以创建已存在的文件不会报错
+
+<li>
+要创建的文件不存在，使用<code>perms</code>指定的权限创建文件
+
+</ul>
+<li>
+<em><strong>close</strong></em>
+
+<ul>
+<li>
+<code>close(int fd)</code>
+
+<li>
+断开文件描述符与已打开文件之间的链接
+
+<li>
+同一程序打开的文件数有限制，释放文件描述符，供其他文件使用
+
+<li>
+与<code>fclose</code>不同的地方， 它不清洗（flush）缓冲区
+
+</ul>
+<li>
+<em><strong>unlink</strong></em>
+
+<ul>
+<li>
+<code>unlink(char *name)</code>
+
+<li>
+删除文件
+
+<li>
+对应标准函数库<code>remove</code>
+
+</ul>
+<li>
+<em><strong>lseek</strong></em>
+
+<ul>
+<li>
+<code>long lseek(int fd, long offset, int origin)</code>
+
+<li>
+将文件描述符为<code>fd</code>的文件的当前位置设置为<code>offset</code>,其中<code>offset</code>是相对于<code>origin</code>而言的。
+
+<li>
+<code>origin</code> 的三个值
+
+<ul>
+<li>
+<code>0</code>:文件开始
+
+<li>
+<code>1</code>:文件当前置
+
+<li>
+<code>2</code>:文件结尾
+
+</ul>
+<li>
+返回一个long值，表示文件的新位置
+
+<li>
+发生错误，返回-1
+
+<li>
+对应标准库中的<code>fseek</code>, 但后者发生错误时返回一个非0值
+
+</ul>
+</ul>
+  
+<h3 id="toc_1.3.1">error函数</h3>
+<ul>
+<li>
+输出错误信息
+
+<li>
+与<code>printf</code>类似，可带变长参数
+<pre  class="brush:c">
+    error("cp: write error on file %s", argv[2]);
+</pre>
+
+</ul>
+	
+<h3 id="toc_1.3.2">将变长参数再次传递</h3>
+<ul>
+<li>
+<code>vprintf vfprintf vsprintf</code>
+<pre  class="brush:c">
+void error(char *fmt, ...) {
+	va_list args;
+	va_start(args, fmt);
+	fprintf(stderr, "error: ");
+	vprintf(stderr, fmt, args);
+	fprintf(stderr, "\n");
+	va_end(args);
+	exit(1);
+}
+</pre>
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

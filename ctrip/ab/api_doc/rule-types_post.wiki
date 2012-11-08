@@ -1,0 +1,70 @@
+%title     /ab/rule-types POST 新建一种分配规则  
+
+=/ab/rule-types POST=
+
+==功能 ==
+新建一种分配规则`RuleType`
+
+==URL==
+/ab/rule-types
+
+==HTTP请求方式==
+POST
+
+==请求类型==
+JSON XML FROM
+
+==请求参数==
+* Form 类型
+| 参数名      | 值     | 描述                                      |
+|-------------|--------|-------------------------------------------|
+| code        | String | `RuleType` 编码，可以唯一标识一种分配规则 |
+| description | String | `RuleType`描述                            |
+
+* XML 类型
+{{{ class="brush:xml"
+ <ruleType>
+    <code>PERCENT</code>
+    <description>group the user by percent.</description>
+</ruleType>
+  }}}
+  
+* JSON 类型
+{{{ class="brush:js"
+{
+    "code": "PERCENT",
+    "description": "group the user by percent."
+}
+  }}}
+
+==返回结果==
+| 状态 | 结果                                        |
+|------|---------------------------------------------|
+| 201  | 创建成功，Header Location里存放新资源的地址 |
+
+==测试==
+{{{ class="brush:bash"
+curl -F code=PERCENT -F description="description"  https://baseurl/rule-types
+curl -v -X post -HContent-type:application/xml --data "<xml data>" https://baseurl/rule-types
+curl -v -X post -HContent-type:application/json --data "<json data>" https://baseurl/rule-types
+  }}}
+  
+==Examples==
+{{{ 
+> post /ab-service/rule-types HTTP/1.1
+> User-Agent: curl/7.23.1 (x86_64-pc-win32) libcurl/7.23.1 OpenSSL/0.9.8r zlib/1.2.5
+> Host: localhost:8080
+> Accept: */*
+> Content-Type:application/xml
+> Content-Length: 283
+>
+* upload completely sent off: 283 out of 283 bytes
+< HTTP/1.1 201 Created
+< Location: http://localhost:8080/ab-service/rule-types/74
+< Content-Length: 0
+< Server: Jetty(6.1.24)
+<
+* Connection #0 to host localhost left intact
+* Closing connection #0
+  }}}
+

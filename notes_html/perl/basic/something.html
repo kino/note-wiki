@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title> 杂</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">杂</h1>
+
+<p>
+日期: 2012-06-03 17:06
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">杂</a>
+</ul>
+</div>
+
+
+<ol>
+<li>
+perl中的boolean值，在perl中没有boolean类型，但if和while等要用到boolean值，所以它有几条规则：
+
+<ul>
+<li>
+如果是数字，0为false，其余为true
+
+<li>
+如果是字符串，空串为false，其余为true
+
+<li>
+其他类型，转换成数字或字符串后，运用上两条规则。
+
+</ul>
+<li>
+用户输入&lt;STDIN&gt;
+
+<li>
+chomp函数，它接收一个变量做参数，功能是把字符串结尾的换行符去掉：
+<pre  class="brush:perl">
+  $hello = "hello\n";
+  chomp($hello);
+  print $hello; #结果就是"hello"，并未有换行符
+  如果结尾有多个换行符，它只去掉一个：
+  $hello = "hello\n\n";
+  chomp($hello);
+  print $hello; #结果就是"hello\n"，还有一个换行符
+</pre>
+
+<li>
+undef,当一个变量未初始化时，它有一个特殊值，就是undef。而且它会在需要数字的地方转换成0,需要字符串的地方转换成空串。
+
+<ul>
+<li>
+而且可以把undef明确赋给一个变量，那它和未被初始化一样，如：$hello=undef
+
+</ul>
+<li>
+defined函数，判断一个变量的值是否为undef,为undef时，返回false.其余返回true.当值明确为0或空串时，返回true.
+
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

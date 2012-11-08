@@ -1,0 +1,94 @@
+%title 控制流
+
+=控制流=
+
+日期: 2012-05-09 17:05
+
+%toc
+
+==if-else==
+
+无花括号时：
+
+* 每个else与最近的前一个没有else配对的if进行匹配
+  {{{ class="brush:c"
+    if(n>0)
+		if(a>b)
+			z=a;
+		else
+			a=b;
+	}}}
+* 容易产生歧义,缩进并不能解决问题
+  {{{ class="brush:c"
+  
+		if (n > 0)
+			for (i = 0; i < n; i++)
+				if (s[i] > 0) {
+					printf("...");
+					return i;
+				}
+		else
+			/* WRONG */
+			printf("error -- n is negative\n");
+	}}}
+	
+==switch==
+
+{{{ class="brush:c"
+	switch (表达式) {
+		case 常量表达式: 语句序列
+		case 常量表达式: 语句序列
+		default: 语句序列
+	}
+  }}}
+  
+* 常量表达式必须是整数值
+ 
+==while & for==
+
+* for 中的三个表达式都可以省略
+  {{{ class="brush:c"
+   for(;;){
+      ...
+   }
+   //中间的表达式省略，认为条件永远为真，是一个“无限循环”
+   }}}
+* `,` 逗号运算符,
+  * C中优先级最低的运算符
+  * 被其分隔的两个表达式按照从左到右的方向求值
+  * 运算符右边的操作数的类型和值作为运算结果的类型和值
+  * for循环中常用的逗号为逗号运算符
+  * 函数参数分隔中的逗号，变量声明中的用于分隔的逗号，并不是逗号运算符, 这些逗号并不保证各表达式按照从左至右的顺序求值。
+  * 一个逗号运算符的例子：
+	  {{{ class="brush:c"
+			for (i = 0, j = strlen(s)-1; i < j; i++, j--)
+				c = s[i], s[i] = s[j], s[j] = c;
+	   }}}
+	   
+==do while==
+
+程序块至少执行一次
+
+==break & continue==
+
+==goto==
+
+* 不建议使用goto，代码会难以维护
+* 使用goto的代码都可以不用goto的代码代替
+* 但有些场合也可以使用一下，比如跳出深层嵌套循环。
+* 标号：
+  * 标号的命名和变量命名形式相同
+  * 标号可以位于goto所在函数的任何位置
+  * 标号的作用域是整个函数
+* 一个例子，查看两个数组中是否存在相同的元素：
+  {{{ class="brush:c"
+		for (i = 0; i < n; i++)
+			for (j = 0; j < m; j++)
+				if (a[i] == b[j])
+					goto found;
+		/* didn't find any common element */
+		...
+		found:
+		/* got one: a[i] == b[j] */
+		...
+	}}}

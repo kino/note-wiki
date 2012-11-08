@@ -1,0 +1,18 @@
+%title 使用sshfs通过ssh的方式挂载远程目录
+=使用sshfs通过ssh的方式挂载远程目录=
+
+日期: 2012-03-31 17:03
+
+
+# 安装sshfs
+ {{{ class="brush:bash"
+ sudo apt-get install sshfs
+   }}}
+# 挂载远程目录
+ {{{ class="brush:bash"
+ sshfs username@remote_hose:/remote_dir /local_mnt_point
+   }}}
+# 卸载远程目录
+ {{{ class="brush:bash"
+ umount /local_mnt_point
+   }}}

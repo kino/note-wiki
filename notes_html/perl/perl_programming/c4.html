@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>语句和声明</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">语句和声明</h1>
+<p>
+日期: 2012-06-20 21:06
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">语句和声明</a>
+<ul>
+<li><a href="#toc_1.1">循环语句</a>
+<li><a href="#toc_1.2">循环控制</a>
+<li><a href="#toc_1.3">裸块</a>
+<li><a href="#toc_1.4">perl中的switch case</a>
+<li><a href="#toc_1.5">goto</a>
+<li><a href="#toc_1.6">全局声明</a>
+<li><a href="#toc_1.7">作用域声明</a>
+<ul>
+<li><a href="#toc_1.7.1">作用域变量声明</a>
+<li><a href="#toc_1.7.2">词法作用域的变量：my</a>
+<li><a href="#toc_1.7.3">词法作用域全局声明：our</a>
+<li><a href="#toc_1.7.4">动态作用域变量：local</a>
+</ul>
+<li><a href="#toc_1.8">pragma</a>
+</ul>
+</ul>
+</div>
+
+<ul>
+<li>
+每条语句最后要以分号结尾
+
+<li>
+如果是块的最后一条语句，分号是可选的
+
+</ul>
+ 
+<h2 id="toc_1.1">循环语句</h2>
+<ul>
+<li>
+while
+
+<li>
+until
+
+<li>
+for
+
+<li>
+foreach
+
+<li>
+continue块
+
+<ul>
+<li>
+while和until语句可以有一个额外的块，continue块。
+
+<li>
+每次继续执行到这个块时，它都会执行一次，不管是退出第一个块，还是用一个明确的next
+
+<li>
+很少用，因为可以用for
+
+</ul>
+<li>
+在测试条件里定义的变量，只在该语句块或由测试条件的控制语句块中可见
+<pre  class="brush:perl">
+      while (my $line = &lt;STDIN&gt;) {
+          $line = lc $line;
+      }
+      continue {
+          print $line;    #仍然可见, 所以continue块也算
+      }
+      # $line 现在超出范围外了
+</pre>
+
+</ul>
+
+<h2 id="toc_1.2">循环控制</h2>
+<ul>
+<li>
+循环控制语法
+<pre  class="brush:perl">
+      last LABEL;
+      next LABEL;
+      redo LABEL;
+</pre>
+
+<li>
+LABEL是可选的，如果忽略了， 就用最内层的封闭循环（while for foreach)
+
+</ul>
+<p>
+*
+</p>
+
+<h2 id="toc_1.3">裸块</h2>
+<ul>
+<li>
+一个BLOCK本身是一个执行一次的循环
+
+<li>
+可以用last退出一个块或用redo重新运行一个块
+
+<li>
+eval{} sub{} do{} 不是循环块
+
+<li>
+循环控制也不能在一个 if 或 unless 里运行,因为它们也不是循环。但是你总是可以引入
+  一付额外的花括弧,这样就有了一个裸块,而裸块的确是一个循环:
+<pre  class="brush:perl">
+      if ( /pattern/) {{
+         last if /alpha/;
+         last if /beta/;
+         last if /gamma/;
+         # 在这里处理一些只在 if()里处理的事情
+      }}
+</pre>
+
+</ul>
+    
+<h2 id="toc_1.4">perl中的switch case</h2>
+<ul>
+<li>
+perl中没有switch case语句
+<pre  class="brush:perl">
+    SWITCH: {
+    			if (/^abc/) { $abc = 1; last SWITCH; }
+    			if (/^def/) { $def = 1; last SWITCH; }
+    			if (/^xyz/) { $xyz = 1; last SWITCH; }
+    			$nothing = 1;
+    		}
+    #这里是另外一个:
+    SWITCH: {
+    			/^abc/ &amp;&amp; do { $abc = 1; last SWITCH; };
+    			/^def/ &amp;&amp; do { $def = 1; last SWITCH; };
+    			/^xyz/ &amp;&amp; do { $xyz = 1; last SWITCH; };
+    		}
+    #或者是把每个分支都格式化得更明显:
+    SWITCH: {
+    			/^abc/
+    				&amp;&amp; do {
+    					$abc = 1;
+    					last SWITCH;
+    				};
+    			/^def/
+    				&amp;&amp; do {
+    					$def = 1;
+    					last SWITCH;
+    				};
+    			/^xyz/
+    				&amp;&amp; do {
+    					$xyz = 1;
+    					last SWITCH;
+    				};
+    		}
+    #甚至可以是更恐怖的:
+    if (/^ac/) {$abc = 1}
+    elseif (/^def/) { $def = 1 }
+    elseif (/^xyz/) { $xyz = 1 }
+    else {$nothing = 1}
+</pre>
+
+</ul>
+  
+<h2 id="toc_1.5">goto</h2>
+<ul>
+<li>
+goto LABEL
+
+<li>
+goto EXPR
+
+<li>
+goto &amp;NAME
+
+</ul>
+
+<h2 id="toc_1.6">全局声明</h2>
+<ul>
+<li>
+子例程和格式声明都是全局声明
+
+<li>
+声明对执行顺序没有影响
+
+<li>
+声明只在编译时起作用
+
+</ul>
+
+<h2 id="toc_1.7">作用域声明</h2>
+
+<h3 id="toc_1.7.1">作用域变量声明</h3>
+<ul>
+<li>
+私有变量<code>my</code>
+
+<li>
+有选择的访问全局变量<code>our</code>
+
+<li>
+给全局变量提供临时值<code>my</code>
+
+<li>
+<code>our</code>把名字限制于一个作用域
+
+<li>
+<code>local</code>把值限制于一个作用域
+
+<li>
+<code>my</code>把名字和值限制于一个作用域
+
+<li>
+修饰词比逗号绑定的更紧密
+<pre  class="brush:perl">
+      my $foo, $bar = 1; #错
+      #上面和下面的东西效果一样:
+      my $foo; 
+      $bar = 1;
+</pre>
+
+</ul>
+	
+<h3 id="toc_1.7.2">词法作用域的变量：my</h3>
+<ul>
+<li>
+词汇对任何在它的作用域内调用的子例程都是不可见的。
+
+</ul>
+	
+<h3 id="toc_1.7.3">词法作用域全局声明：our</h3>
+<ul>
+<li>
+每次使用our时实际上是使用的同一个变量
+
+</ul>
+ 
+<h3 id="toc_1.7.4">动态作用域变量：local</h3>
+<ul>
+<li>
+每次执行local时都给全局变量一个临时值
+
+<li>
+并不影响变量的全局可视性
+
+<li>
+当到达临时值的末尾时，临时值被丢弃，恢复原先的值
+
+<li>
+如果晨全局变量为临时值调用其他函数，而该函数看到的将是临时值
+
+</ul>
+
+<h2 id="toc_1.8">pragma</h2>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

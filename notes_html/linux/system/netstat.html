@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>sudo</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">netstat</h1>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">netstat</a>
+<ul>
+<li><a href="#toc_1.1">显示信息过滤参数</a>
+</ul>
+</ul>
+</div>
+
+<p>
+用于输出linux网络子系统的信息
+</p>
+
+<p>
+==第一个参数决定输出信息类型==
+</p>
+<ul>
+<li>
+<strong>(none)</strong>
+
+</ul>
+<blockquote>
+显示系统打开的socket列表
+</blockquote>
+  
+<ul>
+<li>
+<strong>--rute, -r</strong>
+
+</ul>
+<blockquote>
+显示路由表，等同于`route e`
+</blockquote>
+  
+<ul>
+<li>
+<strong>--groups,-g</strong>
+
+</ul>
+<blockquote>
+显示ipv4和ipv5多播组成员信息
+</blockquote>
+  
+<ul>
+<li>
+<strong>--interface=iface,-i</strong>
+
+</ul>
+<blockquote>
+显示网络接口表或某个特定的接口
+</blockquote>
+  
+<ul>
+<li>
+<strong>--masquerade,-M</strong>
+
+</ul>
+<blockquote>
+显示伪链接列表
+</blockquote>
+  
+<ul>
+<li>
+<strong>--statics,-s</strong>
+
+</ul>
+<blockquote>
+显示每个协议的概要统计信息
+</blockquote>
+  
+<h2 id="toc_1.1">显示信息过滤参数</h2>
+<ul>
+<li>
+<strong>-n, --numeric</strong>
+
+</ul>
+<blockquote>
+显示数字地址，而不是转化为符号
+</blockquote>
+    
+<ul>
+<li>
+<strong>-c, --continus</strong>
+
+</ul>
+<blockquote>
+每隔一秒持续的显示信息
+</blockquote>
+    
+<ul>
+<li>
+<strong>-p, --program</strong>
+
+</ul>
+<blockquote>
+显示socket所属的程序名和PID
+</blockquote>
+
+<ul>
+<li>
+<strong>-l, --listening</strong>
+
+</ul>
+<blockquote>
+只显示正在监听的socket
+</blockquote>
+
+<ul>
+<li>
+<strong>-a, --all</strong>
+
+</ul>
+<blockquote>
+只显示所有的socket，不仅仅是正在监听的
+</blockquote>
+
+<ul>
+<li>
+<strong>-t, --tcp</strong>
+
+</ul>
+<blockquote>
+只显示tcp
+</blockquote>
+
+<ul>
+<li>
+<strong>-u, --udp</strong>
+
+</ul>
+<blockquote>
+只显示udp
+</blockquote>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+%title A/B Test Framework API 文档
+
+=A/B Test Framework API 文档=
+
+==概要==
+# [[api_doc/api_summary|API概要]]
+# [[api_doc/api_system_design|API服务端设计 ]]
+# [[api_doc/domains|域模型 ]]
+==`RuleType`查询添加==
+# [[api_doc/rule-types_post|/ab/rule-types POST]] 新建一个 `RupeType`
+# [[api_doc/rule-types_get|/ab/rule-types GET]] 列出所有的`RupeType`
+# [[api_doc/rule-types_id_get|/ab/rule-types/{ruleTypeId} GET]] 获取指定的 `RupeType`
+# [[api_doc/rule-types_id_post|/ab/rule-types/{ruleTypeId} POST]] 部分修改`RupeType`
+# [[api_doc/rule-types_id_put|/ab/rule-types/{ruleTypeId} PUT]] 刷新整个`RupeType`
+# [[api_doc/rule-types_id_delete|/ab/rule-types/{ruleTypeId} DELETE]] 删除一个 `RupeType`
+==添加管理`Experiment`==
+# [[api_doc/experiments_post|/ab/experiments POST]] 新建一个 `Experiment`
+# [[api_doc/experiments_get|/ab/experiments GET]] 列出所有的`Experiment`
+# [[api_doc/experiments_id_get|/ab/experiments/{experimentId} GET]] 获取指定的 `Experiment`
+# [[api_doc/experiments_id_post|/ab/experiments/{experimentId} POST]] 部分修改`Experiment`
+# [[api_doc/experiments_id_put|/ab/experiments/{experimentId} PUT]] 刷新整个`Experiment`
+# [[api_doc/experiments_id_delete|/ab/experiments/{experimentId} DELETE]] 删除一个 `Experiment`
+==添加管理`Alternative`==
+# [[api_doc/experiments_id_alternativespost|/ab/experiments/{experimentId}/alternatives POST]] 新建一个 `Alternative`
+# [[api_doc/experiments_id_alternativesget|/ab/experiments/{experimentId}/alternatives GET]] 列出所有的`Alternative`
+# [[api_doc/experiments_id_alternatives_id_get|/ab/experiments/{experimentId}/alternatives/{alternativeId} GET]] 获取指定的 `Alternative`
+# [[api_doc/experiments_id_alternatives_id_post|/ab/experiments/{experimentId}/alternatives/{alternativeId} POST]] 部分修改`Alternative`
+# [[api_doc/experiments_id_alternatives_id_put|/ab/experiments/{experimentId}/alternatives/{alternativeId} PUT]] 刷新整个`Alternative`
+# [[api_doc/experiments_id_alternatives_id_delete|/ab/experiments/{experimentId}/alternatives/{alternativeId} DELETE]] 删除一个 `Alternative`
+==获取修改`Alternative`的参数 ==
+# [[api_doc/experiments_id_alternatives_id_rule-params-get|/ab/experiments/{experimentId}/alternatives/{alternativeId}/rule-params GET]] 获取指定的 `Alternative`的规则参数。
+# [[api_doc/experiments_id_alternatives_id_rule-params_post|/ab/experiments/{experimentId}/alternatives/{alternativeId}/rule-params POST]] 部分修改`Alternative`的规则参数。
+# [[api_doc/experiments_id_alternatives_id_rule-params_put|/ab/experiments/{experimentId}/alternatives/{alternativeId}/rule-params PUT]] 刷新整个`Alternative`的规则参数。
+==回传日志==
+# [[api_doc/logs|/ab/logs POST]] 回传日志。
+ 
+
+# 创建更新一次性的 /experiments 为了验证
+# 包装Exception 返回堆栈
+# Experiment name unique String
+# 参数验证
+

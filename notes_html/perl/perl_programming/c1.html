@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>c1</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<p>
+%note
+</p>
+<h1 id="toc_1">Note</h1>
+<p>
+日期: 2012-06-05 20:06
+</p>
+
+<h2 id="toc_1.1">四类变量</h2>
+
+<table>
+<tr>
+<td>
+标量
+</td>
+<td>
+$
+</td>
+</tr>
+<tr>
+<td>
+数组
+</td>
+<td>
+@
+</td>
+</tr>
+<tr>
+<td>
+散列
+</td>
+<td>
+%
+</td>
+</tr>
+<tr>
+<td>
+子例程
+</td>
+<td>
+＆
+</td>
+</tr>
+<tr>
+<td>
+类型团
+</td>
+<td>
+*
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.2">将列表作为标量</h2>
+<pre  class="brush:perl">
+  %wife;
+  $wife{"Jacob"}=("Leah","Rachel",'Bilhah',"Zilpah");#错，列表无法转换成标量
+  $wife{"Jacob"}=["Leah","Rachel",'Bilhah',"Zilpah"];#对，创建未命名数组，在标量环境中返回引用
+</pre>
+  
+<h2 id="toc_1.3">赋值时有趣的例子</h2>
+<pre  class="brush:perl">
+    $line .= "\n";   # 给 $line 附加一个新行
+    $fill x=80;      # 把字串变成自填充 80 遍
+    $val ||= "2";    # 如果 $val 不为真则把它设置为 2
+    
+    #和c的不同
+    #c中返回值作为赋值表达式的值
+    #perl中返回实际的变量作为赋值表达式的值
+	($temp -= 32) *= 5/9;
+</pre>
+
+<h2 id="toc_1.4">逻辑操作符</h2>
+<ul>
+<li>
+&amp;&amp; || !     比逗号优先级高
+
+<li>
+and or not xor   比逗号优先级低
+
+<li>
+效果一样，优先级不同
+
+</ul>
+
+<h2 id="toc_1.5">比较操作符</h2>
+<table>
+<tr>
+<th>
+比较
+</th>
+<th>
+数字
+</th>
+<th>
+字串
+</th>
+<th>
+返回值
+</th>
+<th>
+&nbsp;
+</th>
+</tr>
+<tr>
+<td>
+等于
+</td>
+<td>
+==
+</td>
+<td>
+eq
+</td>
+<td>
+如果 $a 等于 $b
+</td>
+<td>
+返回真
+</td>
+</tr>
+<tr>
+<td>
+不等于
+</td>
+<td>
+=
+</td>
+<td>
+ne
+</td>
+<td>
+如果 $a 不等于 $b
+</td>
+<td>
+返回真
+</td>
+</tr>
+<tr>
+<td>
+小于
+</td>
+<td>
+&lt;
+</td>
+<td>
+lt
+</td>
+<td>
+如果 $a 小于 $b
+</td>
+<td>
+返回真
+</td>
+</tr>
+<tr>
+<td colspan="2">
+大于
+</td>
+<td>
+gt
+</td>
+<td>
+如果 $a 大于 $b
+</td>
+<td>
+返回真
+</td>
+</tr>
+<tr>
+<td>
+小于或等于
+</td>
+<td>
+&lt;=
+</td>
+<td>
+le
+</td>
+<td>
+如果 $a 不大于 $b
+</td>
+<td>
+返回真
+</td>
+</tr>
+<tr>
+<td>
+比较
+</td>
+<td>
+&lt;=&gt;
+</td>
+<td>
+cmp
+</td>
+<td>
+相等时为 0,如果 $a 大为 1 如果 $b 大为 -1
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.6">文件测试</h2>
+<table>
+<tr>
+<th>
+例子
+</th>
+<th>
+名字
+</th>
+<th>
+结果
+</th>
+</tr>
+<tr>
+<td>
+-e $a
+</td>
+<td>
+存在
+</td>
+<td>
+如果在 $a 中命名的文件存在则为真
+</td>
+</tr>
+<tr>
+<td>
+-r $a
+</td>
+<td>
+可读
+</td>
+<td>
+如果在 $a 中命名的文件可读则为真
+</td>
+</tr>
+<tr>
+<td>
+-w $a
+</td>
+<td>
+可写
+</td>
+<td>
+如果在 $a 中命名的文件可写则为真
+</td>
+</tr>
+<tr>
+<td>
+-d $a
+</td>
+<td>
+目录
+</td>
+<td>
+如果在 $a 中命名的文件是目录则为真
+</td>
+</tr>
+<tr>
+<td>
+-f $a
+</td>
+<td>
+文件
+</td>
+<td>
+如果在 $a 中命名的文件是普通文件则为真
+</td>
+</tr>
+<tr>
+<td>
+-T $a
+</td>
+<td>
+文本文件
+</td>
+<td>
+如果在 $a 中命名的文件是文本文件则为真
+</td>
+</tr>
+</table>
+
+<pre  class="brush:perl">
+  -e "/home/$user" or warn "The home dir of user $user doesn't exist.";
+</pre>
+  
+<h2 id="toc_1.7">正则表达式</h2>
+<ul>
+<li>
+反向引用
+<pre  class="brush:perl">
+  $html_code = "&lt;B&gt;Bold&lt;/B&gt;";
+  $html_code =~ /&lt;(.*?)&gt;.*?&lt;\/\1&gt;/;
+  #注意后面的\1, 它保证了两个标签相同，在这里都是B
+</pre>
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

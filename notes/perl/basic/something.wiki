@@ -1,0 +1,27 @@
+%title  杂
+
+=杂 =
+
+日期: 2012-06-03 17:06
+
+%toc
+
+
+# perl中的boolean值，在perl中没有boolean类型，但if和while等要用到boolean值，所以它有几条规则：
+  * 如果是数字，0为false，其余为true
+  * 如果是字符串，空串为false，其余为true
+  * 其他类型，转换成数字或字符串后，运用上两条规则。
+# 用户输入<STDIN>
+# chomp函数，它接收一个变量做参数，功能是把字符串结尾的换行符去掉：
+  {{{ class="brush:perl"
+    $hello = "hello\n";
+    chomp($hello);
+    print $hello; #结果就是"hello"，并未有换行符
+    如果结尾有多个换行符，它只去掉一个：
+    $hello = "hello\n\n";
+    chomp($hello);
+    print $hello; #结果就是"hello\n"，还有一个换行符
+	}}}
+# undef,当一个变量未初始化时，它有一个特殊值，就是undef。而且它会在需要数字的地方转换成0,需要字符串的地方转换成空串。
+  * 而且可以把undef明确赋给一个变量，那它和未被初始化一样，如：$hello=undef
+# defined函数，判断一个变量的值是否为undef,为undef时，返回false.其余返回true.当值明确为0或空串时，返回true.
