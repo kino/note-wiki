@@ -6,3 +6,4 @@
 # [[bash/echo_color|使用echo输出有颜色的内容(转)]]
 # [[bash/command_bc|命令:使用bc进行数学计算]]
 # [[bash/diff_and_patch|用diff和patch工具维护源码(转)]]
+# [[bash/awk_reference|awk quick reference(转)]]

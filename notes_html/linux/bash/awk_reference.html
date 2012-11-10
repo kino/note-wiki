@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>AWK QUICK REFERENCE GUIDE</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">AWK QUICK REFERENCE GUIDE</h1>
+
+<p>
+转自：http://www.vectorsite.net/tsawk_3.html#m5
+</p>
+
+<p>
+<code> * </code> This final section provides a convenient lookup reference for Awk programming.
+</p>
+
+<p>
+<code> * </code> Invoking Awk:<br>
+</p>
+<blockquote>
+<strong>awk [-F&lt;ch&gt;] {pgm} | {-f &lt;pgm file&gt;} [&lt;vars&gt;] [-|&lt;data file&gt;]</strong>
+</blockquote>
+
+<p>
+-- where:
+</p>
+
+<pre>
+    ch:          Field-separator character.
+    pgm:         Awk command-line program.
+    pgm file:    File containing an Awk program.
+    vars:        Awk variable initializations.
+    data file:   Input data file.
+</pre>
+
+<p>
+<code> * </code> General form of Awk program:
+</p>
+
+<pre>
+   BEGIN              {&lt;initializations&gt;}
+   &lt;search pattern 1&gt; {&lt;program actions&gt;}
+   &lt;search pattern 2&gt; {&lt;program actions&gt;}
+   ...
+   END                {&lt;final actions&gt;}
+</pre>
+
+<p>
+<code> * </code> Search patterns:
+</p>
+
+<pre>
+   /&lt;string&gt;/     Search for string.
+   /^&lt;string&gt;/    Search for string at beginning of line.
+   /&lt;string&gt;$/    Search for string at end of line.
+</pre>
+
+<p>
+The search can be constrained to particular fields:
+</p>
+
+<pre>
+   $&lt;field&gt; ~ /&lt;string&gt;/   Search for string in specified field.
+   $&lt;field&gt; !~ /&lt;string&gt;/  Search for string \Inot\i in specified field.
+</pre>
+
+<p>
+Strings can be ORed in a search:
+</p>
+
+<pre>
+   /(&lt;string1&gt;)|(&lt;string2&gt;)/
+</pre>
+
+<p>
+The search can be for an entire range of lines, bounded by two strings:
+</p>
+
+<pre>
+   /&lt;string1&gt;/,/&lt;string2&gt;/
+</pre>
+
+<p>
+The search can be for any condition, such as line number, and can use the following comparison operators:
+</p>
+
+<pre>
+   == != &lt; &gt; &lt;= &gt;=
+</pre>
+
+<p>
+Different conditions can be ORed with "||" or ANDed with "&amp;&amp;".
+</p>
+
+<pre>
+   [&lt;charlist or range&gt;]   Match on any character in list or range.
+   [^&lt;charlist or range&gt;]  Match on any character not in list or range.
+   .                       Match any single character.
+   ` * `                       Match 0 or more occurrences of preceding string.
+   ?                       Match 0 or 1 occurrences of preceding string.
+   +                       Match 1 or more occurrences of preceding string.
+</pre>
+
+<p>
+If a metacharacter is part of the search string, it can be "escaped" by preceding it with a "\".
+</p>
+
+<p>
+<code> * </code> Special characters:
+</p>
+
+<pre>
+   \n     Newline (line feed).
+   \t     Horizontal tab.
+   \b     Backspace.
+   \r     Carriage return.
+   \f     Form feed.
+</pre>
+
+<p>
+A "\" can be embedded in a string by entering it twice: "\\".
+</p>
+
+<p>
+<code> * </code> Built-in variables:
+</p>
+
+<pre>
+   $0; $1,$2,$3,...  Field variables.
+   NR                Number of records (lines).
+   NF                Number of fields.
+   FILENAME          Current input filename.
+   FS                Field separator character (default: " ").
+   RS                Record separator character (default: "\n").
+   OFS               Output field separator (default: " ").
+   ORS               Output record separator (default: "\n").
+   OFMT              Output format (default: "%.6g").
+</pre>
+
+<p>
+<code> * </code> Arithmetic operations:
+</p>
+
+<pre>
+   +   Addition.
+   -   Subtraction.
+   ` * `   Multiplication.
+   /   Division.
+   %   Mod.
+   ++  Increment.
+   --  Decrement.
+</pre>
+
+<p>
+Shorthand assignments:
+</p>
+
+<pre>
+   x += 2  -- is the same as:  x = x + 2
+   x -= 2  -- is the same as:  x = x - 2
+   x ` * `= 2  -- is the same as:  x = x * 2
+   x /= 2  -- is the same as:  x = x / 2
+   x %= 2  -- is the same as:  x = x % 2
+</pre>
+
+<p>
+<code> * </code> The only unique string operation is concatenation, which is performed simply by listing two strings connected by a blank space.
+</p>
+
+<p>
+<code> * </code> Arithmetic functions:
+</p>
+
+<pre>
+   sqrt()     Square root.
+   log()      Base \Ie\i log.
+   exp()      Power of \Ie\i.
+   int()      Integer part of argument.
+</pre>
+
+<p>
+<code> * </code> String functions:
+</p>
+
+<pre>
+    length()
+
+    Length of string.
+
+    substr(&lt;string&gt;,&lt;start of substring&gt;,&lt;max length of substring&gt;)
+
+    Get substring.
+
+    split(&lt;string&gt;,&lt;array&gt;,[&lt;field separator&gt;])
+
+    Split string into array, with initial array index being 1.
+
+    index(&lt;target string&gt;,&lt;search string&gt;)
+
+    Find index of search string in target string.
+
+    sprintf()
+
+    Perform formatted print into string. 
+</pre>
+
+<p>
+<code> * </code> Control structures:
+</p>
+
+<pre>
+   if (&lt;condition&gt;) &lt;action 1&gt; [else &lt;action 2&gt;]
+   while (&lt;condition&gt;) &lt;action&gt;
+   for (&lt;initial action&gt;;&lt;condition&gt;;&lt;end-of-loop action&gt;) &lt;action&gt;
+</pre>
+
+<p>
+Scanning through an associative array with "for":
+</p>
+
+<pre>
+   for (&lt;variable&gt; in &lt;array&gt;) &lt;action&gt;
+</pre>
+
+<p>
+Unconditional control statements:
+</p>
+
+<pre>
+   break       Break out of "while" or "for" loop.
+   continue    Perform next iteration of "while" or "for" loop.
+   next        Get and scan next line of input.
+   exit        Finish reading input and perform END statements.
+</pre>
+
+<p>
+<code> * </code> Print:
+</p>
+
+<pre>
+   print &lt;i1&gt;, &lt;i2&gt;, ...   Print items separated by OFS; end with newline.
+   print &lt;i1&gt; &lt;i2&gt; ...     Print items concatenated; end with newline.
+</pre>
+
+<p>
+<code> * </code> Printf():
+</p>
+
+<p>
+General format:
+</p>
+
+<pre>
+   printf(&lt;string with format codes&gt;,[&lt;parameters&gt;])
+</pre>
+
+<p>
+Newlines must be explicitly specified with a "\n".
+</p>
+
+<p>
+General form of format code:
+</p>
+
+<pre>
+   %[&lt;number&gt;]&lt;format code&gt;
+</pre>
+
+<p>
+The optional "number" can consist of:
+</p>
+
+<pre>
+    A leading "-" for left-justified output.
+
+    An integer part that specifies the minimum output width. (A leading "0" causes the output to be padded with zeroes.)
+
+    A fractional part that specifies either the maximum number of characters to be printed (for a string), or the number of digits to be printed to the right of the decimal point (for floating-point formats). 
+</pre>
+
+<p>
+The format codes are:
+</p>
+
+<pre>
+   d    Prints a number in decimal format.
+   o    Prints a number in octal format.
+   x    Prints a number in hexadecimal format.
+   c    Prints a character, given its numeric code.
+   s    Prints a string.
+   e    Prints a number in exponential format.
+   f    Prints a number in floating-point format.
+   g    Prints a number in exponential or floating-point format.
+</pre>
+
+<p>
+<code> * </code> Awk can perform output redirection (using "&gt;" and "&gt;&gt;") and piping (using "|") from both "print" and "printf". 
+</p>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>
