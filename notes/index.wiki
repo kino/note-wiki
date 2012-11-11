@@ -13,6 +13,7 @@
 * [[java/frq|杂 ]]
 ==C ==
 * [[c/cpl|C Programming Language]]
+* [[c/cfrq|C的一些东西]]
 ==Perl ==
 * [[perl/basic|Perl Basic]]
 * [[perl/perl_programming|Perl语言编程]]
@@ -28,5 +29,7 @@
 * [[mysql/mysql|MySql]]
 ==性能==
 * [[performance/performance|性能 ]]
+==分布式存储 ==
+* [[d_s/hadoop|Hadoop ]]
  
 

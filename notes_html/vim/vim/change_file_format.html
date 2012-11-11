@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>改变文件格式（dos,unix,mac os) </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<div class="toc">
+<ul>
+<li><a href="#toc_1">改变文件格式（dos,unix,mac os)</a>
+<ul>
+<li><a href="#toc_1.1">文件格式</a>
+<li><a href="#toc_1.2">:set ffs or :set fileformats</a>
+<li><a href="#toc_1.3">:set ff or :set fileformat</a>
+<li><a href="#toc_1.4">:e ++ff=?</a>
+</ul>
+</ul>
+</div>
+<h1 id="toc_1">改变文件格式（dos,unix,mac os)</h1>
+
+<h2 id="toc_1.1">文件格式</h2>
+<ul>
+<li>
+文件格式体现在换行符(广义）上
+
+<li>
+简单来说，在读写文件时，在每一行的末尾作一些处理
+
+<ul>
+<li>
+写：在写完一行内容时，会在末尾添加一个或两个特殊字符
+
+<li>
+读：在读取一行内容时，会把这个/些特殊字符去掉
+
+</ul>
+<li>
+文件格式
+
+</ul>
+<table>
+<tr>
+<th>
+&nbsp;
+</th>
+<th>
+Dos,Windows
+</th>
+<th>
+Unix
+</th>
+<th>
+Mac OS
+</th>
+</tr>
+<tr>
+<td>
+Write
+</td>
+<td>
++CRLF
+</td>
+<td>
++LF
+</td>
+<td>
++CR
+</td>
+</tr>
+<tr>
+<td>
+READ
+</td>
+<td>
+-CRLF
+</td>
+<td>
+-LF
+</td>
+<td>
+-CR
+</td>
+</tr>
+</table>
+
+<ul>
+<li>
+CR and LF
+
+</ul>
+<table>
+<tr>
+<td>
+CR
+</td>
+<td>
+\r = Return = 0x0D = 13 = CR = Carriage Return = 回车 = Ctrl + M
+</td>
+</tr>
+<tr>
+<td>
+LF
+</td>
+<td>
+\n = Newline = 0x0A = 10 = LF =Line Feed = 换行 = Ctrl + J
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.2">:set ffs or :set fileformats</h2>
+<ul>
+<li>
+表示新建文件时，所使用的文件格式，因为值是一个列表，所以使用的是第一个可用的值
+
+<li>
+查看
+<pre  class="brush:bash">
+  :set ffs?
+  #unix,dos
+</pre>
+
+<li>
+设置
+<pre  class="brush:bash">
+  :set ffs=unix,dos
+</pre>
+
+</ul>
+  
+<h2 id="toc_1.3">:set ff or :set fileformat</h2>
+<ul>
+<li>
+查看或设置当前文件所使用的文件格式
+
+<li>
+查看当前的文件格式
+<pre  class="brush:bash">
+  :set ff?
+  #dos
+</pre>
+
+<li>
+转换文件格式
+<pre  class="brush:bash">
+  :set ff=unix
+</pre>
+
+</ul>
+  
+<h2 id="toc_1.4">:e ++ff=?</h2>
+<ul>
+<li>
+以指定的文件格式读入
+
+<li>
+如果有一个dos文件已经打开，想以unix的格式重新读入
+<pre  class="brush:bash">
+  :e ++fenc=unix
+</pre>
+
+<ul>
+<li>
+因为dos文件每行是以<code>CRLF</code>结尾的
+
+<li>
+而以unix文件读入时，只会把 <code>LF</code> 当作换行符， <code>CR</code> 会正常显示出来，每行后会多出一个 <strong>^M</strong>
+<pre  class="brush:bash">
+  hello ^M
+  world ^M
+</pre>
+
+</ul>
+<li>
+如果有一个unix文件已经打开，想以dos的格式重新读入
+<pre  class="brush:bash">
+  :e ++fenc=dos
+</pre>
+
+<ul>
+<li>
+因为unix文件每行是以<code>LF</code>结尾的
+
+<li>
+因为dos文件每行是以<code>CRLF</code>结尾的
+
+<li>
+而以dos文件读入时，会寻找 <code>CRLF</code>, 所以会报一个 <code>CR Missing</code> 的警告
+
+<li>
+如果这时保存文件， 会文件转换为dos， 自动添加<code>CR</code>
+
+</ul>
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>
