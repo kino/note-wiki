@@ -1,7 +1,7 @@
 %title Bash 文章列表
 ==Bash==
 # [[bash/bash_shortcuts|Bash 快捷键(转)]]
-# [[bash/bash_common_commands|常用命令小技巧]]
+# [[bash/bash_common_commands|常用命令小技巧 ]]
 # [[bash/tmux_help|tmux 指南(转)]]
 # [[bash/echo_color|使用echo输出有颜色的内容(转)]]
 # [[bash/command_bc|命令:使用bc进行数学计算]]

@@ -13,6 +13,7 @@
 <script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
 
 <script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
 
 <link rel="Stylesheet" type="text/css" href="../../style.css">
 <link rel="Stylesheet" type="text/css" href="../../css/main.css">
@@ -38,6 +39,15 @@
 <li><a href="#toc_1">Hadoop File System</a>
 <ul>
 <li><a href="#toc_1.1">HDFS的设计 </a>
+<li><a href="#toc_1.2">HDFS</a>
+<ul>
+<li><a href="#toc_1.2.1">数据块 </a>
+<li><a href="#toc_1.2.2">namenode &amp; datanode</a>
+<li><a href="#toc_1.2.3">命令行接口 </a>
+<li><a href="#toc_1.2.4">基本文件系统操作</a>
+<li><a href="#toc_1.2.5">Hadoop文件系统</a>
+<li><a href="#toc_1.2.6">接口</a>
+</ul>
 </ul>
 </ul>
 </div>
@@ -100,6 +110,139 @@ HDFS: Hadoop distributed file system.
 </ul>
 <li>
 <strong>不支持多用户写和多用户同时修改:</strong>
+
+</ul>
+ 
+<h2 id="toc_1.2">HDFS</h2>
+<h3 id="toc_1.2.1">数据块 </h3>
+<ul>
+<li>
+<strong>磁盘块:</strong> 磁盘进行读写的最小单位, 一般为512字节
+
+<li>
+文件系统块是磁盘块的整数倍，一般为几千字节
+
+<li>
+HDFS的块默认为64m
+
+<ul>
+<li>
+小于一个块大小的文件不会占满一个块
+
+<li>
+块设的大是为了最小化寻址开销
+
+<li>
+块过大也不行，mapreduce一次处理一个块
+
+<li>
+块的大小要根据实际情况来调整，比如寻址占传输时间的1/100
+
+</ul>
+<li>
+使用块的好处
+
+<ul>
+<li>
+一个文件的大小可以大于任意一个磁盘的大小
+
+<li>
+简化了存储子系统，文件的元数据不和块数据存储在一起
+
+<li>
+适合备份和容错，任何一个块都有复本。
+
+</ul>
+</ul>
+<h3 id="toc_1.2.2">namenode &amp; datanode</h3>
+<ul>
+<li>
+管理者 工作者模式
+
+<li>
+namenode:
+
+<ul>
+<li>
+管理者
+
+<li>
+管理文件系统的命名空间
+
+<li>
+维护文件系统树及树内所的目录与文件
+
+<li>
+信息以两个文件永久保存：命名空间镜像文件与编辑日志文件
+
+<li>
+记录文件中每个块所在数据结点的信息，但不永久保存，系统启动时重建
+
+</ul>
+<li>
+datanode:
+
+<ul>
+<li>
+工作者
+
+<li>
+存储校验数据块
+
+<li>
+定期向namenode发送数据块列表
+
+</ul>
+<li>
+失去namenode等于失去文件系统，所namenode容错非常重要：
+
+<ul>
+<li>
+备份namenode上的元数据，多份同进写
+
+<li>
+使用辅助namenode, 定期合并编辑日志生成空间镜像
+
+</ul>
+</ul>
+<h3 id="toc_1.2.3">命令行接口 </h3>
+<h3 id="toc_1.2.4">基本文件系统操作</h3>
+<pre  class="brush:bash">
+hadoop fs -help
+</pre>
+  
+<h3 id="toc_1.2.5">Hadoop文件系统</h3>
+<ul>
+<li>
+是一个气象的文件系统
+
+<li>
+<strong>HDFS只是它的一个实现 </strong>
+
+<li>
+抽象类定义了一个文件系统接口：<code>org.apache.hadoop.fs.FileSystem</code>
+
+<li>
+还有很多其他实现：Local HDFS HFTP HSFTP HAR hfs FTP S3 
+
+</ul>
+
+<h3 id="toc_1.2.6">接口</h3>
+<ul>
+<li>
+java
+
+<li>
+C
+
+<li>
+Thrift
+
+<li>
+WebDev
+
+<li>
+FUSE
 
 </ul>
 
