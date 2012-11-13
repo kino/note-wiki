@@ -58,4 +58,15 @@ $(document).ready(function(){
 		);
 	 
 	SyntaxHighlighter.all()
+
+    //For math
+    $("pre").each(function(i,o){
+        o=$(o);
+        if(o.attr("class").indexOf("brush:math")>=0){
+            var h = o.html().replace(/&lt;/g,"<").replace(/&gt;/g,">");
+            o.replaceWith($('<div>').html(h).addClass("math"));
+        }
+    });
+
+
 });
