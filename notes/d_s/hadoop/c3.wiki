@@ -66,7 +66,12 @@ hadoop fs -help
 * Thrift
 * WebDev
 * FUSE
+* 
 * HDFS两种特定的
   * HTTP: namenode 50070; datanode 50075
   * FTP
 ===JAVA接口 ===
+
+
+ 
+

@@ -129,12 +129,69 @@
     如果使用常数时间只是把问题减少了一个常数（如将问题减少1）,那这样的算法就是O(N)
     
 ===二分查找 ===
+{{{ class="brush:c"
+    int
+    BinarySearch(const int arr[], int x, int N)
+    {
+        int Low,High,Mid, NotFound;
+
+        Low = 0;
+        High = N;
+        NotFound = -1;
+
+        while(Low <= High){
+            Mid=(Low+High)/2;
+
+            if(arr[Mid]>x){
+                High=Mid-1;
+            }else if(arr[Mid]<x){
+                Low = Mid+1;
+            }else{
+                return Mid;
+            }
+
+        }
+
+        return NotFound;
+    }
+  }}}
 ===最大公因数（欧机里德算法） ===
+{{{class="brush:c"
+    int gcd(int M, int N){
+        int temp;
+        if(M<N){
+            temp = M;
+            M = N;
+            N = temp;
+        }
+
+        while(N>0){
+            temp = N;
+            N = M%N;
+            M = temp;
+        }
+
+        return M;
+    }
+  }}}
 ===定理 ===
 {{{ class="brush:math"
   如果 `M > N`, 则 `M mod N < M/2`
   }}}
 ===幂运算 ===
+{{{ class="brush:c"
+    unsigned long power(int m, int x){
+
+        if(x==1||x==0){
+            return x==0?1:m;
+        }else if(x%2==0){
+            return (unsigned long)power(m, x/2)*power(m,x/2);
+        }else{
+            return (unsigned long)power(m, x/2)*power(m,x/2)*m;
+        }
+
+    }
+  }}}
 
 ==校验分析 ==
 ===校验实际运算时间 ===
