@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>引论 </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1">引论</h1>
+
+<p>
+Tue Oct 30 00:44:02 CST 2012
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">引论</a>
+<ul>
+<li><a href="#toc_1.1">指数</a>
+<li><a href="#toc_1.2">对数</a>
+<li><a href="#toc_1.3">级数</a>
+<li><a href="#toc_1.4">模运算</a>
+<li><a href="#toc_1.5">证明方法</a>
+<ul>
+<li><a href="#toc_1.5.1">归纳法</a>
+<li><a href="#toc_1.5.2">反证法</a>
+</ul>
+<li><a href="#toc_1.6">递归法则</a>
+<ul>
+<li><a href="#toc_1.6.1">基本法则</a>
+</ul>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">指数</h2>
+
+<pre  class="brush:math">
+&lt;div class="item"&gt;`X^A X^B = X^(A+B)`&lt;/div&gt;
+&lt;div class="item"&gt;`X^A/X^B=X^(A-B)`&lt;/div&gt;
+&lt;div class="item"&gt;`(X^A)^B=X^AB`&lt;/div&gt;
+&lt;div class="item"&gt;`X^N+X^N=2X^N!=X^(2N)`&lt;/div&gt;
+&lt;div class="item"&gt;`2^N+2^N=X^(N+1)`&lt;/div&gt;
+</pre>
+
+<h2 id="toc_1.2">对数</h2>
+<pre  class="brush:math">
+  定义: `X^A=B`, 当且仅当 `log_xB=A` 
+  &lt;div class="item"&gt; `log_AB=(log_CA)/(log_CB); C&gt;0`    &lt;/div&gt;
+  &lt;div class="item"&gt; `logAB=logA+logB`    &lt;/div&gt;
+  &lt;div class="item"&gt; `logA//B=logA-logB`    &lt;/div&gt;
+  &lt;div class="item"&gt; `logA^B=BlogA`    &lt;/div&gt;
+  &lt;div class="item"&gt; `logX &lt; X` (对所有的`X&gt;0`成立)    &lt;/div&gt;
+  &lt;div class="item"&gt; `log1=0, log2=1, log4=2, log8=3, log1024=10, log1048 576=20`    &lt;/div&gt;
+</pre>
+  
+<h2 id="toc_1.3">级数</h2>
+<pre  class="brush:math">
+  &lt;div class="item"&gt;  `sum_(i=0)^N2^i=2^(N+1)-1`    &lt;/div&gt;
+  &lt;div class="item"&gt;  `sum_(i=0)^NA^i=(A^(N+1)-1)/(A-1)`    &lt;/div&gt;
+  如果 `0 &lt; A &lt; 1`, 则:
+  &lt;div class="item"&gt;  `sum_(i=0)^NA^i&lt;=1/(A-1)`    &lt;/div&gt;
+  &lt;div class="item"&gt;  `sum_(i=0)^ooi/2^i=2`    &lt;/div&gt;
+  &lt;div class="item"&gt;  `sum_(i=0)^Ni=(N(N+1))/2~~N^2/2`    &lt;/div&gt;
+  &lt;div class="item"&gt;  `sum_(i=0)^Ni^2=(N(N+1)(2N+1))/6~~N^3/3`    &lt;/div&gt;
+  &lt;div class="item"&gt;  `sum_(i=0)^Ni^k~~N^(k+1)/|k+1|,  k!=-1`    &lt;/div&gt;
+  调和数`H_N`:
+  &lt;div class="item"&gt;  `H_N=sum_(i=0)^N2^i~~log_eN`    &lt;/div&gt;
+</pre>
+
+<h2 id="toc_1.4">模运算</h2>
+<pre  class="brush:math">
+  如果`N`能够整除`A-B`,我们就是`A`与`B`模`N`同余,记为`A-=B(modN)`, 则有：
+  &lt;div class="item"&gt;  `A+C-=B+C(modN)`    &lt;/div&gt;
+  &lt;div class="item"&gt;  `AD-=BD(modN)`    &lt;/div&gt;
+</pre>
+<h2 id="toc_1.5">证明方法</h2>
+<h3 id="toc_1.5.1">归纳法</h3>
+<ol>
+<li>
+第一步证明<code>基准情形（base case)</code>, 定理对于某个小的值的正确形
+
+<li>
+第二步<code>归纳假设</code>, 假设对于直到某个有限数<code>k</code>成立
+
+<li>
+第三步证明定理对于下一个值<code>k+1</code>成立
+
+<li>
+定理得证
+
+</ol>
+
+<h3 id="toc_1.5.2">反证法</h3>
+<ol>
+<li>
+假设定理不成立
+
+<li>
+证明假设对于某个已知的性质不成立
+
+<li>
+假设是错误的
+
+<li>
+定理得证
+
+</ol>
+ 
+<ul>
+<li>
+<em><strong>每一个整数或者是素数，或者是素数的乘积</strong></em>
+
+</ul>
+ 
+<h2 id="toc_1.6">递归法则</h2>
+<ul>
+<li>
+当一个函数用它自身来定义时，称之为递归
+<pre  class="brush:math">
+在非负整数集成定义一个函数`F`: `F(0)=0且F(X)=2F(X-1)+X^2`
+</pre>
+
+</ul>
+
+<h3 id="toc_1.6.1">基本法则</h3>
+<ol>
+<li>
+基本情形(base case)。 不需要递归就可以求解
+
+<li>
+不断推进(making progress)。 对于递归求解的情形，必须总能朝着基准情形的方向前进。
+
+<li>
+设计法则(design rule)。假设所有的递归调用都能运行。
+
+<li>
+合成效益法则(compound interest rule)。在求解同一个问题的同一实例时，切勿在不同的递归调用中做重复性的工作。
+
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

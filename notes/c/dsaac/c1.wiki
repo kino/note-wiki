@@ -1,0 +1,75 @@
+%title 引论 
+
+=引论 =
+
+Tue Oct 30 00:44:02 CST 2012
+
+%toc
+
+==指数 ==
+
+{{{ class="brush:math"
+<div class="item">`X^A X^B = X^(A+B)`</div>
+<div class="item">`X^A/X^B=X^(A-B)`</div>
+<div class="item">`(X^A)^B=X^AB`</div>
+<div class="item">`X^N+X^N=2X^N!=X^(2N)`</div>
+<div class="item">`2^N+2^N=X^(N+1)`</div>
+  }}}
+
+==对数 ==
+{{{ class="brush:math"
+  定义: `X^A=B`, 当且仅当 `log_xB=A` 
+  <div class="item"> `log_AB=(log_CA)/(log_CB); C>0`    </div>
+  <div class="item"> `logAB=logA+logB`    </div>
+  <div class="item"> `logA//B=logA-logB`    </div>
+  <div class="item"> `logA^B=BlogA`    </div>
+  <div class="item"> `logX < X` (对所有的`X>0`成立)    </div>
+  <div class="item"> `log1=0, log2=1, log4=2, log8=3, log1024=10, log1048 576=20`    </div>
+  }}}
+  
+==级数 ==
+{{{ class="brush:math"
+  <div class="item">  `sum_(i=0)^N2^i=2^(N+1)-1`    </div>
+  <div class="item">  `sum_(i=0)^NA^i=(A^(N+1)-1)/(A-1)`    </div>
+  如果 `0 < A < 1`, 则:
+  <div class="item">  `sum_(i=0)^NA^i<=1/(A-1)`    </div>
+  <div class="item">  `sum_(i=0)^ooi/2^i=2`    </div>
+  <div class="item">  `sum_(i=0)^Ni=(N(N+1))/2~~N^2/2`    </div>
+  <div class="item">  `sum_(i=0)^Ni^2=(N(N+1)(2N+1))/6~~N^3/3`    </div>
+  <div class="item">  `sum_(i=0)^Ni^k~~N^(k+1)/|k+1|,  k!=-1`    </div>
+  调和数`H_N`:
+  <div class="item">  `H_N=sum_(i=0)^N2^i~~log_eN`    </div>
+  }}}
+
+==模运算 ==
+{{{ class="brush:math"
+  如果`N`能够整除`A-B`,我们就是`A`与`B`模`N`同余,记为`A-=B(modN)`, 则有：
+  <div class="item">  `A+C-=B+C(modN)`    </div>
+  <div class="item">  `AD-=BD(modN)`    </div>
+  }}}
+==证明方法 ==
+===归纳法 ===
+# 第一步证明`基准情形（base case)`, 定理对于某个小的值的正确形
+# 第二步`归纳假设`, 假设对于直到某个有限数`k`成立
+# 第三步证明定理对于下一个值`k+1`成立
+# 定理得证
+
+===反证法 ===
+# 假设定理不成立
+# 证明假设对于某个已知的性质不成立
+# 假设是错误的
+# 定理得证
+ 
+* _*每一个整数或者是素数，或者是素数的乘积*_
+ 
+==递归法则 ==
+* 当一个函数用它自身来定义时，称之为递归
+{{{ class="brush:math"
+在非负整数集成定义一个函数`F`: `F(0)=0且F(X)=2F(X-1)+X^2`
+  }}}
+
+===基本法则 === 
+# 基本情形(base case)。 不需要递归就可以求解
+# 不断推进(making progress)。 对于递归求解的情形，必须总能朝着基准情形的方向前进。
+# 设计法则(design rule)。假设所有的递归调用都能运行。
+# 合成效益法则(compound interest rule)。在求解同一个问题的同一实例时，切勿在不同的递归调用中做重复性的工作。
