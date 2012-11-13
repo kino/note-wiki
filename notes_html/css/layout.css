@@ -68,3 +68,15 @@ body{
 .hidden{
 	display:none;
 }
+
+div.math{
+    background:#ddffe6;
+    border:1px solid #ccc;
+    border-left-width:3px;
+    padding:10px;
+    margin:0 0 0 18px;
+}
+div.math div.item{
+    display:block;
+    margin:0 0 18px 18px;
+}
