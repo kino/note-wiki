@@ -129,6 +129,7 @@
     如果使用常数时间只是把问题减少了一个常数（如将问题减少1）,那这样的算法就是O(N)
     
 ===二分查找 ===
+* log(N)
 {{{ class="brush:c"
     int
     BinarySearch(const int arr[], int x, int N)
@@ -156,6 +157,7 @@
     }
   }}}
 ===最大公因数（欧机里德算法） ===
+* log(N)
 {{{class="brush:c"
     int gcd(int M, int N){
         int temp;
@@ -179,15 +181,16 @@
   如果 `M > N`, 则 `M mod N < M/2`
   }}}
 ===幂运算 ===
+* log(N)
 {{{ class="brush:c"
     unsigned long power(int m, int x){
 
-        if(x==1||x==0){
+        if(x<=1){
             return x==0?1:m;
         }else if(x%2==0){
-            return (unsigned long)power(m, x/2)*power(m,x/2);
+            return (unsigned long)power(m*m, x/2);
         }else{
-            return (unsigned long)power(m, x/2)*power(m,x/2)*m;
+            return (unsigned long)power(m*m, x/2)*m;
         }
 
     }
