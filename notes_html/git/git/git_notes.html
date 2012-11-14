@@ -13,6 +13,7 @@
 <script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
 
 <script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
 
 <link rel="Stylesheet" type="text/css" href="../../style.css">
 <link rel="Stylesheet" type="text/css" href="../../css/main.css">
@@ -69,16 +70,16 @@
 
 <h4 id="toc_1.0.0.4">.git 目录结构</h4>
 <pre>
-  $&gt;tree -L 1
-  .
-  |-- HEAD         # 这个git项目当前处在哪个分支里
-  |-- config       # 项目的配置信息，git config命令会改动它
-  |-- description  # 项目的描述信息
-  |-- hooks/       # 系统默认钩子脚本目录
-  |-- index        # 索引文件
-  |-- logs/        # 各个refs的历史信息
-  |-- objects/     # Git本地仓库的所有对象 (commits, trees, blobs, tags)
-  `-- refs/        # 标识你项目里的每个分支指向了哪个提交(commit)。
+    $&gt;tree -L 1
+    .
+    |-- HEAD         # 这个git项目当前处在哪个分支里
+    |-- config       # 项目的配置信息，git config命令会改动它
+    |-- description  # 项目的描述信息
+    |-- hooks/       # 系统默认钩子脚本目录
+    |-- index        # 索引文件
+    |-- logs/        # 各个refs的历史信息
+    |-- objects/     # Git本地仓库的所有对象 (commits, trees, blobs, tags)
+    `-- refs/        # 标识你项目里的每个分支指向了哪个提交(commit)。
 </pre>
 
 <h4 id="toc_1.0.0.5">git索引是你的工作目录和仓库之间的一个暂存区</h4>
@@ -98,9 +99,19 @@
 <li>
 如果想要提交第二次修改，需要在提交前,将第二次的修改也加进暂存区
 
+<li>
+查看index内容： git ls-files --stage 
+
+</ul>
+    
+<h4 id="toc_1.0.0.6">名词解释</h4>
+<ul>
+<li>
+ dangling commit: 悬空对象，比如将一个commit删除后，相应的文件并没有删除，这是可以用git rabase或git merge再次使用它们
+
 </ul>
 
-<h4 id="toc_1.0.0.6">基本用法</h4>
+<h4 id="toc_1.0.0.7">基本用法</h4>
 <ol>
 <li>
 <code>git clone</code>
@@ -191,7 +202,7 @@ $ <code>git commit -a</code>
 
 </ul>
 <li>
-如果推送(push)结果不是"快速向前"(fast forward),可能会报错，应该先<code>git pull</code> <br>
+如果推送(push)结果不是"快速向前"(fast forward),可能会报错，应该先`git pull` <br>
 
 <ul>
 <li>
@@ -202,7 +213,7 @@ $ <code>git commit -a</code>
 
 </ul>
 <li>
-打标签<code>git tag -s stable-1 1b2e1d63ff</code>
+打标签`git tag -s stable-1 1b2e1d63ff`
 
 <li>
 <code>git remote update (&lt;group&gt;|&lt;remote&gt;)</code>
@@ -222,8 +233,8 @@ $ <code>git commit -a</code>
 
 </ul>
 </ol>
-<h4 id="toc_1.0.0.7">忽略文件，在顶层工作目录添加一个 <code>.gitignore</code> 文件</h4>
-<h4 id="toc_1.0.0.8">git rebase</h4>
+<h4 id="toc_1.0.0.8">忽略文件，在顶层工作目录添加一个 <code>.gitignore</code> 文件</h4>
+<h4 id="toc_1.0.0.9">git rebase</h4>
 <ul>
 <li>
 你从一个分支打了一个新分支，此后，如果两个分支都修改了，就会出现分叉，有了两个线
@@ -272,7 +283,7 @@ rebase可以让资源库清晰干净
 </ol>
 </ul>
       
-<h4 id="toc_1.0.0.9">git stash</h4>
+<h4 id="toc_1.0.0.10">git stash</h4>
 <ul>
 <li>
 <code>git stash</code>
@@ -285,7 +296,7 @@ rebase可以让资源库清晰干净
 
 </ul>
    
-<h4 id="toc_1.0.0.10">你可以使用分支,remote或标签名来代替SHA串名</h4>
+<h4 id="toc_1.0.0.11">你可以使用分支,remote或标签名来代替SHA串名</h4>
 <ul>
 <li>
 它们只是指向某个对象的指针. 假设你的master分支目前在在
@@ -315,7 +326,9 @@ $ git log refs/tags/v1.0
 </ul>
 </ul>
 	 
-<h4 id="toc_1.0.0.11">标示符</h4>
+<p>
+==== 标示符====
+</p>
 <ul>
 <li>
   <code>master@{yesterday}</code>
@@ -384,7 +397,9 @@ master指向的树
 
 </ul>
 
-<h4 id="toc_1.0.0.13">用<code>git grep</code> 命令查找Git库里面的某段文字是很方便的</h4>
+<p>
+====用`git grep` 命令查找Git库里面的某段文字是很方便的==== 
+</p>
 <ul>
 <li>
 当然, 你也可以用unix下的'grep'命令进行搜索, 
@@ -403,8 +418,8 @@ master指向的树
 
 </ul>
 
-<h4 id="toc_1.0.0.14">撤消 恢复</h4>
-<h5 id="toc_1.0.0.14.1">修复未提交文件中的错误(重置)</h5>
+<h4 id="toc_1.0.0.13">撤消 恢复</h4>
+<h5 id="toc_1.0.0.13.1">修复未提交文件中的错误(重置)</h5>
 <ul>
 <li>
 让工作目录回到上次提交时的状态(last committed state):
@@ -432,7 +447,7 @@ master指向的树
 
 </ul>
 </ul>
-<h5 id="toc_1.0.0.14.2">修复已提交的错误</h5>
+<h5 id="toc_1.0.0.13.2">修复已提交的错误</h5>
 <ul>
 <li>
 创建一个新的提交(commit), 在新的提交里撤消老的提交所作的修改. 
@@ -477,22 +492,27 @@ git不会处理项目的历史会改变的情况,如果一个分支的历史被�
 
 </ul>
 </ul>
-<h5 id="toc_1.0.0.14.3"><code>git reset</code>的三种模式，回退提交, 有三个地方需要修改，三种模式依次升级</h5>
+<h5 id="toc_1.0.0.13.3"><code>git reset</code>的三种模式，回退提交, 有三个地方需要修改，三种模式依次升级</h5>
 
 <table>
 <tr>
-<th>
+<td>
 &nbsp;
-</th>
-<th>
+</td>
+<td>
 仓库(HEAD)
-</th>
-<th>
+</td>
+<td>
 暂存区(index)
-</th>
-<th>
-工作区
-</th>
+</td>
+<td>
+工作区 
+</td>
+</tr>
+<tr>
+<td>
+---------+------------+-------------------------------+-------------------------------
+</td>
 </tr>
 <tr>
 <td>
@@ -502,10 +522,10 @@ git不会处理项目的历史会改变的情况,如果一个分支的历史被�
 回退
 </td>
 <td>
-aaa将仓库撤消的更改加进暂存区
+aaa将仓库撤消的更改加进暂存区 
 </td>
 <td>
-不回退(和执行命令前保持不变）
+不回退(和执行命令前保持不变） 
 </td>
 </tr>
 <tr>
@@ -519,7 +539,7 @@ aaa将仓库撤消的更改加进暂存区
 回退(清空)
 </td>
 <td>
-不回退(和执行命令前保持不变）
+不回退(和执行命令前保持不变） 
 </td>
 </tr>
 <tr>
@@ -538,7 +558,7 @@ aaa将仓库撤消的更改加进暂存区
 </tr>
 </table>
 		 
-<h4 id="toc_1.0.0.15">维护git</h4>
+<h4 id="toc_1.0.0.14">维护git</h4>
 <ul>
 <li>
 在大的仓库中, git靠压缩历史信息来节约磁盘和内存空间. 压缩操作并不是自动进行的, 你需要手动执行 git gc:
@@ -558,7 +578,9 @@ git fsck 运行一些仓库的一致性检查, 如果有任何问题就会报告
 </ul>
 </ul>
 
-<h4 id="toc_1.0.0.16"><code>git format-patch</code>与<code>git am</code>的使用</h4>
+<p>
+====<code>git format-patch</code>与`git am`的使用====
+</p>
 <pre>
 	git format-patch经验
 	A:
@@ -596,21 +618,21 @@ git fsck 运行一些仓库的一致性检查, 如果有任何问题就会报告
 
 </pre>
 	
-<h4 id="toc_1.0.0.17">git cherry-pick</h4>
+<h4 id="toc_1.0.0.15">git cherry-pick</h4>
 <blockquote>
 从已存在的commit中引入修改
 </blockquote>
     
-<h4 id="toc_1.0.0.18">配置</h4>
-<h5 id="toc_1.0.0.18.1">branch.&lt;branchname&gt;.name</h5>
+<h4 id="toc_1.0.0.16">配置</h4>
+<h5 id="toc_1.0.0.16.1">branch.&lt;branchname&gt;.name</h5>
 <blockquote>
 :在该分支时，git push git fetch应该操作哪一个远程库 
 </blockquote>
-<h5 id="toc_1.0.0.18.2">branch.&lt;branchname&gt;.merge</h5>
+<h5 id="toc_1.0.0.16.2">branch.&lt;branchname&gt;.merge</h5>
 <blockquote>
 :在该分支时，git pull时应该合并远程的哪一个分支
 </blockquote>
-<h5 id="toc_1.0.0.18.3">push.default</h5>
+<h5 id="toc_1.0.0.16.3">push.default</h5>
 <blockquote>
 :定义git push无参数时的行为，默认情况是把本地的[所有]分支push到远程库的同名分支中（如果存在的话）<br>
 </blockquote>

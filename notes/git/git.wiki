@@ -1,7 +1,8 @@
 %title Git文章列表
 =Git=
 # [[git/git_notes|Git 笔记]]
-# [[git/pretty_log|漂亮的日志]]
+# [[git/pretty_log|漂亮的日志 ]]
 # [[git/using_vimdiff_as_difftoo|git中使用vimdiff比较差异]]
 # [[git/git_directory_structure|git的目录结构(译)]]
 # [[git/restore_a_deleted_file|找回已删除的文件]]
+# [[git/fix_broken_repo|修复损坏的资源库 ]]

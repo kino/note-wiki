@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>修复损坏的资源库 </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<div class="toc">
+<ul>
+<li><a href="#toc_1">修复损坏的资源库</a>
+<ul>
+<li><a href="#toc_1.1">发现错误：git status</a>
+<li><a href="#toc_1.2">进一步检查，确定出问题的文件</a>
+<li><a href="#toc_1.3">找回丢失的文件 </a>
+</ul>
+</ul>
+</div>
+<h1 id="toc_1">修复损坏的资源库</h1>
+
+<h2 id="toc_1.1">发现错误：git status</h2>
+<pre  class="brush:bash">
+    kino@arch-machine ~/work/2012TEST (git)-[master] % git status
+    error: unable to find d5c3bd678bc32015af48cddde700ec7ee3a28572
+    fatal: unable to read d5c3bd678bc32015af48cddde700ec7ee3a28572
+</pre>
+  
+<h2 id="toc_1.2">进一步检查，确定出问题的文件</h2>
+<ul>
+<li>
+使用git fsck --full
+
+<ol>
+<li>
+git fsck --full
+<pre  class="brush:bash">
+        kino@arch-machine ~/work/2012TEST (git)-[master] % git fsck
+        Checking object directories: 100% (256/256), done.
+        broken link from    tree fe9592333f69edc06cd72a5969009b4e8f467b79
+                      to    blob d5c3bd678bc32015af48cddde700ec7ee3a28572
+        missing blob d5c3bd678bc32015af48cddde700ec7ee3a28572
+</pre>
+
+<li>
+发现broken link，使用git list-tree进一步检查
+<pre  class="brush:bash">
+        kino@arch-machine ~/work/2012TEST (git)-[master] % git ls-tree fe9592
+        100644 blob ce0399c5461b1b1cdf83a2ca26071f909e92b6dc    AbstractHttpService.java
+        100644 blob a2da7395d5aa974691cf97bcab569fae4eab6779    Demo.java
+        100644 blob 6057c8915a8f57e8889a775bb8d9d0ee83461543    Demo2.java
+        100644 blob a9b6e9ddef88754bdd257113fb6778baa24bff01    Demo3.java
+        100644 blob d5c3bd678bc32015af48cddde700ec7ee3a28572    PostDemo.java
+</pre>
+
+<li>
+找到缺失的文件：PostDemo.java
+
+</ol>
+<li>
+git fsck --full输出中没有broken link
+<pre  class="brush:bash">
+        kino@arch-machine ~/work/2012TEST (git)-[master] % git fsck
+        Checking object directories: 100% (256/256), done.
+        missing blob d5c3bd678bc32015af48cddde700ec7ee3a28572
+</pre>
+
+<ol>
+<li>
+可以使用其他命令确认，比如git commit  或git reset --hard
+<pre  class="brush:bash">
+         kino@arch-machine ~/work/2012TEST (git)-[master] % git reset --hard 4d6c849
+         error: unable to read sha1 file of src/main/java/com/totoro/demo/httpclient/PostDemo.java (d5c3bd678bc32015af48cddde700ec7ee3a28572)
+            fatal: Could not reset index file to revision '4d6c849'.
+</pre>
+
+</ol>
+</ul>
+      
+<h2 id="toc_1.3">找回丢失的文件 </h2>
+<ul>
+<li>
+检查确认工作目录是不是正是想要的文件
+
+<ol>
+<li>
+执行
+<pre  class="brush:bash">
+         kino@arch-machine ~/work/2012TEST (git)-[master] % git hash-object -w src/main/java/com/totoro/demo/httpclient/PostDemo.java
+         d5c3bd678bc32015af48cddde700ec7ee3a28572
+</pre>
+
+<li>
+查看结果
+
+</ol>
+<li>
+从其他资源库拷过来重建
+
+<ol>
+<li>
+找到文件
+
+<li>
+添加
+<pre  class="brush:bash">
+         kino@arch-machine ~/work/2012TEST (git)-[master] % git hash-object -w PostDemo.java
+         d5c3bd678bc32015af48cddde700ec7ee3a28572
+</pre>
+
+</ol>
+<li>
+利用它的前一个版本和后一个版本进行重建
+
+<ol>
+<li>
+git log --raw --all --full-history -- file 
+
+<li>
+重建文件
+
+<li>
+添加
+<pre  class="brush:bash">
+         kino@arch-machine ~/work/2012TEST (git)-[master] % git hash-object -w PostDemo.java
+         d5c3bd678bc32015af48cddde700ec7ee3a28572
+</pre>
+
+</ol>
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>
