@@ -47,6 +47,11 @@
 <li><a href="#toc_1.2.4">基本文件系统操作</a>
 <li><a href="#toc_1.2.5">Hadoop文件系统</a>
 <li><a href="#toc_1.2.6">接口</a>
+<li><a href="#toc_1.2.7">JAVA接口</a>
+</ul>
+<li><a href="#toc_1.3">数据流 </a>
+<ul>
+<li><a href="#toc_1.3.1">文件读取剖析</a>
 </ul>
 </ul>
 </ul>
@@ -244,7 +249,256 @@ WebDev
 <li>
 FUSE
 
+<li>
+
+
+<li>
+HDFS两种特定的
+
+<ul>
+<li>
+HTTP: namenode 50070; datanode 50075
+
+<li>
+FTP
+
 </ul>
+</ul>
+<h3 id="toc_1.2.7">JAVA接口</h3>
+<ul>
+<li>
+<strong>Configuration FileSystem FSDataInpuStream FSDataOutputStream Path FileStatus PathFileter</strong>
+
+<li>
+<strong>Configuration</strong>
+
+<ol>
+<li>
+文件系统的配置
+
+</ol>
+<li>
+<strong>FileSystem</strong>
+
+<ol>
+<li>
+代表文件系统
+
+<li>
+FileSystem.get(uri, config) :创建
+
+<li>
+FSDataInputStream open(path) :获取指定文件的输入流
+
+<li>
+FSDataOutputStream create(path) :创建一个文件并获得它的输出流
+
+<li>
+FSDataOutputStream append(path) :获取指定文件的输出流，并在其后添加数据
+
+<li>
+boolean mkdirs(path) :创建必要但还没有的父目录
+
+<li>
+FileStatus getFileStatus(path) : 获取指定文件的文件状态
+
+<li>
+FileStatus[] globFileStatus(path) : 获取与文件相匹配的所有文件的文件状态
+
+<li>
+FileStatus[] globFileStatus(path， pathFilter) : 获取与文件相匹配的所有文件的文件状态
+
+<li>
+FileStatus[] listFileStatus(path) : 用来列目录
+
+<li>
+FileStatus[] listFileStatus(path， pathFilter) : 用来列目录
+
+<li>
+boolean delete(path, boolean recursive) : 删除文件或目录， 是否递归删除
+
+</ol>
+<li>
+<strong>FSDataInputStream</strong>
+
+<ol>
+<li>
+支持随机访问
+
+<li>
+seek(long):设置postion
+
+<li>
+long getPos():获取postion
+
+<li>
+int read(long position, byte[] buffer, int offset, int length)
+
+<li>
+void readFully(long position, byte[] buffer, int offset, int length)
+
+<li>
+void readFully(byte[] buffer, int offset, int length)
+
+</ol>
+<li>
+<strong>FSDataOutputStream</strong>
+
+<ol>
+<li>
+用于写数据 
+
+<li>
+支持随机访问
+
+<li>
+long getPos():设置postion
+
+<li>
+但不允许定位
+
+<li>
+只支持对一个打开的文件从头顺序写入， 或从末尾处添加
+
+</ol>
+<li>
+<strong>FileStatus</strong>
+
+<ol>
+<li>
+用于查询一个文件状态
+
+</ol>
+<li>
+<strong>Path</strong>
+
+<ol>
+<li>
+代表一个文件路径
+
+</ol>
+<li>
+<strong>PathFileter</strong>
+
+<ol>
+<li>
+当listStatus时，过滤文件
+
+</ol>
+<li>
+例子：
+
+<ol>
+<li>
+读
+
+<li>
+写
+
+<li>
+目录
+
+<li>
+列文件
+
+<li>
+删除
+
+</ol>
+</ul>
+   
+<h2 id="toc_1.3">数据流 </h2>
+<h3 id="toc_1.3.1">文件读取剖析</h3>
+<p>
+<img src="reading-data-from-hdfs.png" />
+</p>
+<ol>
+<li>
+fileSystem.open打开要读取的文件 
+
+<ul>
+<li>
+这个文件就是HDFS分布式文件系统中的一个实例
+
+</ul>
+<li>
+DistributedFileSystem通过RPC调用NameNode确定文件 *起始块* 所在的位置
+
+<ul>
+<li>
+NameNode返回所有包含该块的DataNode地址
+
+<li>
+并按网络距离排序
+
+<li>
+比如客户端所在就是一个DataNode, 而该块在此DataNode上刚好存有复本，就会发起本地读取
+
+<li>
+返回一个FSDataInputStream对象，供客户端使用. 进而转而封装为HdfsDataInputStream,管理着Namenode和Datanode之间的io
+
+</ul>
+<li>
+对输入流(FSDataInputStream)调用read()方法
+
+<ul>
+<li>
+HdfsDataInputStream会从最近的Datanode读入
+
+<li>
+不停的read()直到块的末尾
+
+<li>
+HdfsDataInpuStream会寻找  <strong>下一个块</strong>  的 <strong>最优Datanode</strong> 继续读取
+
+<li>
+对于 *下一块* 也需要向Namenode查询所需的Datanode
+
+<li>
+读取完毕调用FSDataInputStream的close()方法进行关闭
+
+<li>
+<strong>HdfsDataInputStream与Datanode通信出错时：</strong>
+
+<ol>
+<li>
+尝试比这个Datanode次邻近的Datanode读取
+
+<li>
+它会记住这个出错的Datanode,后续的块也不会从这里读取
+
+<li>
+它也会校验读取的数据是否完整,如果发现损坏的块
+
+<li>
+如果不完整，再尝试从其他Datanode读取数据之前，通知Namenode
+
+</ol>
+<li>
+<strong>设计优劣:</strong>
+
+<ol>
+<li>
+Namenode告知client最佳的Datanode
+
+<li>
+client直接从Datenode取数据
+
+<li>
+因为Datanode分散在集群中
+
+<li>
+所以很容易扩展到大量并发客户端
+
+<li>
+Namenode仅提供块位置请求，而不提供数据请求，很高效
+
+<li>
+随着客户端的增加， Namenode还是会成为瓶颈
+
+</ol>
+</ul>
+</ol>
 
 			</div>
 

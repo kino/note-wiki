@@ -71,6 +71,76 @@ hadoop fs -help
   * HTTP: namenode 50070; datanode 50075
   * FTP
 ===JAVA接口 ===
+* *Configuration FileSystem FSDataInpuStream FSDataOutputStream Path FileStatus PathFileter*
+* *Configuration*
+  # 文件系统的配置
+* *FileSystem*
+  # 代表文件系统
+  # FileSystem.get(uri, config) :创建
+  # FSDataInputStream open(path) :获取指定文件的输入流
+  # FSDataOutputStream create(path) :创建一个文件并获得它的输出流
+  # FSDataOutputStream append(path) :获取指定文件的输出流，并在其后添加数据
+  # boolean mkdirs(path) :创建必要但还没有的父目录
+  # FileStatus getFileStatus(path) : 获取指定文件的文件状态
+  # FileStatus[] globFileStatus(path) : 获取与文件相匹配的所有文件的文件状态
+  # FileStatus[] globFileStatus(path， pathFilter) : 获取与文件相匹配的所有文件的文件状态
+  # FileStatus[] listFileStatus(path) : 用来列目录
+  # FileStatus[] listFileStatus(path， pathFilter) : 用来列目录
+  # boolean delete(path, boolean recursive) : 删除文件或目录， 是否递归删除
+* *FSDataInputStream*
+  # 支持随机访问
+  # seek(long):设置postion
+  # long getPos():获取postion
+  # int read(long position, byte[] buffer, int offset, int length)
+  # void readFully(long position, byte[] buffer, int offset, int length)
+  # void readFully(byte[] buffer, int offset, int length)
+* *FSDataOutputStream*
+  # 用于写数据 
+  # 支持随机访问
+  # long getPos():设置postion
+  # 但不允许定位
+  # 只支持对一个打开的文件从头顺序写入， 或从末尾处添加
+* *FileStatus*
+  # 用于查询一个文件状态
+* *Path*
+  # 代表一个文件路径
+* *PathFileter*
+  # 当listStatus时，过滤文件
+* 例子：
+  # 读
+  # 写
+  # 目录
+  # 列文件
+  # 删除
+   
+==数据流 ==
+===文件读取剖析 ===
+{{reading-data-from-hdfs.png}}
+# fileSystem.open打开要读取的文件 
+  * 这个文件就是HDFS分布式文件系统中的一个实例
+# DistributedFileSystem通过RPC调用NameNode确定文件 *起始块* 所在的位置
+  * NameNode返回所有包含该块的DataNode地址
+  * 并按网络距离排序
+  * 比如客户端所在就是一个DataNode, 而该块在此DataNode上刚好存有复本，就会发起本地读取
+  * 返回一个FSDataInputStream对象，供客户端使用. 进而转而封装为HdfsDataInputStream,管理着Namenode和Datanode之间的io
+# 对输入流(FSDataInputStream)调用read()方法
+  * HdfsDataInputStream会从最近的Datanode读入
+  * 不停的read()直到块的末尾
+  * HdfsDataInpuStream会寻找  *下一个块*  的 *最优Datanode* 继续读取
+  * 对于 *下一块* 也需要向Namenode查询所需的Datanode
+  * 读取完毕调用FSDataInputStream的close()方法进行关闭
+  * *HdfsDataInputStream与Datanode通信出错时：*
+    # 尝试比这个Datanode次邻近的Datanode读取
+    # 它会记住这个出错的Datanode,后续的块也不会从这里读取
+    # 它也会校验读取的数据是否完整,如果发现损坏的块
+    # 如果不完整，再尝试从其他Datanode读取数据之前，通知Namenode
+  * *设计优劣:*
+    # Namenode告知client最佳的Datanode
+    # client直接从Datenode取数据
+    # 因为Datanode分散在集群中
+    # 所以很容易扩展到大量并发客户端
+    # Namenode仅提供块位置请求，而不提供数据请求，很高效
+    # 随着客户端的增加， Namenode还是会成为瓶颈
 
 
  
