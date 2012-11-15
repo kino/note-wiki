@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>使用hdparm和dd测试硬盘</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<div class="toc">
+<ul>
+<li><a href="#toc_1">使用hdparm和dd测试硬盘</a>
+<ul>
+<li><a href="#toc_1.1">硬盘信息</a>
+<li><a href="#toc_1.2">读取速度 M/s</a>
+<li><a href="#toc_1.3">写入速度 M/s</a>
+</ul>
+</ul>
+</div>
+
+<h1 id="toc_1">使用hdparm和dd测试硬盘</h1>
+
+<h2 id="toc_1.1">硬盘信息</h2>
+<ul>
+<li>
+获取硬盘信息
+<pre  class="brush:bash">
+ hdparm -I /dev/sda
+</pre>
+
+</ul>
+  
+<h2 id="toc_1.2">读取速度 M/s</h2>
+<ul>
+<li>
+测试硬盘的读取的速度
+<pre  class="brush:bash">
+ hdparm -t --direct /dev/sda
+</pre>
+
+</ul>
+  
+<h2 id="toc_1.3">写入速度 M/s</h2>
+<ul>
+<li>
+测试硬盘的写入的速度
+<pre  class="brush:bash">
+ sync;time bash -c "(dd if=/dev/zero of=bf bs=8k count=500000; sync)"
+</pre>
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

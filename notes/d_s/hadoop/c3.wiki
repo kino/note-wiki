@@ -130,12 +130,12 @@ hadoop fs -help
   * 对于 *下一块 * 也需要向Namenode查询所需的Datanode
 # 读取完毕调用FSDataInputStream的close()方法进行关闭
  
-* *HdfsDataInputStream与Datanode通信出错时：*
+*HdfsDataInputStream与Datanode通信出错时：*
   # 尝试比这个Datanode次邻近的Datanode读取
   # 它会记住这个出错的Datanode,后续的块也不会从这里读取
   # 它也会校验读取的数据是否完整,如果发现损坏的块
   # 如果不完整，再尝试从其他Datanode读取数据之前，通知Namenode
-* *设计优劣:*
+*设计优劣:*
   # Namenode告知client最佳的Datanode
   # client直接从Datenode取数据
   # 因为Datanode分散在集群中
@@ -144,6 +144,7 @@ hadoop fs -help
   # 随着客户端的增加， Namenode还是会成为瓶颈
 
 ===如何衡量节点的距离 ===
+{{network-distance.png}}
 * 海量数据处理中，主要的限制因素是节点间的传输速率 -- 带宽
 * 将带宽作为衡量距离的标准
 * 带宽是很难衡量比较的
@@ -165,13 +166,14 @@ hadoop fs -help
 # 调用write()写入数据
   * HdfsOutputStream将数据分成一个个数据包，并写入内部队列data queue
   * DataStreamer 处理数据队列
-  * 它根据datanode列表要求namenode分配相应的块来写入数据备份
-  * 这组datanode组成一个管线，其中的数目就是我们所高的备份数replication
+  * 它负责请求namenode分配blocks存储数据，namenode生成一个合适的datanode列表用于存储复本
+  * 这组datanode组成一个管线，其中的数目就是我们所设的备份数replication
 # DataStreamer将数据包流式传入管线中的第一个节点的datanode
   * 该datanode存储数据并同时把数据发往管线中的下一个datanode
   * 以此类推，datanode在存储数据的同时发往管线中的下一个datanode(如果存在的话，也就是直到最后一个）
 # HdfsOutputStream等待datanode的确认返回 ack queue
   * HdfsOutStream维护了一个内部队列，等待daqanode的确认返回, 称为确认队列ack queue
+  * 只有数据包在管线中的所有datanode收到后，才从ack queue中移除
 # 数据写入完毕,调用close()方法
   * 触发将剩余的数据包写入管线中
   * 向namenode发送确认完成信号
@@ -180,5 +182,67 @@ hadoop fs -help
   * 因DataStreamer曾要求namenode分配数据块
   * 等待数据块进行最小量的复制
   * 完成返回
+   
+*在写入过程中，datanode发生故障:* 
+# 关闭管线 pipeline
+# 把ack queue中的所有数据包添加到data queue的前端, 确保故障datanode后的datanode不会漏掉数据包
+# 为正在写的数据块分配一个标识符，并传给namenode;用于在　故障datanode　恢复后，清除这个未写完的数据块。
+# 将故障datanode从pipeline中移除，将剩余的数据块写入pipeline中剩余的datanode中
+# namenode发现复本量不足时，会在另外的节点上创建新的复本，后续的数据块正常处理。（ *这个datanode会加入pipeline吗？* ）
  
+*在写入过程中，多datanode同时故障:* 
+# 很少发生
+# 只要复本数达到dfs.replication.min(默认为1),就认为写入成功
+# 事后会通过异步复制，达到dfs.replication(默认为3)
+ 
+===如何确定复本布局和pipeline ===
+{{replica-pipeline.png}}
+# 第1个复本：
+  * client所在的datanode
+  * 若client在集群之外，随机选取一个datanode
+# 第2个复本：
+  * 在和第1个datanode *不同* 的机架上随机选一个datanode
+# 第3个复本：
+  * 在和第2个datanode *相同* 的机架上随机选一个datanode（第2个datanode除外)
+# 其他复本：
+  * 除了前3个datanode外，在cluster中随机选取一个datanode
+  
+* 选取完毕后，这些datanode就组成了一个管线
+ 
+===一致性 Coherency Model ===
+* Coherency Model:一个文件的读和写操作对其数据的可见性
+* HDFS牺牲了一些POSIX的一些要求，所以一些操作可能并不如你期望的一样
+ 
+# 创建一个文件扣，并不能立即可见：
+  {{{ class="brush:java"
+    Path p = new Path("p");
+    fs.create(p);
+    assertThat(fs.exists(p), is(true));
+    }}}
+# 写入的数据并不保证立即可见，即使已经flush()
+  {{{ class="brush:java"
+    Path p = new Path("p");
+    OutputStream out = fs.create(p);
+    out.write("content".getBytes("UTF-8"));
+    out.flush();
+    assertThat(fs.getFileStatus(p).getLen(), is(0L));//为0
+    }}}
+# 当写满一个块后就可见了，也就是只有正在写的block是不可见的
+# 提供了一个方法来和datanodes同步，保证数据的可见性，FSDataOutputStream上的sync()
+  {{{ class="brush:java"
+        Path p = new Path("p");
+        FSDataOutputStream out = fs.create(p);
+        out.write("content".getBytes("UTF-8"));
+        out.flush();
+        out.sync();
+        assertThat(fs.getFileStatus(p).getLen(), is(((long) "content".length())));
+    }}}
+# 关闭一个文件会隐匿的调用close()
+  {{{ class="brush:java"
+        Path p = new Path("p");
+        OutputStream out = fs.create(p);
+        out.write("content".getBytes("UTF-8"));
+        out.close();
+        assertThat(fs.getFileStatus(p).getLen(), is(((long) "content".length())));
+    }}}
 

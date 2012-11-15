@@ -54,6 +54,8 @@
 <li><a href="#toc_1.3.1">文件读取剖析</a>
 <li><a href="#toc_1.3.2">如何衡量节点的距离 </a>
 <li><a href="#toc_1.3.3">文件写入分析</a>
+<li><a href="#toc_1.3.4">如何确定复本布局和pipeline</a>
+<li><a href="#toc_1.3.5">一致性 Coherency Model</a>
 </ul>
 </ul>
 </ul>
@@ -464,10 +466,9 @@ HdfsDataInpuStream会寻找  <strong>下一个块</strong>  的 <strong>最优Da
 
 </ol>
  
-<ul>
-<li>
+<p>
 <strong>HdfsDataInputStream与Datanode通信出错时：</strong>
-
+</p>
 <ol>
 <li>
 尝试比这个Datanode次邻近的Datanode读取
@@ -482,9 +483,9 @@ HdfsDataInpuStream会寻找  <strong>下一个块</strong>  的 <strong>最优Da
 如果不完整，再尝试从其他Datanode读取数据之前，通知Namenode
 
 </ol>
-<li>
+<p>
 <strong>设计优劣:</strong>
-
+</p>
 <ol>
 <li>
 Namenode告知client最佳的Datanode
@@ -505,9 +506,11 @@ Namenode仅提供块位置请求，而不提供数据请求，很高效
 随着客户端的增加， Namenode还是会成为瓶颈
 
 </ol>
-</ul>
 
 <h3 id="toc_1.3.2">如何衡量节点的距离 </h3>
+<p>
+<img src="network-distance.png" />
+</p>
 <ul>
 <li>
 海量数据处理中，主要的限制因素是节点间的传输速率 -- 带宽
@@ -576,10 +579,10 @@ HdfsOutputStream将数据分成一个个数据包，并写入内部队列data qu
 DataStreamer 处理数据队列
 
 <li>
-它根据datanode列表要求namenode分配相应的块来写入数据备份
+它负责请求namenode分配blocks存储数据，namenode生成一个合适的datanode列表用于存储复本
 
 <li>
-这组datanode组成一个管线，其中的数目就是我们所高的备份数replication
+这组datanode组成一个管线，其中的数目就是我们所设的备份数replication
 
 </ul>
 <li>
@@ -599,6 +602,9 @@ HdfsOutputStream等待datanode的确认返回 ack queue
 <ul>
 <li>
 HdfsOutStream维护了一个内部队列，等待daqanode的确认返回, 称为确认队列ack queue
+
+<li>
+只有数据包在管线中的所有datanode收到后，才从ack queue中移除
 
 </ul>
 <li>
@@ -629,6 +635,145 @@ namenode已知文件由哪些数据块组成
 完成返回
 
 </ul>
+</ol>
+   
+<p>
+<strong>在写入过程中，datanode发生故障:</strong> 
+</p>
+<ol>
+<li>
+关闭管线 pipeline
+
+<li>
+把ack queue中的所有数据包添加到data queue的前端, 确保故障datanode后的datanode不会漏掉数据包
+
+<li>
+为正在写的数据块分配一个标识符，并传给namenode;用于在　故障datanode　恢复后，清除这个未写完的数据块。
+
+<li>
+将故障datanode从pipeline中移除，将剩余的数据块写入pipeline中剩余的datanode中
+
+<li>
+namenode发现复本量不足时，会在另外的节点上创建新的复本，后续的数据块正常处理。（ <strong>这个datanode会加入pipeline吗？</strong> ）
+
+</ol>
+ 
+<p>
+<strong>在写入过程中，多datanode同时故障:</strong> 
+</p>
+<ol>
+<li>
+很少发生
+
+<li>
+只要复本数达到dfs.replication.min(默认为1),就认为写入成功
+
+<li>
+事后会通过异步复制，达到dfs.replication(默认为3)
+
+</ol>
+ 
+<h3 id="toc_1.3.4">如何确定复本布局和pipeline</h3>
+<p>
+<img src="replica-pipeline.png" />
+</p>
+<ol>
+<li>
+第1个复本：
+
+<ul>
+<li>
+client所在的datanode
+
+<li>
+若client在集群之外，随机选取一个datanode
+
+</ul>
+<li>
+第2个复本：
+
+<ul>
+<li>
+在和第1个datanode <strong>不同</strong> 的机架上随机选一个datanode
+
+</ul>
+<li>
+第3个复本：
+
+<ul>
+<li>
+在和第2个datanode <strong>相同</strong> 的机架上随机选一个datanode（第2个datanode除外)
+
+</ul>
+<li>
+其他复本：
+
+<ul>
+<li>
+除了前3个datanode外，在cluster中随机选取一个datanode
+
+</ul>
+</ol>
+  
+<ul>
+<li>
+选取完毕后，这些datanode就组成了一个管线
+
+</ul>
+ 
+<h3 id="toc_1.3.5">一致性 Coherency Model</h3>
+<ul>
+<li>
+Coherency Model:一个文件的读和写操作对其数据的可见性
+
+<li>
+HDFS牺牲了一些POSIX的一些要求，所以一些操作可能并不如你期望的一样
+
+</ul>
+ 
+<ol>
+<li>
+创建一个文件扣，并不能立即可见：
+<pre  class="brush:java">
+    Path p = new Path("p");
+    fs.create(p);
+    assertThat(fs.exists(p), is(true));
+</pre>
+
+<li>
+写入的数据并不保证立即可见，即使已经flush()
+<pre  class="brush:java">
+    Path p = new Path("p");
+    OutputStream out = fs.create(p);
+    out.write("content".getBytes("UTF-8"));
+    out.flush();
+    assertThat(fs.getFileStatus(p).getLen(), is(0L));//为0
+</pre>
+
+<li>
+当写满一个块后就可见了，也就是只有正在写的block是不可见的
+
+<li>
+提供了一个方法来和datanodes同步，保证数据的可见性，FSDataOutputStream上的sync()
+<pre  class="brush:java">
+        Path p = new Path("p");
+        FSDataOutputStream out = fs.create(p);
+        out.write("content".getBytes("UTF-8"));
+        out.flush();
+        out.sync();
+        assertThat(fs.getFileStatus(p).getLen(), is(((long) "content".length())));
+</pre>
+
+<li>
+关闭一个文件会隐匿的调用close()
+<pre  class="brush:java">
+        Path p = new Path("p");
+        OutputStream out = fs.create(p);
+        out.write("content".getBytes("UTF-8"));
+        out.close();
+        assertThat(fs.getFileStatus(p).getLen(), is(((long) "content".length())));
+</pre>
+
 </ol>
 
 			</div>

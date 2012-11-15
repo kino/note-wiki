@@ -1,0 +1,22 @@
+%title 使用hdparm和dd测试硬盘
+%toc
+
+=使用hdparm和dd测试硬盘 =
+
+==硬盘信息 == 
+* 获取硬盘信息
+{{{ class="brush:bash"
+ hdparm -I /dev/sda
+  }}}
+  
+==读取速度 M/s == 
+* 测试硬盘的读取的速度
+{{{ class="brush:bash"
+ hdparm -t --direct /dev/sda
+  }}}
+  
+==写入速度 M/s == 
+* 测试硬盘的写入的速度
+{{{ class="brush:bash"
+ sync;time bash -c "(dd if=/dev/zero of=bf bs=8k count=500000; sync)"
+  }}}
