@@ -124,24 +124,61 @@ hadoop fs -help
   * 比如客户端所在就是一个DataNode, 而该块在此DataNode上刚好存有复本，就会发起本地读取
   * 返回一个FSDataInputStream对象，供客户端使用. 进而转而封装为HdfsDataInputStream,管理着Namenode和Datanode之间的io
 # 对输入流(FSDataInputStream)调用read()方法
-  * HdfsDataInputStream会从最近的Datanode读入
+# HdfsDataInputStream会从最近的Datanode读入
   * 不停的read()直到块的末尾
-  * HdfsDataInpuStream会寻找  *下一个块*  的 *最优Datanode* 继续读取
-  * 对于 *下一块* 也需要向Namenode查询所需的Datanode
-  * 读取完毕调用FSDataInputStream的close()方法进行关闭
-  * *HdfsDataInputStream与Datanode通信出错时：*
-    # 尝试比这个Datanode次邻近的Datanode读取
-    # 它会记住这个出错的Datanode,后续的块也不会从这里读取
-    # 它也会校验读取的数据是否完整,如果发现损坏的块
-    # 如果不完整，再尝试从其他Datanode读取数据之前，通知Namenode
-  * *设计优劣:*
-    # Namenode告知client最佳的Datanode
-    # client直接从Datenode取数据
-    # 因为Datanode分散在集群中
-    # 所以很容易扩展到大量并发客户端
-    # Namenode仅提供块位置请求，而不提供数据请求，很高效
-    # 随着客户端的增加， Namenode还是会成为瓶颈
+# HdfsDataInpuStream会寻找  *下一个块*  的 *最优Datanode* 继续读取
+  * 对于 *下一块 * 也需要向Namenode查询所需的Datanode
+# 读取完毕调用FSDataInputStream的close()方法进行关闭
+ 
+* *HdfsDataInputStream与Datanode通信出错时：*
+  # 尝试比这个Datanode次邻近的Datanode读取
+  # 它会记住这个出错的Datanode,后续的块也不会从这里读取
+  # 它也会校验读取的数据是否完整,如果发现损坏的块
+  # 如果不完整，再尝试从其他Datanode读取数据之前，通知Namenode
+* *设计优劣:*
+  # Namenode告知client最佳的Datanode
+  # client直接从Datenode取数据
+  # 因为Datanode分散在集群中
+  # 所以很容易扩展到大量并发客户端
+  # Namenode仅提供块位置请求，而不提供数据请求，很高效
+  # 随着客户端的增加， Namenode还是会成为瓶颈
 
+===如何衡量节点的距离 ===
+* 海量数据处理中，主要的限制因素是节点间的传输速率 -- 带宽
+* 将带宽作为衡量距离的标准
+* 带宽是很难衡量比较的
+* Hadoop采用了一个简单的方法，以下带宽以次递减
+  # 同一节点中的不同进程
+  # 同一机架上的不同节点
+  # 同一数据中心不同机架上的节点
+  # 不同数据中心里的节点
+* 这些信息需要我们辅助定义
 
+===文件写入分析 ===
+{{writing-data-from-hdfs.png}}
+# 调用DistributedFileSystem的create()来创建文件
+# DistributedFileSystem对namenode发起一个RPC, 在文件系统命名空间中创建一个文件，此时还没有数据块
+  * namenode执行各种检查确保要创建的文件还不存在
+  * namenode检查客户端的权限
+  * 检查通过为新文件添加一条记录， 否则抛出异常
+  * 返回一个FSDataOutputStream,  里面封装了HdfsOutputStream, 负责datanode与namenode之间的通信
+# 调用write()写入数据
+  * HdfsOutputStream将数据分成一个个数据包，并写入内部队列data queue
+  * DataStreamer 处理数据队列
+  * 它根据datanode列表要求namenode分配相应的块来写入数据备份
+  * 这组datanode组成一个管线，其中的数目就是我们所高的备份数replication
+# DataStreamer将数据包流式传入管线中的第一个节点的datanode
+  * 该datanode存储数据并同时把数据发往管线中的下一个datanode
+  * 以此类推，datanode在存储数据的同时发往管线中的下一个datanode(如果存在的话，也就是直到最后一个）
+# HdfsOutputStream等待datanode的确认返回 ack queue
+  * HdfsOutStream维护了一个内部队列，等待daqanode的确认返回, 称为确认队列ack queue
+# 数据写入完毕,调用close()方法
+  * 触发将剩余的数据包写入管线中
+  * 向namenode发送确认完成信号
+# 向namenode发送确认完成信号（在close方法内部）
+  * namenode已知文件由哪些数据块组成
+  * 因DataStreamer曾要求namenode分配数据块
+  * 等待数据块进行最小量的复制
+  * 完成返回
  
 

@@ -52,6 +52,8 @@
 <li><a href="#toc_1.3">数据流 </a>
 <ul>
 <li><a href="#toc_1.3.1">文件读取剖析</a>
+<li><a href="#toc_1.3.2">如何衡量节点的距离 </a>
+<li><a href="#toc_1.3.3">文件写入分析</a>
 </ul>
 </ul>
 </ul>
@@ -441,22 +443,28 @@ NameNode返回所有包含该块的DataNode地址
 <li>
 对输入流(FSDataInputStream)调用read()方法
 
-<ul>
 <li>
 HdfsDataInputStream会从最近的Datanode读入
 
+<ul>
 <li>
 不停的read()直到块的末尾
 
+</ul>
 <li>
 HdfsDataInpuStream会寻找  <strong>下一个块</strong>  的 <strong>最优Datanode</strong> 继续读取
 
+<ul>
 <li>
-对于 *下一块* 也需要向Namenode查询所需的Datanode
+对于 <strong>下一块 </strong> 也需要向Namenode查询所需的Datanode
 
+</ul>
 <li>
 读取完毕调用FSDataInputStream的close()方法进行关闭
 
+</ol>
+ 
+<ul>
 <li>
 <strong>HdfsDataInputStream与Datanode通信出错时：</strong>
 
@@ -497,6 +505,129 @@ Namenode仅提供块位置请求，而不提供数据请求，很高效
 随着客户端的增加， Namenode还是会成为瓶颈
 
 </ol>
+</ul>
+
+<h3 id="toc_1.3.2">如何衡量节点的距离 </h3>
+<ul>
+<li>
+海量数据处理中，主要的限制因素是节点间的传输速率 -- 带宽
+
+<li>
+将带宽作为衡量距离的标准
+
+<li>
+带宽是很难衡量比较的
+
+<li>
+Hadoop采用了一个简单的方法，以下带宽以次递减
+
+<ol>
+<li>
+同一节点中的不同进程
+
+<li>
+同一机架上的不同节点
+
+<li>
+同一数据中心不同机架上的节点
+
+<li>
+不同数据中心里的节点
+
+</ol>
+<li>
+这些信息需要我们辅助定义
+
+</ul>
+
+<h3 id="toc_1.3.3">文件写入分析</h3>
+<p>
+<img src="writing-data-from-hdfs.png" />
+</p>
+<ol>
+<li>
+调用DistributedFileSystem的create()来创建文件
+
+<li>
+DistributedFileSystem对namenode发起一个RPC, 在文件系统命名空间中创建一个文件，此时还没有数据块
+
+<ul>
+<li>
+namenode执行各种检查确保要创建的文件还不存在
+
+<li>
+namenode检查客户端的权限
+
+<li>
+检查通过为新文件添加一条记录， 否则抛出异常
+
+<li>
+返回一个FSDataOutputStream,  里面封装了HdfsOutputStream, 负责datanode与namenode之间的通信
+
+</ul>
+<li>
+调用write()写入数据
+
+<ul>
+<li>
+HdfsOutputStream将数据分成一个个数据包，并写入内部队列data queue
+
+<li>
+DataStreamer 处理数据队列
+
+<li>
+它根据datanode列表要求namenode分配相应的块来写入数据备份
+
+<li>
+这组datanode组成一个管线，其中的数目就是我们所高的备份数replication
+
+</ul>
+<li>
+DataStreamer将数据包流式传入管线中的第一个节点的datanode
+
+<ul>
+<li>
+该datanode存储数据并同时把数据发往管线中的下一个datanode
+
+<li>
+以此类推，datanode在存储数据的同时发往管线中的下一个datanode(如果存在的话，也就是直到最后一个）
+
+</ul>
+<li>
+HdfsOutputStream等待datanode的确认返回 ack queue
+
+<ul>
+<li>
+HdfsOutStream维护了一个内部队列，等待daqanode的确认返回, 称为确认队列ack queue
+
+</ul>
+<li>
+数据写入完毕,调用close()方法
+
+<ul>
+<li>
+触发将剩余的数据包写入管线中
+
+<li>
+向namenode发送确认完成信号
+
+</ul>
+<li>
+向namenode发送确认完成信号（在close方法内部）
+
+<ul>
+<li>
+namenode已知文件由哪些数据块组成
+
+<li>
+因DataStreamer曾要求namenode分配数据块
+
+<li>
+等待数据块进行最小量的复制
+
+<li>
+完成返回
+
 </ul>
 </ol>
 
