@@ -32,6 +32,7 @@ var TopNav = function(){
 	});
 }
 $(document).ready(function(){
+    $('#page-title a').html('Ticks');
 	new TopNav();
 	var rootPath = $('#root_path').val();
 

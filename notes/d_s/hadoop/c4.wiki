@@ -1,0 +1,45 @@
+%title Hadoop I/O
+%toc
+=Hadoop I/O=
+
+==数据完整性 Integrity ==
+为了保证数据不丢失和损坏，在写入或读出数据时进行校验
+
+===HDFS的数据完整性 ===
+*校验和checksum:*
+* HDFS的写入数据时计算较验和，在读取时验证校验和
+* HDFS对每io.bytes.per.checksum个（default 512)字节计算checksum
+* 使用CRC-32, checksum为4bytes
+* 默认存储checksum的额外开销低于1%
+ 
+*写入时:*
+# Datanode在存储它接收到的data和它们的checksum前，进行验证
+# 这些数据来自client或其他datanode
+# 当client向pipeline写入数据时:
+  * 只有最后一个datanode负责验证checksum
+  * 验证出错时，client会收到一个ChecksumException(IOExcpetion的一个子类)
+  * 由应用程序来处理这个异常，比如重试
+   
+*读取时:*
+# client读取数据也要进行checksum的验证
+# 重新计算checksum并和datanode上存储的checksum进行比较
+# datanode还存储了一个checksum的验证日志，这存储最后一次进行checksum验证的时间
+# client验证checksum成功后，就会更新这个日志
+# 保留这份统计信息对检测损坏磁盘很有价值
+
+*datanode对checksum进行定期验证:*
+# datanode使用 *DataBlockScanner*
+# 对存储在其上的所有的Block进行定期验证
+# 可以有效防止由于bit rot造成的物理磁盘损坏
+
+*修复损坏的block:*
+# 可以通过复制一个正常的block产生一个新的正常的block复本
+# 当client检测到一个checksum  error时
+# 在抛出异常前，client会向namenode报告出现error的block和其所在datanode
+# namenode并不会指挥client去修复这个error
+# namenode会异步的计划在另外的datanode重建一个这个block的复本，使其复本数量达到设置的水平
+
+*关闭checksum验证:*
+* 使用open()读取一个文件前调用FileSystem的setVerifyChecksum(false)方法
+* 在shell中使用-get和-copyToLocal时添加-ignoreCrc选项
+  * 可以将损坏的文件拷到本地进行检查，很有用的

@@ -245,4 +245,66 @@ hadoop fs -help
         out.close();
         assertThat(fs.getFileStatus(p).getLen(), is(((long) "content".length())));
     }}}
+    
+==通过distcp进行复制 ==
+* 可以从hadoop中复制大量数据
+* 也可将大量数据复制到hadoop
+* 跨集群复制
+  {{{ class="brush:bash"
+  hadoop distcp hdfs://namenode1/foo hdfs://namenode2/bar
+  # 将foo目录复制到bar目录下，如果bar不存在，会自动创建
+  # 可以将多个源路径复制到一个目标路径下
+  # 源路径必须是绝对路径
+   
+  hadoop distcp --update hdfs://namenode1/foo hdfs://namenode2/bar/foo
+  # 将一个集群中foo目录下的内容， 复制到另一个集群中的/bar/foo下
+  # 只复制更新过的文件
+  # 注意对路径的解释变了
+   
+  hadoop distcp --overwrite hdfs://namenode1/foo hdfs://namenode2/bar/foo 
+  # 对路径的解释和--update一致
+  
+    }}}
+    
+* 默认每个节点最多分配20个map任务
+* 如果是两个hdfs之间的复制，需要他们版本一致
+* *保持hdfs集群的均衡性cluster balanced*
+  {{{ class="brush:bash"
+  hadoop distcp -m 1 hdfs://namenode1/foo hdfs://namenode2/bar
+  #只用一个map进行复制，丢失均衡性
+    }}}
+    
+==hadoop存档 Hadoop Archives ==
+问题：
+* hadoop存小文件很低效
+* 因为大量的小文件会耗光namenode的内存
+* 存小文件并不会带空间的多占用，一m的文件就是1m，而不会变成一个block，64m or 128m
+
+===hadoop存档工具 ===
+* hadoop存档文件是存档工具根据一组成文件创建的
+* 是一个MapReduce任务
+* 需要一个MapReduce集群 
+
+# 创建一个存档文件
+  {{{ class="brush:bash"
+  hadoop archive -archiveName files.har /my/files /my
+  # 可以有多个源文件目录
+  # 最后一个目录是归档文件存储的目录
+   
+
+    hadoop fs -ls /my/files.har
+    
+  # 使用har风格的url和har文件进行交互
+    hadoop fs -lsr har:///my/files.har
+    hadoop fs -lsr har:///my/files.har/my/files/dir
+    hadoop fs -lsr har://hdfs-localhost:8020/my/files.har/my/files/dir
+    
+   # 删除一个har文件
+    hadoop fs -rmr /my/files.har
+    }}}
+*不足 *
+* 创建一个存档文件，会创建原始文件的一个复本
+* 所以需要和原始文件一样大小的空间
+* 一旦创建，不能修改，不能从中删除或添加文件
+* har文件虽然可以作为mapreduce的输入，但其不知已经归档，等于修理har中的很多小文件，仍然是低效的
 

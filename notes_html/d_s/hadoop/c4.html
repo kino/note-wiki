@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Hadoop I/O</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<div class="toc">
+<ul>
+<li><a href="#toc_1">Hadoop I/O</a>
+<ul>
+<li><a href="#toc_1.1">数据完整性 Integrity</a>
+<ul>
+<li><a href="#toc_1.1.1">HDFS的数据完整性 </a>
+</ul>
+</ul>
+</ul>
+</div>
+<h1 id="toc_1">Hadoop I/O</h1>
+
+<h2 id="toc_1.1">数据完整性 Integrity</h2>
+<p>
+为了保证数据不丢失和损坏，在写入或读出数据时进行校验
+</p>
+
+<h3 id="toc_1.1.1">HDFS的数据完整性 </h3>
+<p>
+<strong>校验和checksum:</strong>
+</p>
+<ul>
+<li>
+HDFS的写入数据时计算较验和，在读取时验证校验和
+
+<li>
+HDFS对每io.bytes.per.checksum个（default 512)字节计算checksum
+
+<li>
+使用CRC-32, checksum为4bytes
+
+<li>
+默认存储checksum的额外开销低于1%
+
+</ul>
+ 
+<p>
+<strong>写入时:</strong>
+</p>
+<ol>
+<li>
+Datanode在存储它接收到的data和它们的checksum前，进行验证
+
+<li>
+这些数据来自client或其他datanode
+
+<li>
+当client向pipeline写入数据时:
+
+<ul>
+<li>
+只有最后一个datanode负责验证checksum
+
+<li>
+验证出错时，client会收到一个ChecksumException(IOExcpetion的一个子类)
+
+<li>
+由应用程序来处理这个异常，比如重试
+
+</ul>
+</ol>
+   
+<p>
+<strong>读取时:</strong>
+</p>
+<ol>
+<li>
+client读取数据也要进行checksum的验证
+
+<li>
+重新计算checksum并和datanode上存储的checksum进行比较
+
+<li>
+datanode还存储了一个checksum的验证日志，这存储最后一次进行checksum验证的时间
+
+<li>
+client验证checksum成功后，就会更新这个日志
+
+<li>
+保留这份统计信息对检测损坏磁盘很有价值
+
+</ol>
+
+<p>
+<strong>datanode对checksum进行定期验证:</strong>
+</p>
+<ol>
+<li>
+datanode使用 <strong>DataBlockScanner</strong>
+
+<li>
+对存储在其上的所有的Block进行定期验证
+
+<li>
+可以有效防止由于bit rot造成的物理磁盘损坏
+
+</ol>
+
+<p>
+<strong>修复损坏的block:</strong>
+</p>
+<ol>
+<li>
+可以通过复制一个正常的block产生一个新的正常的block复本
+
+<li>
+当client检测到一个checksum  error时
+
+<li>
+在抛出异常前，client会向namenode报告出现error的block和其所在datanode
+
+<li>
+namenode并不会指挥client去修复这个error
+
+<li>
+namenode会异步的计划在另外的datanode重建一个这个block的复本，使其复本数量达到设置的水平
+
+</ol>
+
+<p>
+<strong>关闭checksum验证:</strong>
+</p>
+<ul>
+<li>
+使用open()读取一个文件前调用FileSystem的setVerifyChecksum(false)方法
+
+<li>
+在shell中使用-get和-copyToLocal时添加-ignoreCrc选项
+
+<ul>
+<li>
+可以将损坏的文件拷到本地进行检查，很有用的
+
+</ul>
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

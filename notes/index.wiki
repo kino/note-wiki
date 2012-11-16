@@ -14,7 +14,7 @@
 ==C ==
 * [[c/cpl|C Programming Language]]
 * [[c/dsaac|Data Structure and Algorithm Analysis in C]]
-* [[c/cfrq|C的一些东西]]
+* [[c/cfrq|C的一些东西 ]]
 ==Perl ==
 * [[perl/basic|Perl Basic]]
 * [[perl/perl_programming|Perl语言编程]]
@@ -34,5 +34,7 @@
 * [[d_s/hadoop|Hadoop ]]
 ==Operating Systems ==
 * [[operating_systems/operating_systems_design_and_implementation|Operating Systems Design and Implementation]]
+==Online Resource ==
+* [[resource/links|Resource Links]]
  
 
