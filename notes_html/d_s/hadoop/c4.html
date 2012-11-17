@@ -40,7 +40,13 @@
 <ul>
 <li><a href="#toc_1.1">数据完整性 Integrity</a>
 <ul>
-<li><a href="#toc_1.1.1">HDFS的数据完整性 </a>
+<li><a href="#toc_1.1.1">HDFS中的数据完整性 </a>
+<li><a href="#toc_1.1.2">LocalFileSystem类 </a>
+<li><a href="#toc_1.1.3">ChecksumFileSystem类 </a>
+</ul>
+<li><a href="#toc_1.2">文件压缩File Compression</a>
+<ul>
+<li><a href="#toc_1.2.1">Codecs</a>
 </ul>
 </ul>
 </ul>
@@ -52,7 +58,7 @@
 为了保证数据不丢失和损坏，在写入或读出数据时进行校验
 </p>
 
-<h3 id="toc_1.1.1">HDFS的数据完整性 </h3>
+<h3 id="toc_1.1.1">HDFS中的数据完整性 </h3>
 <p>
 <strong>校验和checksum:</strong>
 </p>
@@ -170,6 +176,179 @@ namenode会异步的计划在另外的datanode重建一个这个block的复本�
 
 </ul>
 </ul>
+
+<h3 id="toc_1.1.2">LocalFileSystem类 </h3>
+
+<p>
+Hadoop中的LocalFileSystem类负责执行客户端的文件验证
+</p>
+<ol>
+<li>
+当创建一个 <code>filename</code> 的文件时
+
+<li>
+客户端会在同一目录下同时创建一个隐藏文件 <code>.filename.crc</code>, 这种行为是透明的
+
+<ul>
+<li>
+这个文件包含了对于文件 <code>filename</code> 每一个chunk的checksum
+
+<li>
+chunk的大小同样由io.bytes.per.checksum指定
+
+<li>
+这个文件还同时存储了这次验证所使用的chunk大小(作为元数据），即当前io.bytes.per.checksum的大小
+
+<li>
+因此以后即使修改了io.bytes.per.checksum的配置，也不影响恢复文件
+
+</ul>
+<li>
+客户端在读取文件时，会验证Checksums, 如果发生error, LocalFileSystem会抛出一个ChecksumException
+
+</ol>
+ 
+<p>
+<strong>禁止验证</strong> 
+</p>
+
+<p>
+可以禁止验证，特别是当底层系统已经支持的情况下，这时可以 <strong>使用RawLocalFileSystem代替LocalFilesystem</strong>
+</p>
+<ul>
+<li>
+在应用全局内生效：将属性fs.file.impl设置为org.apache.hadoop.fs.RawLocalFileSysem, 它实现了对文件URI的重新映射
+
+<li>
+某次读取使用，可以生成一个RawLocalFileSystem实例
+<pre  class="brush:java">
+      Configuration conf = ...
+      FileSystem fs = new RawLocalFileSystem();
+      fs.initialize(null, conf);
+</pre>
+
+</ul>
+  
+<h3 id="toc_1.1.3">ChecksumFileSystem类 </h3>
+
+<p>
+LocalFileSystem使用ChecksumFileSystem去做这它的工作（晕死，有完没完)
+</p>
+
+<p>
+ChecksumFileSystem很容易给其他的文件系统添加文件验证的功能，它其实是FileSystem类的一个包装类Wrapper
+</p>
+<pre  class="brush:java">
+    FileSystem rawFs = ...
+    FileSystem checksummedFs = new ChecksumFileSystem(rawFs);
+</pre>
+  
+<ol>
+<li>
+rawFs是具体的底层文件系统
+
+<li>
+ChecksumFileSystem的getRawFileSystem()可以获取它
+
+<li>
+ChecksumFileSysem的getChecksumFile()可以获得任一个文件校验文件checksumfile的路径
+
+<li>
+发生错误时，会调用ChecksumFileSysem的reportCheckFailure(), 默认什么也不做
+
+<ul>
+<li>
+LocalFileSystem对这个方法的实现 ：
+
+<li>
+将出错文件 和它的校验文件移到同一设备的一个side directory , 名叫bad_files
+
+<li>
+管理员应该定期检查这个文件夹
+
+</ul>
+</ol>
+  
+<h2 id="toc_1.2">文件压缩File Compression</h2>
+<p>
+<strong>文件压缩的两大好处:</strong>
+</p>
+<ul>
+<li>
+减少存储空间
+
+<li>
+加快传输
+
+</ul>
+
+<h3 id="toc_1.2.1">Codecs</h3>
+<ul>
+<li>
+一个codec代表一种压缩解压算法 
+
+<li>
+一个codec是接口CompressionCodec的一个实现
+
+</ul>
+<table>
+<tr>
+<th>
+Compression format
+</th>
+<th>
+Hadoop CompressionCodec
+</th>
+</tr>
+<tr>
+<td>
+DEFLATE
+</td>
+<td>
+org.apache.hadoop.io.compress.DefaultCodec
+</td>
+</tr>
+<tr>
+<td>
+gzip
+</td>
+<td>
+org.apache.hadoop.io.compress.GzipCodec
+</td>
+</tr>
+<tr>
+<td>
+bzip2
+</td>
+<td>
+org.apache.hadoop.io.compress.BZip2Codec
+</td>
+</tr>
+<tr>
+<td>
+LZO
+</td>
+<td>
+com.hadoop.compression.lzo.LzopCodec
+</td>
+</tr>
+<tr>
+<td>
+LZ4
+</td>
+<td>
+org.apache.hadoop.io.compress.Lz4Codec
+</td>
+</tr>
+<tr>
+<td>
+Snappy
+</td>
+<td>
+org.apache.hadoop.io.compress.SnappyCodec
+</td>
+</tr>
+</table>
 
 			</div>
 

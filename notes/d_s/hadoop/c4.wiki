@@ -5,7 +5,7 @@
 ==数据完整性 Integrity ==
 为了保证数据不丢失和损坏，在写入或读出数据时进行校验
 
-===HDFS的数据完整性 ===
+===HDFS中的数据完整性 ===
 *校验和checksum:*
 * HDFS的写入数据时计算较验和，在读取时验证校验和
 * HDFS对每io.bytes.per.checksum个（default 512)字节计算checksum
@@ -43,3 +43,70 @@
 * 使用open()读取一个文件前调用FileSystem的setVerifyChecksum(false)方法
 * 在shell中使用-get和-copyToLocal时添加-ignoreCrc选项
   * 可以将损坏的文件拷到本地进行检查，很有用的
+
+===LocalFileSystem类 ===
+
+Hadoop中的LocalFileSystem类负责执行客户端的文件验证
+# 当创建一个 `filename` 的文件时
+# 客户端会在同一目录下同时创建一个隐藏文件 `.filename.crc`, 这种行为是透明的
+  * 这个文件包含了对于文件 `filename` 每一个chunk的checksum
+  * chunk的大小同样由io.bytes.per.checksum指定
+  * 这个文件还同时存储了这次验证所使用的chunk大小(作为元数据），即当前io.bytes.per.checksum的大小
+  * 因此以后即使修改了io.bytes.per.checksum的配置，也不影响恢复文件
+# 客户端在读取文件时，会验证Checksums, 如果发生error, LocalFileSystem会抛出一个ChecksumException
+ 
+*禁止验证* 
+
+可以禁止验证，特别是当底层系统已经支持的情况下，这时可以 *使用RawLocalFileSystem代替LocalFilesystem*
+* 在应用全局内生效：将属性fs.file.impl设置为org.apache.hadoop.fs.RawLocalFileSysem, 它实现了对文件URI的重新映射
+* 某次读取使用，可以生成一个RawLocalFileSystem实例
+  {{{ class="brush:java"
+      Configuration conf = ...
+      FileSystem fs = new RawLocalFileSystem();
+      fs.initialize(null, conf);
+  }}}
+  
+===ChecksumFileSystem类 ===
+
+LocalFileSystem使用ChecksumFileSystem去做这它的工作（晕死，有完没完)
+
+ChecksumFileSystem很容易给其他的文件系统添加文件验证的功能，它其实是FileSystem类的一个包装类Wrapper
+  {{{ class="brush:java"
+    FileSystem rawFs = ...
+    FileSystem checksummedFs = new ChecksumFileSystem(rawFs);
+  }}}
+  
+# rawFs是具体的底层文件系统
+# ChecksumFileSystem的getRawFileSystem()可以获取它
+# ChecksumFileSysem的getChecksumFile()可以获得任一个文件校验文件checksumfile的路径
+# 发生错误时，会调用ChecksumFileSysem的reportCheckFailure(), 默认什么也不做
+  * LocalFileSystem对这个方法的实现 ：
+  * 将出错文件 和它的校验文件移到同一设备的一个side directory , 名叫bad_files
+  * 管理员应该定期检查这个文件夹
+  
+==文件压缩File Compression==
+*文件压缩的两大好处:*
+* 减少存储空间
+* 加快传输
+
+===Codecs===
+* 一个codec代表一种压缩解压算法 
+* 一个codec是接口CompressionCodec的一个实现
+| Compression format | Hadoop CompressionCodec                    |
+|--------------------|--------------------------------------------|
+| DEFLATE            | org.apache.hadoop.io.compress.DefaultCodec |
+| gzip               | org.apache.hadoop.io.compress.GzipCodec    |
+| bzip2              | org.apache.hadoop.io.compress.BZip2Codec   |
+| LZO                | com.hadoop.compression.lzo.LzopCodec       |
+| LZ4                | org.apache.hadoop.io.compress.Lz4Codec     |
+| Snappy             | org.apache.hadoop.io.compress.SnappyCodec  |
+
+*对流进行压缩与解压:*
+# createOutputStream(OutputStream outputStream) 创建了一个CompressionOutputStream
+  * 将未压缩的数据写入它
+  * 它将压缩过的数据写入底层Stream
+# createInputStream(InputStream inputStream) 创建了一个CompressionInputStream
+  * 从它读取未压缩过的数据
+  * 底层Stream返回的实际上是压缩过的数据
+
+
