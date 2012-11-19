@@ -1,0 +1,63 @@
+%title 改变文件格式（dos,unix,mac os) 
+%toc
+=改变文件格式（dos,unix,mac os) =
+
+==文件格式 ==
+* 文件格式体现在换行符(广义）上
+* 简单来说，在读写文件时，在每一行的末尾作一些处理
+  * 写：在写完一行内容时，会在末尾添加一个或两个特殊字符
+  * 读：在读取一行内容时，会把这个/些特殊字符去掉
+* 文件格式
+|       | Dos,Windows | Unix | Mac OS |
+|-------|-------------|------|--------|
+| Write | +CRLF       | +LF  | +CR    |
+| READ  | -CRLF       | -LF  | -CR    |
+
+* CR and LF
+| CR | \r = Return = 0x0D = 13 = CR = Carriage Return = 回车 = Ctrl + M |
+| LF | \n = Newline = 0x0A = 10 = LF =Line Feed = 换行 = Ctrl + J       |
+
+==:set ffs or :set fileformats ==
+* 表示新建文件时，所使用的文件格式，因为值是一个列表，所以使用的是第一个可用的值
+* 查看
+  {{{ class="brush:bash"
+  :set ffs?
+  #unix,dos
+  }}}
+* 设置
+  {{{ class="brush:bash"
+  :set ffs=unix,dos
+  }}}
+  
+==:set ff or :set fileformat ==
+* 查看或设置当前文件所使用的文件格式
+* 查看当前的文件格式
+  {{{ class="brush:bash"
+  :set ff?
+  #dos
+  }}}
+* 转换文件格式
+  {{{ class="brush:bash"
+  :set ff=unix
+  }}}
+  
+==:e ++ff=? ==
+* 以指定的文件格式读入
+* 如果有一个dos文件已经打开，想以unix的格式重新读入
+  {{{ class="brush:bash"
+  :e ++fenc=unix
+  }}}
+  * 因为dos文件每行是以`CRLF`结尾的
+  * 而以unix文件读入时，只会把 `LF` 当作换行符， `CR` 会正常显示出来，每行后会多出一个 *^M*
+  {{{ class="brush:bash"
+  hello ^M
+  world ^M
+  }}}
+* 如果有一个unix文件已经打开，想以dos的格式重新读入
+  {{{ class="brush:bash"
+  :e ++fenc=dos
+  }}}
+  * 因为unix文件每行是以`LF`结尾的
+  * 因为dos文件每行是以`CRLF`结尾的
+  * 而以dos文件读入时，会寻找 `CRLF`, 所以会报一个 `CR Missing` 的警告
+  * 如果这时保存文件， 会文件转换为dos， 自动添加`CR`

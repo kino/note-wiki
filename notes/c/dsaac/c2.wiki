@@ -1,0 +1,87 @@
+%title 算法分析
+%toc
+=算法分析 =
+
+==数学基础 ==
+
+===定义 ===
+* *大O定义:* 
+  {{{ class="brush:math"
+    如果存在正常数 `c` 和 `n_0`, 使得当`N>n_0`时, `T(N)<=cf(N)`, 记作 ` T(N) = O(f(N)) `
+    <br>
+    <br>
+    <strong>    *注：</strong>`T(N)`在以不快于`f(N)`的速度增长，所以`f(N)`是`T(N)`的一个上界，`upper bound`.
+    }}}
+    
+* *Omega定义:* 
+  {{{ class="brush:math"
+    如果存在正常数 `c` 和 `n_0`, 使得当`N>n_0`时, `T(N)>=cg(N)`, 记作 ` T(N) = Omega(g(N)) `
+    <br>
+    <br>
+    <strong>    *注：</strong>`T(N)`在以不慢于`g(N)`的速度增长，所以`g(N)`是`T(N)`的一个下界，`lower bound`.
+    }}}
+* *Theta定义:* 
+  {{{ class="brush:math"
+    ` T(N) = Theta(h(N)) `, 当且仅当 ` T(N) = O(h(N)) ` 且` T(N) = Omega(h(N)) `
+    }}}
+* *小o定义:* 
+  {{{ class="brush:math"
+     如果` T(N) = O(h(N)) ` 且` T(N) != Theta(h(N)) `, 则` T(N) = o(h(N)) `
+    }}}
+* 通常为了证明 ` T(N) = O(h(N)) ` , 通常会使用一些已知的结果，所以计算通常会很简单。
+ 
+===法则 ===
+* *法则一:* 
+  {{{ class="brush:math"
+    如果`T_1(N)=O(f(N)`且`T_2(N)=O(g(N)`, 那么：<br>
+    (a)  `T_1(N) + T_2(N) = max(O(f(N)), O(g(N)))`;<br>
+    (b)  `T_1(N)*T_2(N) = max(f(N)*g(N))`;<br>
+    }}}
+* *法则二:* 
+  {{{ class="brush:math"
+    如果`T(N)`是一个`k`次多项式, 那么 `T(N)=Theta(N^k)`
+    }}}
+* *法则三:* 
+  {{{ class="brush:math"
+    对任意常数`k`， `log^kN=O(N)`, 说明对数增长的很缓慢
+    }}}
+* *常见函数的增长率，按大小:* 
+  {{{ class="brush:math"
+    <table> 
+    <tr><th>函数       </th><th>名称     </th></tr>
+    <tr><td>`c`        </td><td>常数      </td></tr>
+    <tr><td>`logN`     </td><td>对数级    </td></tr>
+    <tr><td>`log^2N`   </td><td>对数平方根</td></tr>     
+    <tr><td>`N`        </td><td>线性级    </td></tr>
+    <tr><td>`NlogN`    </td><td>          </td></tr>
+    <tr><td>`N^2`      </td><td>平方根    </td></tr>
+    <tr><td>`N^3`      </td><td>立方根    </td></tr>
+    <tr><td>`2^N`      </td><td>指数级    </td></tr>
+    </table>
+    }}}
+* *分析大O,可以进行各种简化，数度要求很低 :* 
+  * 低价项可以被忽略
+  * 常数被放弃
+  {{{ class="brush:math"
+    `T(N)=O(2N^2)` 与 `T(N)=O(N^2+N)` 都应该简化为：<br>
+    `T(N)=O(2N^2)`
+    }}}
+* *通过极限计算相对增长率:* 
+  {{{ class="brush:math"
+    计算极限`lim_(n->\infty)f(N)/g(N)`, 来确定`f(N)`和`g(N)`的相对增长率：<br>
+    * 极限是`0`:意味着`f(N)=o(g(N))` <br>
+    * 极限是`c!=0`:意味着`f(N)=Theta(g(N))` <br>
+    * 极限是`\infty`:意味着`g(N)=o(f(N))` <br>
+    * 极限`摆动`:意味着`二者无关` <br>
+    }}}
+* *简单代数方法:* 
+  {{{ class="brush:math"
+    `f(N)=NlogN`, `g(N)=N^1.5`则：<br>
+    1) 比较`f(N)`与`g(N)`哪个增长的快 <br>
+    2) 就是比较`logN`与`N^0.5` <br>
+    3) 就是比较`log^2N`与`N` <br>
+    4) 则`g(N)`快于`f(N)` <br>
+    }}}
+    
+==指数 ==
+

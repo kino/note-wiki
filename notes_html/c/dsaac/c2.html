@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>算法分析</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<div class="toc">
+<ul>
+<li><a href="#toc_1">算法分析</a>
+<ul>
+<li><a href="#toc_1.1">数学基础</a>
+<ul>
+<li><a href="#toc_1.1.1">定义</a>
+<li><a href="#toc_1.1.2">法则</a>
+</ul>
+<li><a href="#toc_1.2">指数</a>
+</ul>
+</ul>
+</div>
+<h1 id="toc_1">算法分析</h1>
+
+<h2 id="toc_1.1">数学基础</h2>
+
+<h3 id="toc_1.1.1">定义</h3>
+<ul>
+<li>
+<strong>大O定义:</strong> 
+<pre  class="brush:math">
+    如果存在正常数 `c` 和 `n_0`, 使得当`N&gt;n_0`时, `T(N)&lt;=cf(N)`, 记作 ` T(N) = O(f(N)) `
+    &lt;br&gt;
+    &lt;br&gt;
+    &lt;strong&gt;    *注：&lt;/strong&gt;`T(N)`在以不快于`f(N)`的速度增长，所以`f(N)`是`T(N)`的一个上界，`upper bound`.
+</pre>
+
+</ul>
+    
+<ul>
+<li>
+<strong>Omega定义:</strong> 
+<pre  class="brush:math">
+    如果存在正常数 `c` 和 `n_0`, 使得当`N&gt;n_0`时, `T(N)&gt;=cg(N)`, 记作 ` T(N) = Omega(g(N)) `
+    &lt;br&gt;
+    &lt;br&gt;
+    &lt;strong&gt;    *注：&lt;/strong&gt;`T(N)`在以不慢于`g(N)`的速度增长，所以`g(N)`是`T(N)`的一个下界，`lower bound`.
+</pre>
+
+<li>
+<strong>Theta定义:</strong> 
+<pre  class="brush:math">
+    ` T(N) = Theta(h(N)) `, 当且仅当 ` T(N) = O(h(N)) ` 且` T(N) = Omega(h(N)) `
+</pre>
+
+<li>
+<strong>小o定义:</strong> 
+<pre  class="brush:math">
+     如果` T(N) = O(h(N)) ` 且` T(N) != Theta(h(N)) `, 则` T(N) = o(h(N)) `
+</pre>
+
+<li>
+通常为了证明 <code> T(N) = O(h(N)) </code> , 通常会使用一些已知的结果，所以计算通常会很简单。
+
+</ul>
+ 
+<h3 id="toc_1.1.2">法则</h3>
+<ul>
+<li>
+<strong>法则一:</strong> 
+<pre  class="brush:math">
+    如果`T_1(N)=O(f(N)`且`T_2(N)=O(g(N)`, 那么：&lt;br&gt;
+    (a)  `T_1(N) + T_2(N) = max(O(f(N)), O(g(N)))`;&lt;br&gt;
+    (b)  `T_1(N)*T_2(N) = max(f(N)*g(N))`;&lt;br&gt;
+</pre>
+
+<li>
+<strong>法则二:</strong> 
+<pre  class="brush:math">
+    如果`T(N)`是一个`k`次多项式, 那么 `T(N)=Theta(N^k)`
+</pre>
+
+<li>
+<strong>法则三:</strong> 
+<pre  class="brush:math">
+    对任意常数`k`， `log^kN=O(N)`, 说明对数增长的很缓慢
+</pre>
+
+<li>
+<strong>常见函数的增长率，按大小:</strong> 
+<pre  class="brush:math">
+    &lt;table&gt; 
+    &lt;tr&gt;&lt;th&gt;函数       &lt;/th&gt;&lt;th&gt;名称     &lt;/th&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;`c`        &lt;/td&gt;&lt;td&gt;常数      &lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;`logN`     &lt;/td&gt;&lt;td&gt;对数级    &lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;`log^2N`   &lt;/td&gt;&lt;td&gt;对数平方根&lt;/td&gt;&lt;/tr&gt;     
+    &lt;tr&gt;&lt;td&gt;`N`        &lt;/td&gt;&lt;td&gt;线性级    &lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;`NlogN`    &lt;/td&gt;&lt;td&gt;          &lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;`N^2`      &lt;/td&gt;&lt;td&gt;平方根    &lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;`N^3`      &lt;/td&gt;&lt;td&gt;立方根    &lt;/td&gt;&lt;/tr&gt;
+    &lt;tr&gt;&lt;td&gt;`2^N`      &lt;/td&gt;&lt;td&gt;指数级    &lt;/td&gt;&lt;/tr&gt;
+    &lt;/table&gt;
+</pre>
+
+<li>
+<strong>分析大O,可以进行各种简化，数度要求很低 :</strong> 
+
+<ul>
+<li>
+低价项可以被忽略
+
+<li>
+常数被放弃
+<pre  class="brush:math">
+    `T(N)=O(2N^2)` 与 `T(N)=O(N^2+N)` 都应该简化为：&lt;br&gt;
+    `T(N)=O(2N^2)`
+</pre>
+
+</ul>
+<li>
+<strong>通过极限计算相对增长率:</strong> 
+<pre  class="brush:math">
+    计算极限`lim_(n-&gt;\infty)f(N)/g(N)`, 来确定`f(N)`和`g(N)`的相对增长率：&lt;br&gt;
+    * 极限是`0`:意味着`f(N)=o(g(N))` &lt;br&gt;
+    * 极限是`c!=0`:意味着`f(N)=Theta(g(N))` &lt;br&gt;
+    * 极限是`\infty`:意味着`g(N)=o(f(N))` &lt;br&gt;
+    * 极限`摆动`:意味着`二者无关` &lt;br&gt;
+</pre>
+
+<li>
+<strong>简单代数方法:</strong> 
+<pre  class="brush:math">
+    `f(N)=NlogN`, `g(N)=N^1.5`则：&lt;br&gt;
+    1) 比较`f(N)`与`g(N)`哪个增长的快 &lt;br&gt;
+    2) 就是比较`logN`与`N^0.5` &lt;br&gt;
+    3) 就是比较`log^2N`与`N` &lt;br&gt;
+    4) 则`g(N)`快于`f(N)` &lt;br&gt;
+</pre>
+
+</ul>
+    
+<h2 id="toc_1.2">指数</h2>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

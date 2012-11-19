@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Hadoop File System</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<div class="toc">
+<ul>
+<li><a href="#toc_1">Hadoop File System</a>
+<ul>
+<li><a href="#toc_1.1">HDFS的设计 </a>
+</ul>
+</ul>
+</div>
+<h1 id="toc_1">Hadoop File System</h1>
+<ul>
+<li>
+当数据集大小超过一台物理机器，需要对它分区存储到不同的机器上。
+
+<li>
+跨机器管理存储的文件系统称之为分布式文件系统，Distributed File System
+
+<li>
+HDFS: Hadoop distributed file system.
+
+</ul>
+
+<h2 id="toc_1.1">HDFS的设计 </h2>
+<ul>
+<li>
+<strong>超大文件:</strong> MB GB TB PB 
+
+<li>
+<strong>流式数据访问:</strong>
+
+<ul>
+<li>
+一次写入，多次读入
+
+<li>
+每次数据分析涉及数据集中的大部分或全部
+
+</ul>
+<li>
+<strong>商业硬件:</strong> 并不需要运行在昂贵的可靠的商业硬件上
+
+<li>
+<strong>商业硬件:</strong> 并不需要运行在昂贵的可靠的商业硬件上
+
+<li>
+<strong>低时间延迟的访问:</strong>
+
+<ul>
+<li>
+不适合低时间延迟的访问，比如几十毫秒
+
+<li>
+为高吞吐量做的优化， 但可能会高时间延迟为代价
+
+</ul>
+<li>
+<strong>大量小文件:</strong>
+
+<ul>
+<li>
+元数据存储在Namenode上
+
+<li>
+文件总数的大小依赖于Namenode的内存大小 
+
+</ul>
+<li>
+<strong>不支持多用户写和多用户同时修改:</strong>
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

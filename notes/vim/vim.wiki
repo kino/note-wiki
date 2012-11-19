@@ -1,9 +1,10 @@
 %title Vim 文章列表
 =Vim=
 # [[vimwiki|vimwiki文档(转)]]
-# [[insert_date|在vim中插入日期]]
+# [[insert_date|在vim中插入日期 ]]
 # [[vim/delete_row|删除包含或不包含某个单词的行]]
 # [[vim/format_json|格式化json]]
-# [[vim/save_without_root|保存一个拥有root权限的文件]]
+# [[vim/save_without_root|保存一个拥有root权限的文件 ]]
 # [[vim/character_encoding_tricks_for_vim|vim中字符编码的技巧(译)]]
 # [[vim/space_and_tab_replacement|vim中空格与TAB的替换(转)]]
+# [[vim/change_file_format|改变文件格式（dos,unix,mac os) ]]
