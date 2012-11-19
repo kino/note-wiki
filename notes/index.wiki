@@ -13,6 +13,7 @@
 * [[java/frq|杂 ]]
 ==C ==
 * [[c/cpl|C Programming Language]]
+* [[c/dsaac|Data Structure and Algorithm Analysis in C]]
 ==Perl ==
 * [[perl/basic|Perl Basic]]
 * [[perl/perl_programming|Perl语言编程]]
