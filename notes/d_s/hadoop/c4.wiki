@@ -101,12 +101,32 @@ ChecksumFileSystem很容易给其他的文件系统添加文件验证的功能�
 | LZ4                | org.apache.hadoop.io.compress.Lz4Codec     |
 | Snappy             | org.apache.hadoop.io.compress.SnappyCodec  |
 
-*对流进行压缩与解压:*
+*使用CompressionCodec对流进行压缩与解压:*
 # createOutputStream(OutputStream outputStream) 创建了一个CompressionOutputStream
   * 将未压缩的数据写入它
   * 它将压缩过的数据写入底层Stream
 # createInputStream(InputStream inputStream) 创建了一个CompressionInputStream
   * 从它读取未压缩过的数据
   * 底层Stream返回的实际上是压缩过的数据
+   
+*使用CompressionCodecFactory推断CompressionCodec:*
+# 一般可以通过文件扩展名推断压缩算法
+# CompressionCodecFactory的方法getCodec(Path), 根据扩展名获得对应的Codec
+# 属性 *io.compression.codecs:*
+  * 定义了一个列表， CompressionCodecFactory 就是从这里面查找对应的Codec
+  * 默认列出hadoop支持的所有的codec
+  * 可以向里面注册自己自定义的
+   
+*原生类库Native Library:*
+为了性能，推荐使用原生类库进行解压和压缩。
+
+# 并不是所有的压缩方式都有对应的原生类库
+# 如果找不到原生类库，就使用java实现 
+# 原生类库默认在 `lib/native` 下
+# 原生类库位置可以通过java系统的属性指定：java.library.path
+# 默认hadoop会自动搜索自己运行所在平台的原生类库
+# 搜到自动加载
+# 可以通过属性haddop.native.lib禁止使用原生类库，设为false
+
 
 

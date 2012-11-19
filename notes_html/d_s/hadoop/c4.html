@@ -350,6 +350,46 @@ org.apache.hadoop.io.compress.SnappyCodec
 </tr>
 </table>
 
+<p>
+<strong>使用CompressionCodec对流进行压缩与解压:</strong>
+</p>
+<ol>
+<li>
+createOutputStream(OutputStream outputStream) 创建了一个CompressionOutputStream
+
+<ul>
+<li>
+将未压缩的数据写入它
+
+<li>
+它将压缩过的数据写入底层Stream
+
+</ul>
+<li>
+createInputStream(InputStream inputStream) 创建了一个CompressionInputStream
+
+<ul>
+<li>
+从它读取未压缩过的数据
+
+<li>
+底层Stream返回的实际上是压缩过的数据
+
+</ul>
+</ol>
+   
+<p>
+<strong>使用CompressionCodecFactory推断CompressionCodec:</strong>
+</p>
+<ol>
+<li>
+一般可以通过文件扩展名推断压缩算法
+
+<li>
+CompressionCodecFactory的方法getCodec(Path), 根据扩展名获得对应的Codec
+
+</ol>
+
 			</div>
 
 			<div id="bottom">
