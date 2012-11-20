@@ -43,7 +43,21 @@
 <li><a href="#toc_1.1.1">定义</a>
 <li><a href="#toc_1.1.2">法则</a>
 </ul>
-<li><a href="#toc_1.2">指数</a>
+<li><a href="#toc_1.2">计算运行时间</a>
+<ul>
+<li><a href="#toc_1.2.1">一般法则</a>
+<li><a href="#toc_1.2.2">最大子序列</a>
+<li><a href="#toc_1.2.3">运行时间中的对数</a>
+<li><a href="#toc_1.2.4">二分查找</a>
+<li><a href="#toc_1.2.5">最大公因数（欧机里德算法）</a>
+<li><a href="#toc_1.2.6">定理</a>
+<li><a href="#toc_1.2.7">幂运算</a>
+</ul>
+<li><a href="#toc_1.3">校验分析</a>
+<ul>
+<li><a href="#toc_1.3.1">校验实际运算时间</a>
+<li><a href="#toc_1.3.2">验证T(N)=O(f(N)),计算T(N)/f(N)</a>
+</ul>
 </ul>
 </ul>
 </div>
@@ -166,7 +180,150 @@
 
 </ul>
     
-<h2 id="toc_1.2">指数</h2>
+<h2 id="toc_1.2">计算运行时间</h2>
+<h3 id="toc_1.2.1">一般法则</h3>
+<ul>
+<li>
+<strong>法则 1 -- For 循环:</strong>
+
+<ul>
+<li>
+一次for循环的时间至多是循环内语句（包括测试）的运行时间乘以迭代次数。
+
+</ul>
+<li>
+<strong>法则 2 -- 嵌套的For 循环:</strong>
+
+<ul>
+<li>
+由里向外分析。在一组嵌套循环内的一条语句的总运行时间是该该语句的运行时间乘以所有for循环大小的乘积。
+
+</ul>
+<li>
+<strong>法则 3 -- 顺序语句:</strong>
+
+<ul>
+<li>
+将各语句的运行时间求和就可。
+
+</ul>
+<li>
+<strong>法则 4 -- IF/ELSE:</strong>
+
+<ul>
+<li>
+判断加上运行时间较长的分支
+
+</ul>
+</ul>
+
+<h3 id="toc_1.2.2">最大子序列</h3>
+<ul>
+<li>
+分治算法:O(NlogN)
+
+<li>
+O(N)算法
+<pre  class="brush:c">
+  int 
+  MaxSubsequenceSum(const int A[ ], int N)
+  {
+    int ThisSum, MaxSum, j;
+
+    ThisSum=MaxSum=0;
+    for(j=0; j&lt;N; j++)
+    {
+        ThisSum += A[j];
+        if(ThisSum &gt; MaxSum)
+        {
+            MaxSum=ThisSum;
+        }else if(ThisSum&lt;0)
+        {
+            ThisSum=0;
+        }
+    }
+    
+    return MaxSum;
+  }
+</pre>
+
+</ul>
+  
+
+<h3 id="toc_1.2.3">运行时间中的对数</h3>
+<ul>
+<li>
+分析算法最混乱的地方大概集中在对数上。
+
+<li>
+对数最常出现的地方
+
+<ul>
+<li>
+分治算法
+
+<li>
+如果一个算法用常数时间（O(1))将问题的大小消减为某一部分（通常为1/2)，那第该算法就是O(logN).
+    如果使用常数时间只是把问题减少了一个常数（如将问题减少1）,那这样的算法就是O(N)
+
+</ul>
+</ul>
+    
+<h3 id="toc_1.2.4">二分查找</h3>
+<h3 id="toc_1.2.5">最大公因数（欧机里德算法）</h3>
+<h3 id="toc_1.2.6">定理</h3>
+<pre  class="brush:math">
+  如果 `M &gt; N`, 则 `M mod N &lt; M/2`
+</pre>
+<h3 id="toc_1.2.7">幂运算</h3>
+
+<h2 id="toc_1.3">校验分析</h2>
+<h3 id="toc_1.3.1">校验实际运算时间</h3>
+<ol>
+<li>
+记录N时的运行时间
+
+<li>
+看2N时的运算时间
+
+<ul>
+<li>
+O(N)算法，时间应该乘以2
+
+<li>
+O(N^2)算法，时间应该乘以4
+
+<li>
+O(N^3)算法，时间应该乘以8
+
+<li>
+O(logN)算法，时间多加一个常数
+
+<li>
+O(NlogN)算法，两倍多一点
+
+</ul>
+</ol>
+<h3 id="toc_1.3.2">验证T(N)=O(f(N)),计算T(N)/f(N)</h3>
+<ol>
+<li>
+间隔记录N(通常为2的倍数隔开）在某个范围内的实际运行时间T(N)
+
+<li>
+统计T(N)/f(N)
+
+<ul>
+<li>
+收敛于正常数， 和理想接近
+
+<li>
+收敛于0， f(N)估计过大
+
+<li>
+发散，说明程序不是O(f(N))
+
+</ul>
+</ol>
 
 			</div>
 
