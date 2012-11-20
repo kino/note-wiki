@@ -88,6 +88,16 @@ ChecksumFileSystem很容易给其他的文件系统添加文件验证的功能�
 *文件压缩的两大好处:*
 * 减少存储空间
 * 加快传输
+ 
+*常用压缩格式:*
+| Compression format | Tool  | Algorithm | Filename extension | Splittable?                       |
+|--------------------|-------|-----------|--------------------|-----------------------------------|
+| DEFLATE            | N/A   | DEFLATE   | .deflate           | No                                |
+| gzip               | gzip  | DEFLATE   | .gz                | No                                |
+| bzip2              | bzip2 | bzip2     | .bz2               | Yes                               |
+| LZO                | lzop  | LZO       | .lzo               | No(可以预建切分索引，以支持切分） |
+| LZ4                | N/A   | LZ4       | .lz4               | No                                |
+| Snappy             | N/A   | Snappy    | .snappy            | No                                |
 
 ===Codecs===
 * 一个codec代表一种压缩解压算法 
@@ -127,6 +137,112 @@ ChecksumFileSystem很容易给其他的文件系统添加文件验证的功能�
 # 默认hadoop会自动搜索自己运行所在平台的原生类库
 # 搜到自动加载
 # 可以通过属性haddop.native.lib禁止使用原生类库，设为false
+# 如果使用原生库且做大量压缩与解压， 通过 *CodecPool* 可以重复使用 *Compressor* 实例，提升性能：
+  * 就像线程池一样，有借有还
+  * 借：CodecPool.getCompressor(CompressionCodec)
+  * 还：CodecPool.returnCompressor(Compressor)
+    {{{ class="brush:java"
+          public static void main(String[] args) throws Exception {
+              String codecClassname = args[0];
+              Class<?> codecClass = Class.forName(codecClassname);
+              Configuration conf = new Configuration();
+              CompressionCodec codec = (CompressionCodec)
+                  CodecPool.ReflectionUtils.newInstance(codecClass, conf);
+              Compressor compressor = null;
+              try {
+                  compressor = CodecPool.getCompressor(codec);
+                  CompressionOutputStream out =
+                      codec.createOutputStream(System.out, compressor);
+                  IOUtils.copyBytes(System.in, out, 4096, false);
+                  out.finish();
+              } finally {
+                  CodecPool.returnCompressor(compressor);
+              }
+          }
+      }}}
+      
+===压缩与输入切片Compression and Input Splitting ===
+当被压缩的数据要被MapReduce使用时，该压缩算法是否支持切片将变的十分重要.
+* 如果不支持切片，单个数据块就无法作为数据切片供 MapReduce使用
+* 但可以将整个文件的所有数据块作为单个Map任务的输入，会失去MapReduce的优势
+
+*使用哪种压缩格式？ *
+* 与具体的应用有关, 要考虑文件的大小，格式，处理所用的工具
+* 下面有一些方案，效率有高到低：
+  # 使用Sequence File或Avro datafile. 两者都支持压缩与切片，选择一个快速算法：LZO, LZ4, Snappy
+  # 使用一种支持切片的压缩格式，比如bzip2,或者LZO(可以通过建立切分点索引以支持切片）
+  # application将文件分成一个个的chunk，每个chunk单独压缩存储， 每个chunk压缩后的大小应该近似于HDFS的block
+  # 不压缩直接存储
+* 不应该大文件使用不支持切分的压缩格式，MapReduce将失去优势
+
+===在MapReduce中使用压缩Using Compression in MapReduce===
+*输入:*
+# 一个压缩的文件作为MapReduce的输入，会自动进行解压
+# 使用文件扩展名来确定所使用的Codec
+
+*输出:*
+# 可以确定是否对MapReduce的输出进入压缩。
+# 通过属性 `mapred.output.compress` 来指定， true or false
+# 通过属性 `mapred.output.compression.codec` 来指定所使用的Codec
+# 如果不通过属性指定，可以通过FileOutputFormat的静态方法来指定
+{{{ class="brush:java"
+    FileOutputFormat.setCompressOutput(job, true);
+    FileOutputFormat.setOutputCompressorClass(job, GzipCodec.class);
+  }}}
+
+
+*MapReduce compression properties:*
+| Property name                   | Type        | Default  value                             | Description                                                                     |   |
+|---------------------------------|-------------|--------------------------------------------|---------------------------------------------------------------------------------|---|
+| mapred.output.compress          | boolean     | false                                      | Compress outputs                                                                |   |
+| mapred.output.compression.codec | Class  name | org.apache.hadoop.io.compress.DefaultCodec | The compression codec to use for outputs                                        |   |
+| mapred.output.compression.type  | String      | RECORD                                     | The type of compression to use for SequenceFile outputs: NONE, RECORD, or BLOCK |   |
+
+*压缩Map输出Compressing Map Output:*
+# 对Map task产生的中间结果进行压缩也是可以获得好处的
+# Map的输出会存储到磁盘上，并通过网络传输到Reduce结点
+# 如果使用快速压缩算法LZO LZ4 或Snappy,就可以获得性能提升
+# 相关属性：
+| Property name                       | Type    | Default value                              | Description                                 |
+|-------------------------------------|---------|--------------------------------------------|---------------------------------------------|
+| mapred.compress.map.output          | boolean | false                                      | Compress map outputs                        |
+| mapred.map.output.compression.codec | Class   | org.apache.hadoop.io.compress.DefaultCodec | The compression codec to use for map output |
+
+* 代码示例：
+{{{ class="brush:java"
+    Configuration conf = new Configuration();
+    conf.setBoolean("mapred.compress.map.output", true);
+    conf.setClass("mapred.map.output.compression.codec", GzipCodec.class,
+            CompressionCodec.class);
+    Job job = new Job(conf);
+  }}}
+
+==序列化Serialization==
+*序列化Serialization:* 将结构化数据转化为字节流
+
+*反序列化Deserailization:* 将字节流转化回结构化数据
+
+序列化经常用于两个方面 *进程间通信Interproess communication* 和 *永久存储Persistent storage*
+
+Hadoop使用RPC进行不同结点间的定义，RPC协议对消息进行Serialization和Deserialization
+
+不管通信还是永久存储对序列化格式都有如下要求（但解释的侧重点不同）：
+* Compact 紧凑
+* Fast 快速
+* Extensible 可扩展
+* Interoprable 互操作性
+
+Hadoop使用自己的序列化格式Writable, 紧凑，快速，但很难被其他的语言所扩展
+
+===Writable接口 ===
+*两个方法:*
+{{{ class="brush:java"
+    public interface Writable {
+        void write(DataOutput out) throws IOException;
+        void readFields(DataInput in) throws IOException;
+    }
+  }}}
+
 
 
 

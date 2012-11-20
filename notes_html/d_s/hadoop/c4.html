@@ -47,6 +47,12 @@
 <li><a href="#toc_1.2">文件压缩File Compression</a>
 <ul>
 <li><a href="#toc_1.2.1">Codecs</a>
+<li><a href="#toc_1.2.2">压缩与输入切片Compression and Input Splitting</a>
+<li><a href="#toc_1.2.3">在MapReduce中使用压缩Using Compression in MapReduce</a>
+</ul>
+<li><a href="#toc_1.3">序列化Serialization</a>
+<ul>
+<li><a href="#toc_1.3.1">Writable接口</a>
 </ul>
 </ul>
 </ul>
@@ -281,6 +287,131 @@ LocalFileSystem对这个方法的实现 ：
 加快传输
 
 </ul>
+ 
+<p>
+<strong>常用压缩格式:</strong>
+<table>
+<tr>
+<th>
+Compression format
+</th>
+<th>
+Tool
+</th>
+<th>
+Algorithm
+</th>
+<th>
+Filename extension
+</th>
+<th>
+Splittable?
+</th>
+</tr>
+<tr>
+<td>
+DEFLATE
+</td>
+<td>
+N/A
+</td>
+<td>
+DEFLATE
+</td>
+<td>
+.deflate
+</td>
+<td>
+No
+</td>
+</tr>
+<tr>
+<td>
+gzip
+</td>
+<td>
+gzip
+</td>
+<td>
+DEFLATE
+</td>
+<td>
+.gz
+</td>
+<td>
+No
+</td>
+</tr>
+<tr>
+<td>
+bzip2
+</td>
+<td>
+bzip2
+</td>
+<td>
+bzip2
+</td>
+<td>
+.bz2
+</td>
+<td>
+Yes
+</td>
+</tr>
+<tr>
+<td>
+LZO
+</td>
+<td>
+lzop
+</td>
+<td>
+LZO
+</td>
+<td>
+.lzo
+</td>
+<td>
+No(可以预建切分索引，以支持切分） 
+</td>
+</tr>
+<tr>
+<td>
+LZ4
+</td>
+<td>
+N/A
+</td>
+<td>
+LZ4
+</td>
+<td>
+.lz4
+</td>
+<td>
+No
+</td>
+</tr>
+<tr>
+<td>
+Snappy
+</td>
+<td>
+N/A
+</td>
+<td>
+Snappy
+</td>
+<td>
+.snappy
+</td>
+<td>
+No
+</td>
+</tr>
+</table>
+</p>
 
 <h3 id="toc_1.2.1">Codecs</h3>
 <ul>
@@ -388,7 +519,360 @@ createInputStream(InputStream inputStream) 创建了一个CompressionInputStream
 <li>
 CompressionCodecFactory的方法getCodec(Path), 根据扩展名获得对应的Codec
 
+<li>
+属性 <strong>io.compression.codecs:</strong>
+
+<ul>
+<li>
+定义了一个列表， CompressionCodecFactory 就是从这里面查找对应的Codec
+
+<li>
+默认列出hadoop支持的所有的codec
+
+<li>
+可以向里面注册自己自定义的
+
+</ul>
 </ol>
+   
+<p>
+<strong>原生类库Native Library:</strong>
+为了性能，推荐使用原生类库进行解压和压缩。
+</p>
+
+<ol>
+<li>
+并不是所有的压缩方式都有对应的原生类库
+
+<li>
+如果找不到原生类库，就使用java实现 
+
+<li>
+原生类库默认在 <code>lib/native</code> 下
+
+<li>
+原生类库位置可以通过java系统的属性指定：java.library.path
+
+<li>
+默认hadoop会自动搜索自己运行所在平台的原生类库
+
+<li>
+搜到自动加载
+
+<li>
+可以通过属性haddop.native.lib禁止使用原生类库，设为false
+
+<li>
+如果使用原生库且做大量压缩与解压， 通过 <strong>CodecPool</strong> 可以重复使用 <strong>Compressor</strong> 实例，提升性能：
+
+<ul>
+<li>
+就像线程池一样，有借有还
+
+<li>
+借：CodecPool.getCompressor(CompressionCodec)
+
+<li>
+还：CodecPool.returnCompressor(Compressor)
+<pre  class="brush:java">
+          public static void main(String[] args) throws Exception {
+              String codecClassname = args[0];
+              Class&lt;?&gt; codecClass = Class.forName(codecClassname);
+              Configuration conf = new Configuration();
+              CompressionCodec codec = (CompressionCodec)
+                  CodecPool.ReflectionUtils.newInstance(codecClass, conf);
+              Compressor compressor = null;
+              try {
+                  compressor = CodecPool.getCompressor(codec);
+                  CompressionOutputStream out =
+                      codec.createOutputStream(System.out, compressor);
+                  IOUtils.copyBytes(System.in, out, 4096, false);
+                  out.finish();
+              } finally {
+                  CodecPool.returnCompressor(compressor);
+              }
+          }
+</pre>
+
+</ul>
+</ol>
+      
+<h3 id="toc_1.2.2">压缩与输入切片Compression and Input Splitting</h3>
+<p>
+当被压缩的数据要被MapReduce使用时，该压缩算法是否支持切片将变的十分重要.
+</p>
+<ul>
+<li>
+如果不支持切片，单个数据块就无法作为数据切片供 MapReduce使用
+
+<li>
+但可以将整个文件的所有数据块作为单个Map任务的输入，会失去MapReduce的优势
+
+</ul>
+
+<p>
+<strong>使用哪种压缩格式？ </strong>
+</p>
+<ul>
+<li>
+与具体的应用有关, 要考虑文件的大小，格式，处理所用的工具
+
+<li>
+下面有一些方案，效率有高到低：
+
+<ol>
+<li>
+使用Sequence File或Avro datafile. 两者都支持压缩与切片，选择一个快速算法：LZO, LZ4, Snappy
+
+<li>
+使用一种支持切片的压缩格式，比如bzip2,或者LZO(可以通过建立切分点索引以支持切片）
+
+<li>
+application将文件分成一个个的chunk，每个chunk单独压缩存储， 每个chunk压缩后的大小应该近似于HDFS的block
+
+<li>
+不压缩直接存储
+
+</ol>
+<li>
+不应该大文件使用不支持切分的压缩格式，MapReduce将失去优势
+
+</ul>
+
+<h3 id="toc_1.2.3">在MapReduce中使用压缩Using Compression in MapReduce</h3>
+<p>
+<strong>输入:</strong>
+</p>
+<ol>
+<li>
+一个压缩的文件作为MapReduce的输入，会自动进行解压
+
+<li>
+使用文件扩展名来确定所使用的Codec
+
+</ol>
+
+<p>
+<strong>输出:</strong>
+</p>
+<ol>
+<li>
+可以确定是否对MapReduce的输出进入压缩。
+
+<li>
+通过属性 <code>mapred.output.compress</code> 来指定， true or false
+
+<li>
+通过属性 <code>mapred.output.compression.codec</code> 来指定所使用的Codec
+
+<li>
+如果不通过属性指定，可以通过FileOutputFormat的静态方法来指定
+<pre  class="brush:java">
+    FileOutputFormat.setCompressOutput(job, true);
+    FileOutputFormat.setOutputCompressorClass(job, GzipCodec.class);
+</pre>
+
+</ol>
+
+
+<p>
+<strong>MapReduce compression properties:</strong>
+<table>
+<tr>
+<th>
+Property name
+</th>
+<th>
+Type
+</th>
+<th>
+Default  value
+</th>
+<th>
+Description
+</th>
+<th>
+&nbsp;
+</th>
+</tr>
+<tr>
+<td>
+mapred.output.compress
+</td>
+<td>
+boolean
+</td>
+<td>
+false
+</td>
+<td>
+Compress outputs
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+mapred.output.compression.codec
+</td>
+<td>
+Class  name
+</td>
+<td>
+org.apache.hadoop.io.compress.DefaultCodec
+</td>
+<td>
+The compression codec to use for outputs
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+mapred.output.compression.type
+</td>
+<td>
+String
+</td>
+<td>
+RECORD
+</td>
+<td>
+The type of compression to use for SequenceFile outputs: NONE, RECORD, or BLOCK
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+</table>
+</p>
+
+<p>
+<strong>压缩Map输出Compressing Map Output:</strong>
+</p>
+<ol>
+<li>
+对Map task产生的中间结果进行压缩也是可以获得好处的
+
+<li>
+Map的输出会存储到磁盘上，并通过网络传输到Reduce结点
+
+<li>
+如果使用快速压缩算法LZO LZ4 或Snappy,就可以获得性能提升
+
+<li>
+相关属性：
+
+</ol>
+<table>
+<tr>
+<th>
+Property name
+</th>
+<th>
+Type
+</th>
+<th>
+Default value
+</th>
+<th>
+Description
+</th>
+</tr>
+<tr>
+<td>
+mapred.compress.map.output
+</td>
+<td>
+boolean
+</td>
+<td>
+false
+</td>
+<td>
+Compress map outputs
+</td>
+</tr>
+<tr>
+<td>
+mapred.map.output.compression.codec
+</td>
+<td>
+Class
+</td>
+<td>
+org.apache.hadoop.io.compress.DefaultCodec
+</td>
+<td>
+The compression codec to use for map output
+</td>
+</tr>
+</table>
+
+<ul>
+<li>
+代码示例：
+<pre  class="brush:java">
+    Configuration conf = new Configuration();
+    conf.setBoolean("mapred.compress.map.output", true);
+    conf.setClass("mapred.map.output.compression.codec", GzipCodec.class,
+            CompressionCodec.class);
+    Job job = new Job(conf);
+</pre>
+
+</ul>
+
+<h2 id="toc_1.3">序列化Serialization</h2>
+<p>
+<strong>序列化Serialization:</strong> 将结构化数据转化为字节流
+</p>
+
+<p>
+<strong>反序列化Deserailization:</strong> 将字节流转化回结构化数据
+</p>
+
+<p>
+序列化经常用于两个方面 <strong>进程间通信Interproess communication</strong> 和 <strong>永久存储Persistent storage</strong>
+</p>
+
+<p>
+Hadoop使用RPC进行不同结点间的定义，RPC协议对消息进行Serialization和Deserialization
+</p>
+
+<p>
+不管通信还是永久存储对序列化格式都有如下要求（但解释的侧重点不同）：
+</p>
+<ul>
+<li>
+Compact 紧凑
+
+<li>
+Fast 快速
+
+<li>
+Extensible 可扩展
+
+<li>
+Interoprable 互操作性
+
+</ul>
+
+<p>
+Hadoop使用自己的序列化格式Writable, 紧凑，快速，但很难被其他的语言所扩展
+</p>
+
+<h3 id="toc_1.3.1">Writable接口</h3>
+<p>
+<strong>两个方法:</strong>
+</p>
+<pre  class="brush:java">
+    public interface Writable {
+        void write(DataOutput out) throws IOException;
+        void readFields(DataInput in) throws IOException;
+    }
+</pre>
 
 			</div>
 

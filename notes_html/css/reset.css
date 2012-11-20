@@ -67,8 +67,6 @@ caption, th {
 	text-align: left;
 }
 sup, sub {
-	font-size: 100%;
-	vertical-align: baseline;
 }
 /* remember to highlight anchors and inserts somehow! */
 :link, :visited , ins {
