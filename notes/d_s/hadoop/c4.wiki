@@ -242,7 +242,125 @@ Hadoop使用自己的序列化格式Writable, 紧凑，快速，但很难被其�
         void readFields(DataInput in) throws IOException;
     }
   }}}
+  
+*WritableComparable and comparators:*
+* 在MapReduce的排序阶段，类型比较是十分重要的
+* WritableComparable
+  {{{ class="brush:java"
+        package org.apache.hadoop.io;
+        public interface WritableComparable<T> extends Writable, Comparable<T> {
+        }
+    }}}
+* RawComparator
+  # 对Comparator的一个扩展
+  # 允许实现不用反序列化，基于就可以对记录进行比较
+  # 定义
+  {{{ class="brush:java"
+        package org.apache.hadoop.io;
+        import java.util.Comparator;
+        public interface RawComparator<T> extends Comparator<T> {
+            public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2);
+        }
+    }}}
+* WritableComparator
+  # RawComparator的一个通用实现
+  # 功能一：实现compare()方法
+    * 从流中将对象返序列化
+    * 调用对象的compareTo()方法进行比较
+  # 功能二：作为RawComparator的实例工厂
+    * 用于获取指定Writable的Comparator
+      {{{ class="brush:java"
+          //获取用于IntWritable的Comparator
+          RawComparator<IntWritable> comparator = WritableComparator.get(IntWritable.class);
+        }}}
+    * 获取Comparator实例后，也可以不反序列化，直接基于流比较
+      {{{ class="brush:java"
+            IntWritable w1 = new IntWritable(163);
+            IntWritable w2 = new IntWritable(67);
+            assertThat(comparator.compare(w1, w2), greaterThan(0));
+            
+            //OR:
+            
+            byte[] b1 = serialize(w1);
+            byte[] b2 = serialize(w2);
+            assertThat(comparator.compare(b1, 0, b1.length, b2, 0, b2.length),
+                    greaterThan(0));
+        }}}
 
+===Writable类 ===
+在 `org.apache.hadoop.io` 里有丰富的Writable类。
+{{hadoop-writables.png}}
+
+*整数编码:*
+# 定长格式: `IntWritable`  and `LongWritable`
+# 变长格式: `VIntWritable` and `VLongWritable`
+# 变长格式会做优化，比如数很小时(-127 ~ 127), 就会只有一个字节保存 
+
+*Text:*
+# 是针对UTF-8字符序列的Writable类
+# 索引
+# 迭代
+# 易变，可重用
+ 
+*BytesWritable:*
+# 对一个二进制字节数组的包装
+# 有两部分组成
+  * 一个4字节的整数，指明数组的长度
+  * 数组中的字节
+   
+*NullWritable:*
+# 特殊类型
+# 长度为0
+# 不从流中读数据，也不写数据
+# 充当点位符
+# 单例
+# 通过 `NullWritable.get()a` 获得
+ 
+*ObjectWritable:*
+# 对java基本类型或基本类型数组的一个通用封装(primitives,String, enum, Writable, null)
+# Hadoop RPC中对参数或返回值进行封装和解封
+# 当一个field包含多个类型时非常有用
+  * 把这个段的值映射为一个ObjectWritable
+  * 这会浪费一些空间，序列化时需要指定值的类型，也就是类型的Classname
+# 使用 *GenericWritable* 进行优化
+  * 如果这个field的可能的类型是一个已知的类型数组
+  * 可以声明这样一个数组
+  * 序列化field值时，通过索引指定值的类型，而不是classname, 可以提高性能
+  * 需要创建一个子类，声明支持的类型
+
+*Writable集合类:*
+# 有六个: `ArrayWritable, ArrayPrimitiveWritable, TwoDArrayWritable, MapWritable, SortedMapWritable, EnumSetWritable`.
+# ArrayWritable和TowDArrayWritable
+  * 分别用于Writable的数组和二维数组
+  * 里面的 element必须是同类型的Writable
+  * 用于SequenceFile的键或值，或MapReduce的输入
+  * 创建它位的子类，以指定类型
+    {{{ class="brush:java"
+          public class TextArrayWritable extends ArrayWritable {
+              public TextArrayWritable() {
+                  super(Text.class);
+              }
+          }
+      }}}
+# ArrayPrimitiveWritable
+  * 用于java的primitive数组
+  * 类型通过set()时自检测
+# MapWritable和SortedMapWritable
+  * 分别是java.util.Map<Writable,Writable>和java.util.SortedMap<WritableComparable,Writable>的实现
+  * key和value的类型
+    * 作为这个Field序列化一部分存在的
+    * 一个字节
+    * 指定一个类型数组的索引
+    * 这个数组由org.apache.hadoop.io中标准类型填充
+    * 可以扩展自定义Writable类型，通过写一个header实现，里面封装了非标准Writable类型的数组
+    
+*自定义Writable类型:*
+# 标准的Writable的类型已经可以满足大部分需求
+# 仍然可以自定义Writable, 对二进制表示和排序实现全控制
+# Writable是MapReduce的核心
+# 调整Writable的二进制表示对性能有很大的影响
+# 标准的Writable已经有了很好的性能
+# 有时对于复杂的结构创建一个自定义的Writable会有更好的性能
 
 
 
