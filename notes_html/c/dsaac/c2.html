@@ -270,6 +270,9 @@ O(N)算法
 </ul>
     
 <h3 id="toc_1.2.4">二分查找</h3>
+<ul>
+<li>
+log(N)
 <pre  class="brush:c">
     int
     BinarySearch(const int arr[], int x, int N)
@@ -296,7 +299,12 @@ O(N)算法
         return NotFound;
     }
 </pre>
+
+</ul>
 <h3 id="toc_1.2.5">最大公因数（欧机里德算法）</h3>
+<ul>
+<li>
+log(N)
 <pre class="brush:c">
     int gcd(int M, int N){
         int temp;
@@ -315,24 +323,31 @@ O(N)算法
         return M;
     }
 </pre>
+
+</ul>
 <h3 id="toc_1.2.6">定理</h3>
 <pre  class="brush:math">
   如果 `M &gt; N`, 则 `M mod N &lt; M/2`
 </pre>
 <h3 id="toc_1.2.7">幂运算</h3>
+<ul>
+<li>
+log(N)
 <pre  class="brush:c">
     unsigned long power(int m, int x){
 
-        if(x==1||x==0){
+        if(x&lt;=1){
             return x==0?1:m;
         }else if(x%2==0){
-            return (unsigned long)power(m, x/2)*power(m,x/2);
+            return (unsigned long)power(m*m, x/2);
         }else{
-            return (unsigned long)power(m, x/2)*power(m,x/2)*m;
+            return (unsigned long)power(m*m, x/2)*m;
         }
 
     }
 </pre>
+
+</ul>
 
 <h2 id="toc_1.3">校验分析</h2>
 <h3 id="toc_1.3.1">校验实际运算时间</h3>
