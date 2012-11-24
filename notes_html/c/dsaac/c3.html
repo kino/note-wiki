@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>表、栈和队列</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<div class="toc">
+<ul>
+<li><a href="#toc_1">表、栈和队列</a>
+<ul>
+<li><a href="#toc_1.1">抽象数据类型</a>
+<li><a href="#toc_1.2">表(List ADT)</a>
+<ul>
+<li><a href="#toc_1.2.1">基于数组的实现</a>
+<li><a href="#toc_1.2.2">链表(Linked List)</a>
+<li><a href="#toc_1.2.3">双链表(Doubly Linked List)</a>
+<li><a href="#toc_1.2.4">循环链表(Circularly Linked List)</a>
+</ul>
+</ul>
+</ul>
+</div>
+<h1 id="toc_1">表、栈和队列</h1>
+
+<h2 id="toc_1.1">抽象数据类型</h2>
+<ul>
+<li>
+abstract data type, ADT
+
+<li>
+一些操作的集合
+
+<li>
+是数学的抽象
+
+<li>
+如表、集合、图和它们的操作一起被看作是一种抽象数据类型
+
+<li>
+就像整数实数布尔量等数据类型一样，它们有相关的操作。
+
+</ul>
+
+<h2 id="toc_1.2">表(List ADT)</h2>
+<ul>
+<li>
+A1,A2,A3 ... AN;表的大小为N
+
+<li>
+操作：PrintList MakeEmpty Insert Delete Find FindKth
+
+<li>
+Ai+1 后继 Ai; Ai前驱Ai+1
+
+<li>
+Ai+1是Ai的后继元(Successor)；Ai是Ai+1的前驱元(Predecessor)
+
+</ul>
+
+<h3 id="toc_1.2.1">基于数组的实现</h3>
+<ul>
+<li>
+需要对表的大小进行最大值预估
+
+<li>
+PrintList Find 是线性时间
+
+<li>
+FindKth是常数
+
+<li>
+Insert Delete 需要移动元素，是O（N）
+
+</ul>
+
+<h3 id="toc_1.2.2">链表(Linked List)</h3>
+<ul>
+<li>
+由一系列在内存中 <strong>不必相连</strong> 的结构组成。
+
+<li>
+每个结构中包含元素和指向后继元结构的指针<code>Next</code>, 最后一个单元<code>Next</code>指向<code>NULL</code>
+<pre  class="brush:c">
+    struct Node{
+      ElementType Element;
+      struct Node *Next;
+    }
+</pre>
+
+</ul>
+<p>
+<img src="ADT-List.png" />
+</p>
+<ul>
+<li>
+操作
+<pre  class="brush:c">
+        #ifndef _List_H
+        struct Node;
+        typedef struct Node *PtrToNode;
+        typedef PtrToNode List;
+        typedef PtrToNode Position;
+
+        List MakeEmpty( List L );
+        int IsEmpty( List L );
+        int IsLast( Position P, List L );
+        Position Find( ElementType X, List L );
+        void Delete( ElementType X, List L );
+        Position FindPrevious( ElementType X, List L );
+        void Insert( ElementType X, List L, Position P );
+        void DeleteList( List L );
+        Position Header( List L );
+        Position First( List L );
+        Position Advance( Position P );
+        ElementType Retrieve( Position P );
+        #endif    /* _List_H */
+        
+        /* Place in the interface file */
+        struct Node
+        {
+            ElementType Element;
+            Position    Next;
+        };
+</pre>
+
+<li>
+资源: <a href="list.h.html">list.h</a>, <a href="list.c.html">list.c</a>, <a href="testlist.c.html">testlist.c</a>
+
+</ul>
+    
+<h3 id="toc_1.2.3">双链表(Doubly Linked List)</h3>
+<p>
+<img src="ADT-DLList" />
+</p>
+
+<h3 id="toc_1.2.4">循环链表(Circularly Linked List)</h3>
+<p>
+<img src="ADT-CLList" />
+</p>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>
