@@ -32,5 +32,7 @@
 * [[performance/performance|性能 ]]
 ==分布式存储 ==
 * [[d_s/hadoop|Hadoop ]]
+==Operating Systems ==
+* [[operating_systems/operating_systems_design_and_implementation|Operating Systems Design and Implementation]]
  
 

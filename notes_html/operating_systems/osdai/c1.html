@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Operating Systems Design and Implementation</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">Operating Systems Design and Implementation</a>
+<ul>
+<li><a href="#toc_1.1">什么是操作系统</a>
+<ul>
+<li><a href="#toc_1.1.1">操作系统作为虚拟机</a>
+<li><a href="#toc_1.1.2">操作系统作为资源管理器</a>
+</ul>
+<li><a href="#toc_1.2">操作系统发展历史</a>
+<ul>
+<li><a href="#toc_1.2.1">第一代计算机(1945 ~ 1955):真空管和插板</a>
+<li><a href="#toc_1.2.2">第二代计算机(1955 ~ 1965):晶体管和批处理系统</a>
+<li><a href="#toc_1.2.3">第三代计算机(1965 ~ 1980):集成电路芯片与多道程序</a>
+<li><a href="#toc_1.2.4">第四代计算机(1980 ~ NOW):个人计算机</a>
+</ul>
+</ul>
+</ul>
+</div>
+
+<h1 id="toc_1">Operating Systems Design and Implementation</h1>
+
+<ul>
+<li>
+软件分为系统软件和应用软件
+
+<ul>
+<li>
+系统软件管理系统及应用程序
+
+<li>
+应用软件执行用户最终所需要的功能
+
+<li>
+最基本的系统软件就是操作系统
+
+<li>
+它控制计算机的所有的资源并提供开发应用程序的基础
+
+</ul>
+<li>
+virtual machine
+
+<ul>
+<li>
+在裸机上加载一层软件来管理整个系统，为用户提供一套更容易理解与编程的接口
+
+<li>
+这个接口叫virtual machine
+
+<li>
+层软件号操作系统
+
+</ul>
+<li>
+微程序microprogram
+
+<ul>
+<li>
+一层原始软件
+
+<li>
+控制设备并向上一层提供一套更清晰的清晰的接口
+
+<li>
+它实际上是一个解释器：也取得机器语言的指令，执行相应的指令
+
+</ul>
+<li>
+精简指令集计算机（Reduced Instruction Set Computer, RISC)
+
+<ul>
+<li>
+没有微程序层
+
+</ul>
+<li>
+操作系统专指运行在内核态(kernel mode)或管态(supervisor mode)下的程序。
+
+<ul>
+<li>
+它受硬件保护而免遭用户篡改
+
+<li>
+命令解释器 编译器 编辑器运行在用户态(user mode), 它们是应用程序。
+
+</ul>
+</ul>
+  
+<h2 id="toc_1.1">什么是操作系统</h2>
+<h3 id="toc_1.1.1">操作系统作为虚拟机</h3>
+<ul>
+<li>
+操作系统为用户提供一台等价的扩展计算机，或叫虚拟机，它比低层硬件更容易编程。
+
+</ul>
+
+<h3 id="toc_1.1.2">操作系统作为资源管理器</h3>
+<ul>
+<li>
+跟踪资源的使用状况、满足资源请求、提高资源利用率，及协调各程序和用户对资源的使用冲突。
+
+</ul>
+
+<h2 id="toc_1.2">操作系统发展历史</h2>
+<ul>
+<li>
+第一台数字计算机，英国数学家Charles Babbage设计，纯机械式，无操作系统
+
+<li>
+第一个程序员：Ada Lovelace,诗人拜伦的女儿。
+
+</ul>
+
+<h3 id="toc_1.2.1">第一代计算机(1945 ~ 1955):真空管和插板</h3>
+<ul>
+<li>
+每一台都专门设计，使用机器语言，没有编程语言，没有操作系统
+
+</ul>
+ 
+<h3 id="toc_1.2.2">第二代计算机(1955 ~ 1965):晶体管和批处理系统</h3>
+<ul>
+<li>
+卡片，磁带，批处理（读入一队作业，顺序执行），负责读入作业并输出结果的特殊程序就是操作系统的前身
+
+</ul>
+ 
+<h3 id="toc_1.2.3">第三代计算机(1965 ~ 1980):集成电路芯片与多道程序</h3>
+<ul>
+<li>
+当一个作业在等待io时，cpu就会空闲下来，很浪费
+
+<li>
+<strong>多道程序(multiprogramming):</strong>
+
+<ol>
+<li>
+将内存划分为几部分，每一部分存放一个作业
+
+<li>
+当一个作业在等待io时，另一个作业可以使用cpu
+
+</ol>
+<li>
+<strong>spooling:</strong>
+
+<ol>
+<li>
+Simultaneous Peripheral Operation On Line, 联机即时外设操作
+
+<li>
+可以很快的将卡片上的作业读入磁盘。
+
+</ol>
+<li>
+<strong>分时系统(timesharing):</strong>
+
+<ol>
+<li>
+多道程序的变种
+
+<li>
+每一个用户有一个终端
+
+<li>
+cpu轮流为它们服务
+
+<li>
+可以为用户提供交互式服务
+
+<li>
+每个用户感觉自己拥有一个完整的计算机
+
+<li>
+cpu空闲时可以执行后台大作业
+
+</ol>
+<li>
+UNIX
+
+<li>
+POSIX
+
+</ul>
+
+<h3 id="toc_1.2.4">第四代计算机(1980 ~ NOW):个人计算机</h3>
+<ul>
+<li>
+网络操作系统
+
+<li>
+分布式操作系统
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>
