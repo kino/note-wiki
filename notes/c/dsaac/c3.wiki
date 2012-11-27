@@ -187,3 +187,48 @@
 * 资源：[[cursor.h]] [[cursor.c]]  [[testcurs.c]] 
     
 
+==栈(Stack ADT) ==
+
+===栈模型(Stack Model)===
+*Stack:*
+* Stack是只能在 一个位置 上进行插入和删除的List
+* 该位置在表的末端，被称之为 *栈顶(top)*
+* 又称之为LILO表（后进先出)
+ 
+*Operation:*
+* *Push:* 在top上插入一个元素
+* *Pop:* 删除并返回在top上的元素
+* *Top:* 返回top上的元素并不删除，可以在Pop之前来进行验证操作
+ 
+*错误：*
+* 对empty statck进行Pop Top操作被认为是ADT错误
+* Push时空间不足认为是实现错误
+
+===Stack的实现 ===
+Stack是一个List，所以任何实现List的方式都可以实现Stack,最常用的有两种：
+* 基于指针
+* 基于数组
+ 
+====基于单链表的Stack ====
+* 实现
+* 花费：除了置空栈之外，所有的操作都花费常数时间
+* 缺点:malloc与free是昂贵的
+* 解决：
+  # 使用双链表
+  # Pop时并不free,只是把它移到第二个链表中
+  # Push并不总是malloc,先查看第二个链表有没有空间，若有直接拿来用。
+====基于数组的Stack ====
+*概要:*
+* 这是一种更流行的做法
+* 唯一的潜在危害就是预先声明一个数组的大小
+* 一般来说这不是问题
+* 因为大多数典型的应用在任五时刻，Statck的元素个数并不会太多
+* 声明一个足够用又不是太浪费的数组，具体到应用的话，并不是太难
+*实现:*
+# Stack对应一个数组
+# TopOfStack是一个表示Stack Top的下标
+# Empty Stack时，TopOfStack等于 -1
+# Push(X): TopOfStack加1 ，Stack[TopOfStack]=x
+# Pop(Stack):返回Stack[TopOfStack],  TopOfStack减1
+*花费:*
+* 所有的操作以非常快的常数时间运行

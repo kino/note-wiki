@@ -76,19 +76,10 @@
 * 一个进程本质上是一个程序的 *执行*
 *地址空间address space*
 * 每个进程拥有自己的address space: 0 ~ 最大值
-* address sapce 中有： 可执行程序， 程序数据， 程序的堆栈
+* address apce 中有： 可执行程序， 程序数据， 程序的堆栈
 *进程还包括：一组寄存器register 程序计数器program counter 指针stack pointer  其他硬件寄存器hardware register*
 *进程表 process tabel:*
 * 除address space之外的进程所有的信息都保存在一张表中
 * 每一进程对应表中的一项
-* process table 是一个结构数组或链表
-*一个进程包括:*
-* address space, 又叫内核映像core image
-* process table中的一项
-*进程间通信*
-
-*中断和信号*
-
-*一个挂起的进程，需要再运行，则需要把进程暂停前的所有信息都保存下来*
 
 

@@ -50,6 +50,15 @@
 <li><a href="#toc_1.2.7">例子：基数排序(Radix Sort Or Card Sort)</a>
 <li><a href="#toc_1.2.8">基于游标实现的链表(Cursor)</a>
 </ul>
+<li><a href="#toc_1.3">栈(Stack ADT)</a>
+<ul>
+<li><a href="#toc_1.3.1">栈模型(Stack Model)</a>
+<li><a href="#toc_1.3.2">Stack的实现</a>
+<ul>
+<li><a href="#toc_1.3.2.1">基于单链表的Stack</a>
+<li><a href="#toc_1.3.2.2">基于数组的Stack</a>
+</ul>
+</ul>
 </ul>
 </ul>
 </div>
@@ -478,6 +487,141 @@ Next
 <ul>
 <li>
 资源：<a href="cursor.h.html">cursor.h</a> <a href="cursor.c.html">cursor.c</a>  <a href="testcurs.c.html">testcurs.c</a> 
+
+</ul>
+    
+
+<h2 id="toc_1.3">栈(Stack ADT)</h2>
+
+<h3 id="toc_1.3.1">栈模型(Stack Model)</h3>
+<p>
+<strong>Stack:</strong>
+</p>
+<ul>
+<li>
+Stack是只能在 一个位置 上进行插入和删除的List
+
+<li>
+该位置在表的末端，被称之为 <strong>栈顶(top)</strong>
+
+<li>
+又称之为LILO表（后进先出)
+
+</ul>
+ 
+<p>
+<strong>Operation:</strong>
+</p>
+<ul>
+<li>
+<strong>Push:</strong> 在top上插入一个元素
+
+<li>
+<strong>Pop:</strong> 删除并返回在top上的元素
+
+<li>
+<strong>Top:</strong> 返回top上的元素并不删除，可以在Pop之前来进行验证操作
+
+</ul>
+ 
+<p>
+<strong>错误：</strong>
+</p>
+<ul>
+<li>
+对empty statck进行Pop Top操作被认为是ADT错误
+
+<li>
+Push时空间不足认为是实现错误
+
+</ul>
+
+<h3 id="toc_1.3.2">Stack的实现</h3>
+<p>
+Stack是一个List，所以任何实现List的方式都可以实现Stack,最常用的有两种：
+</p>
+<ul>
+<li>
+基于指针
+
+<li>
+基于数组
+
+</ul>
+ 
+<h4 id="toc_1.3.2.1">基于单链表的Stack</h4>
+<ul>
+<li>
+实现
+
+<li>
+花费：除了置空栈之外，所有的操作都花费常数时间
+
+<li>
+缺点:malloc与free是昂贵的
+
+<li>
+解决：
+
+<ol>
+<li>
+使用双链表
+
+<li>
+Pop时并不free,只是把它移到第二个链表中
+
+<li>
+Push并不总是malloc,先查看第二个链表有没有空间，若有直接拿来用。
+
+</ol>
+</ul>
+<h4 id="toc_1.3.2.2">基于数组的Stack</h4>
+<p>
+<strong>概要:</strong>
+</p>
+<ul>
+<li>
+这是一种更流行的做法
+
+<li>
+唯一的潜在危害就是预先声明一个数组的大小
+
+<li>
+一般来说这不是问题
+
+<li>
+因为大多数典型的应用在任五时刻，Statck的元素个数并不会太多
+
+<li>
+声明一个足够用又不是太浪费的数组，具体到应用的话，并不是太难
+
+</ul>
+<p>
+<strong>实现:</strong>
+</p>
+<ol>
+<li>
+Stack对应一个数组
+
+<li>
+TopOfStack是一个表示Stack Top的下标
+
+<li>
+Empty Stack时，TopOfStack等于 -1
+
+<li>
+Push(X): TopOfStack加1 ，Stack[TopOfStack]=x
+
+<li>
+Pop(Stack):返回Stack[TopOfStack],  TopOfStack减1
+
+</ol>
+<p>
+<strong>花费:</strong>
+</p>
+<ul>
+<li>
+所有的操作以非常快的常数时间运行
 
 </ul>
 
