@@ -112,209 +112,239 @@
 * POSIX标准
 
 *进程管理Process Management:*
-# 
   {{{ class="brush:c"
     //创建一个child process
     pid = fork();
-    }}}
-# 
-  {{{ class="brush:c"
+    
     //等待一个child process结束
     pid = waitpid (pid, &statloc, opts)
-    }}}
-# 
-  {{{ class="brush:c"
+    
     //老版本的waitpid
     s = waitpid (&status)
-    }}}
-# 
-  {{{ class="brush:c"
+    
     //替换一个进程的内核映象
     s = execve (name, argv, envp)
-    }}}
-# 
-  {{{ class="brush:c"
+    
     //结束进程执行返回一个状态码
     exit (status)
-    }}}
-# 
-  {{{ class="brush:c"
+    
     //设置数据段大小
     size = brk (addr)
-    }}}
-# 
-  {{{ class="brush:c"
+    
     //返回调用者进程号
     pid = getpid ()
-    }}}
-# 
-  {{{ class="brush:c"
+    
     //返回调用者组标识号
     pid = getpgrp ()
-    }}}
-# 
-  {{{ class="brush:c"
+    
     //创建一个会话并返回其组标识号
     pid = setsid ()
-    }}}
-# 用于调试
-  {{{ class="brush:c"
+    
+    //用于调试
     l = ptrace (req, pid, addr, data)
     }}}
     
-    
 *信号Signal*
-
-# 
   {{{ class="brush:c"
     //定义对信号的处理工作
     s = sigaction (sig, &act, &oldact)
-    }}}
-# 
-  {{{ class="brush:c"
+    
     //从信号返回
     s = sigreturn (&context)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //检查或修改信号掩码mask
     s = sigprocmask (how, &set, &old)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //获得阻塞信息集合
     s = sigpending (set)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //替换信号掩码并挂起进程
     s = sigsuspend (sigmask)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //给进程发送一个信号
     s = kill (pid, sig)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //设置时间闹钟
     residual = alarm (seconds)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //挂起调用进程直到下一个信号
     s = pause ()   
     }}}
-    
 
 *文件管理File Management:*
-
-#  
   {{{ class="brush:c"
     //创建一个新文件
     fd = creat (name, mode)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     // 创建普通、设备文件或目录i节点
     fd = mknod (name, mode, addr)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //打开一个文件进行只读或读写操作
     fd = open (file, how, ...)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //关闭一个已打开的文件
     s = close (fd)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //从文件读数据到缓冲区
     n = read (fd, buffer, nbytes)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //从缓冲区将数据写入文件
     n = write (fd, buffer, nbytes)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //移动文件指针
     pos = lseek (fd, offset, whence)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //获取文件状态信息
     s = stat (name, &buf)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //获取文件状态信息
     s = fstat (fd, &buf)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //为打开的文件分配一个新的文件描述符
     fd = dup (fd)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //创建一个管道
     s = pipe (&fd[0])
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //对文件时行特殊操作
     s = ioctl (fd, request, argp)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //检查文件的访问权限
     s = access (name, amode)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //重命名文件
     s = rename (old, new)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //文件加锁及其他操作
     s = fcntl (fd, cmd, ...)
     }}}
     
 *目录及文件系统管理Dir. & File System Mgt:*
-#  
   {{{ class="brush:c"
     //创建一个新目录
     s = mkdir (name, mode)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //删除一个目录
     s = rmdir (name)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //创建一个新项name2，它指向name1
     s = link (name1, name2)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //删除一个目录项
     s = unlink (name)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     //挂一个文件系统
     s = mount (special, name, flag)
-    }}}
-#  
-  {{{ class="brush:c"
+    
     // Unmount a file system
     s = umount (special)
+    
+    //将缓存中的数据块回写到磁盘
+    s = sync ()
+    
+    //改变工作目录
+    s = chdir (dirname)
+    
+    //改变根目录
+    s = chroot (dirname)
     }}}
-
+    
+*保护Prodeciton:*
+  {{{ class="brush:c"   
+    //修改文件的保护位
+    s = chmod (name, mode)
+    
+    //获取调用进程的uid
+    uid = getuid ()
+    
+    //获取调用进程的gid
+    gid = getgid ()
+    
+    //设置调用进程的uid
+    s = setuid (uid)
+    
+    //设置调用进程的gid
+    s = setgid (gid)
+    
+    //修改文件的拥有者和组
+    s = chown (name, owner, group)
+    
+    //修改文件模式掩码
+    oldmask = umask (complmode)
+    
+    }}}
+    
+*时间管理Time Management:*
+  {{{ class="brush:c"
+    //获取自19700101以来的秒数
+    seconds = time (&seconds)
+    
+    //获取自19700101以来的时间
+    s = stime (tp)
+    
+    //设置文件最后访问时间
+    s = utime (file, timep)
+    
+    //获取当前的用户和系统时间
+    s = times (buffer)
+    
+    }}}
+    
 ===进程管理的系统调用Process management===
+
+*fork():*
+* fork是创建新进程的唯一途径
+* fork创建了一个调用者进程的精确副本：文件描述符，寄存器等所有内容
+* fork后原进程子进程各自执行，互不相关
+* fork时，两个进程的变量拥有相同的值，此后各自维护
+* fork()对子进程返回0， 对你进程返回一个正整数，为新子进程的pid
+* fork()可以以返回值区分是子进程还是你进程
+* shell框架demo:
+  {{{ class="brush:c"
+        #define TRUE 1
+        
+        while (TRUE){                           /* repeat forever */
+            type_prompt();                      /* display prompt on the screen */
+            read_command(command, parameters);  /* read input from terminal */
+            
+            if (fork() != 0){                   /* fork off child process */
+                /* Parent code. */
+                waitpid(1, &status, 0);         /* wait for child to exit */
+            } else {
+                /* Child code. */
+                execve(command, parameters, 0); /* execute command */
+            }
+        }
+    }}}
+    
+*exec():*
+* 有三个参数：
+  # 待执行文件名：用于替换内核映象
+  # 指向参数数组的指针
+  # 指向环境变量数组的指针
+* 简化版：`execl execv execle execve`
+ 
+*main(argc, argv, envp):*
+* argc: 包括程序名在内的参数个数
+* argv: 指向参数数组的指针, argv[0]为程序名
+* envp: 环境变量指针
+ 
+*进程的存储空间:*
+* 分为三部分：正文段（text segment, 程序代码), 数据段（data segment,即变量), 堆栈段（stack segment)
+* data segment向上增长，stack segment向下增长；
+* statck segment的增长随程序的执行自动进行
+* data segment通过brk显示完成
+* data segment的结束指针必须小于stack segment的指针，不然会重叠，这是不允许的。
+ 
+*getpid():*
+* 获得当前进程的标识号
+
+===信号管理的系统调用System Calls for Signaling===
+
+
+ 
+ 
+
+
+
+ 
