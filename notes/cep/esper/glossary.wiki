@@ -1,0 +1,7 @@
+%title 名词解释
+=名词解释 =
+
+* *ESP:* Event Stream Processing 
+* *CEP:* Complex Event Processing
+* *EDA:* Event Driven Architecture
+* *EPL:* Event Processing Language

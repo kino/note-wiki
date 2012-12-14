@@ -1,0 +1,32 @@
+%title 速记
+
+=速记 =
+
+Esper is a lightweight kernel written in Java 
+which is fully embeddable into any Java process, JEE application server or Java-based Enterprise Service Bus. 
+It enables rapid development of applications that process large volumes of incoming messages or events.
+
+finance, fraud detection, business intelligence or battlefield operation
+
+Information flows in from different sources in the form of messages or events, 
+giving a hint on the state at a given time such as stock price. 
+That said, looking at those discrete events is most of the time meaningless.
+
+Event streams--that is an infinite set of events--considered over a sliding window and further correlated, are highly meaningful, and reacting to them with the minimal latency is critical for effective action and competitive advantage.
+
+can be thought of as a database turned upside-down: instead of storing the data and running queries against stored data, Esper allows applications to store queries and run the data through. Response from the Esper engine is real-time when conditions occur that match user defined queries. The execution model is thus continuous rather than only when a query is submitted.
+
+ Such concepts are a key foundation of EDA, and have been under active research in more than the last 10 years. Awareness of the importance of such systems in real-world architectures has started to emerge only recently.
+ 
+ In Esper, 
+ a tailored EPL allows registering queries in the engine. 
+ A listener class--which is basically a POJO--will then be called by the engine 
+ when the EPL condition is matched as events flow in. 
+ The EPL enables to express complex matching conditions that include temporal windows, 
+ joining of different event streams, as well as filtering, aggregation, and sorting. 
+ Esper statements can also be combined together with "followed by" conditions thus deriving complex events from more simple events. 
+ Events can be represented as JavaBean classes, legacy Java classes, XML document or java.util.Map, 
+ which promotes reuse of existing systems acting as messages publishers.
+
+
+
