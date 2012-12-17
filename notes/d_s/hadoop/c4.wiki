@@ -362,5 +362,41 @@ Hadoop使用自己的序列化格式Writable, 紧凑，快速，但很难被其�
 # 标准的Writable已经有了很好的性能
 # 有时对于复杂的结构创建一个自定义的Writable会有更好的性能
 
+===序列化框架 ===
+# MapReduce并不强迫使用Writable进行序列化
+# 反而提供了一种 *可替换序列化框架的机制 * 
+  * 接口 `org.apache.hadoop.io.serializer.Serialization`
+  * 接口的每个实现就是一个 序列化框架
+  * 定义了由Type到Serializer和Deserailizer的映射
+  * 比如WritableSerialization和JavaSerialization(java默认机制）
+# 通过属性 `io.serializations` 指定支持的 序列化框架
+  * 值是一个 全类名列表
+  * 默认值：org.apache.hadoop.io.serialization.WritableSerialization
+  * 所以默认由Writable进行序列化
+# 为什么不用Java Serialization
+  * 精确控制对象的读和写，就hadoop的核心
+  * 需要精简  快速  可扩展 可互操作
+  * java serialization复杂
+  * 它基于引用，需要存储类名和状态
+# 为什么不用RMI
+  * 进程间通信也是hadoop的核心
+  * 需要精确控制连接，延迟和缓冲的处理方式，RMI无法满足
+ 
+*序列第IDL Interface Description Language*
+# 有些框架不依赖语言来解决问题，而是通过IDL来定义相关信息
+# Thrift 和 Protocaol Buffers两个比较流行的序列化框架
+
+==AVRO==
+# 独立于编程语言的数据序列化系统
+# Avro数据用语言无关的Schema定义
+# Avro代码生成是可选的
+# 可以根据一个Schema进行读写数据，哪怕第一次见到这个Schema
+# Avro假定Schema在读写时总是存在的
+# 这会生成非常紧凑的编码数据，因为在编码的数据中不需要指定字段标识符
+# Avro通常使用json编写schema, 使用二进制对数据进行编码
+# 还有其他可选项
+# Avro有很强的schema解析能力，读写时的schema不必完全一致，它们会分别忽略掉自己不关心的内容
+# 支持压缩可切分
+
 
 
