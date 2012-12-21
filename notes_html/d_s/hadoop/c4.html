@@ -56,6 +56,7 @@
 <li><a href="#toc_1.3.2">Writable类 </a>
 <li><a href="#toc_1.3.3">序列化框架 </a>
 </ul>
+<li><a href="#toc_1.4">AVRO</a>
 </ul>
 </ul>
 </div>
@@ -1180,6 +1181,116 @@ Writable是MapReduce的核心
 </ol>
 
 <h3 id="toc_1.3.3">序列化框架 </h3>
+<ol>
+<li>
+MapReduce并不强迫使用Writable进行序列化
+
+<li>
+反而提供了一种 <strong>可替换序列化框架的机制 </strong> 
+
+<ul>
+<li>
+接口 <code>org.apache.hadoop.io.serializer.Serialization</code>
+
+<li>
+接口的每个实现就是一个 序列化框架
+
+<li>
+定义了由Type到Serializer和Deserailizer的映射
+
+<li>
+比如WritableSerialization和JavaSerialization(java默认机制）
+
+</ul>
+<li>
+通过属性 <code>io.serializations</code> 指定支持的 序列化框架
+
+<ul>
+<li>
+值是一个 全类名列表
+
+<li>
+默认值：org.apache.hadoop.io.serialization.WritableSerialization
+
+<li>
+所以默认由Writable进行序列化
+
+</ul>
+<li>
+为什么不用Java Serialization
+
+<ul>
+<li>
+精确控制对象的读和写，就hadoop的核心
+
+<li>
+需要精简  快速  可扩展 可互操作
+
+<li>
+java serialization复杂
+
+<li>
+它基于引用，需要存储类名和状态
+
+</ul>
+<li>
+为什么不用RMI
+
+<ul>
+<li>
+进程间通信也是hadoop的核心
+
+<li>
+需要精确控制连接，延迟和缓冲的处理方式，RMI无法满足
+
+</ul>
+</ol>
+ 
+<p>
+<strong>序列第IDL Interface Description Language</strong>
+</p>
+<ol>
+<li>
+有些框架不依赖语言来解决问题，而是通过IDL来定义相关信息
+
+<li>
+Thrift 和 Protocaol Buffers两个比较流行的序列化框架
+
+</ol>
+
+<h2 id="toc_1.4">AVRO</h2>
+<ol>
+<li>
+独立于编程语言的数据序列化系统
+
+<li>
+Avro数据用语言无关的Schema定义
+
+<li>
+Avro代码生成是可选的
+
+<li>
+可以根据一个Schema进行读写数据，哪怕第一次见到这个Schema
+
+<li>
+Avro假定Schema在读写时总是存在的
+
+<li>
+这会生成非常紧凑的编码数据，因为在编码的数据中不需要指定字段标识符
+
+<li>
+Avro通常使用json编写schema, 使用二进制对数据进行编码
+
+<li>
+还有其他可选项
+
+<li>
+Avro有很强的schema解析能力，读写时的schema不必完全一致，它们会分别忽略掉自己不关心的内容
+
+<li>
+支持压缩可切分
+
+</ol>
 
 			</div>
 
