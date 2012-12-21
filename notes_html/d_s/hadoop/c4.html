@@ -57,6 +57,11 @@
 <li><a href="#toc_1.3.3">序列化框架 </a>
 </ul>
 <li><a href="#toc_1.4">AVRO</a>
+<ul>
+<li><a href="#toc_1.4.1">核心类 </a>
+<li><a href="#toc_1.4.2">Avro Data Files</a>
+<li><a href="#toc_1.4.3">Schemo Resolution</a>
+</ul>
 </ul>
 </ul>
 </div>
@@ -1291,6 +1296,183 @@ Avro有很强的schema解析能力，读写时的schema不必完全一致，它�
 支持压缩可切分
 
 </ol>
+ 
+<h3 id="toc_1.4.1">核心类 </h3>
+<ol>
+<li>
+Schema
+
+<li>
+Schema.Parser 解析一个文件，用于生成一个Schema实例
+
+<li>
+GenericRecord 代表一个要持久化的对象, 由Schema而来
+
+<li>
+DatumWriter&lt;T&gt;  输出序列化
+
+<li>
+Encoder
+
+<li>
+DatumReader&lt;T&gt;  反序列化
+
+<li>
+Encoder
+<pre  class="brush:java">
+    public static void main(String[] args) throws IOException {
+        Schema.Parser parser = new Schema.Parser();
+        Schema schema = parser.parse(Demo.class.getResourceAsStream("/StringPair.avsc"));
+
+
+        GenericRecord datum = new GenericData.Record(schema);
+        datum.put("left", "L");
+        datum.put("right", "R");
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        DatumWriter&lt;GenericRecord&gt; writer = new GenericDatumWriter&lt;GenericRecord&gt;(schema);
+        Encoder encoder = EncoderFactory.get().binaryEncoder(out, null);
+        writer.write(datum, encoder);
+        encoder.flush();
+        out.close();
+
+        DatumReader&lt;GenericRecord&gt; reader = new GenericDatumReader&lt;GenericRecord&gt;(schema);
+        Decoder decoder = DecoderFactory.get().binaryDecoder(out.toByteArray(), null);
+        GenericRecord result = reader.read(null, decoder);
+        assertThat(result.get("left").toString(), is("L"));
+        assertThat(result.get("right").toString(), is("R"));
+        System.out.println(result.get("left").toString());
+    }
+</pre>
+
+</ol>
+  
+<h3 id="toc_1.4.2">Avro Data Files</h3>
+<ol>
+<li>
+用于存储Avro 对象序列
+
+<li>
+文件头会存储schema的meta data
+
+<li>
+跨语言
+
+<li>
+可切分，适合MapReduce快速处理
+
+<li>
+和写入流类似
+
+<li>
+使用DataFileWriter和DataFileReader
+
+<li>
+append的对象必须符合schema，不然会报错
+<pre  class="brush:java">
+
+    File file = new File("data.avro");
+    DatumWriter&lt;GenericRecord&gt; writer = new GenericDatumWriter&lt;GenericRecord&gt;(schema);
+    DataFileWriter&lt;GenericRecord&gt; dataFileWriter = new DataFileWriter&lt;GenericRecord&gt;(writer);
+    dataFileWriter.create(schema, file);
+    dataFileWriter.append(datum);
+    dataFileWriter.close();
+
+    DatumReader&lt;GenericRecord&gt; reader = new GenericDatumReader&lt;GenericRecord&gt;();
+    DataFileReader&lt;GenericRecord&gt; dataFileReader =
+    new DataFileReader&lt;GenericRecord&gt;(file, reader);
+    assertThat("Schema is the same", schema, is(dataFileReader.getSchema()));
+    
+
+    GenericRecord record = null;
+    while (dataFileReader.hasNext()) {
+        record = dataFileReader.next(record);
+        // process record
+    }
+
+</pre>
+
+</ol>
+
+<h3 id="toc_1.4.3">Schemo Resolution</h3>
+<ol>
+<li>
+支持写入的Schema和读入的Schema不同
+
+<li>
+在Schema中增加的字段必须增加默认值
+
+<li>
+Rules of the resolution:
+
+</ol>
+
+<table>
+<tr>
+<th>
+New schema
+</th>
+<th>
+Writer
+</th>
+<th>
+Reader
+</th>
+<th>
+Action
+</th>
+</tr>
+<tr>
+<td rowspan="2">
+Added field
+</td>
+<td>
+Old
+</td>
+<td>
+New
+</td>
+<td>
+The reader uses the default value of the new field, since it is not written by the writer.
+</td>
+</tr>
+<tr>
+<td>
+New
+</td>
+<td>
+Old
+</td>
+<td>
+The reader does not know about the new field written by the writer, so it is ignored(projection).
+</td>
+</tr>
+<tr>
+<td rowspan="2">
+Removed field
+</td>
+<td>
+Old
+</td>
+<td>
+New
+</td>
+<td>
+The reader ignores the removed field (projection).
+</td>
+</tr>
+<tr>
+<td>
+New
+</td>
+<td>
+Old
+</td>
+<td>
+The removed field is not written by the writer. If the old schema had a default defined for the field, the reader uses this; otherwise, it gets an error. In this case, it is best to update the reader’s schema, either at the same time as or before the writer’s.
+</td>
+</tr>
+</table>
 
 			</div>
 

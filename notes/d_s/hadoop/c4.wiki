@@ -397,6 +397,86 @@ Hadoop使用自己的序列化格式Writable, 紧凑，快速，但很难被其�
 # 还有其他可选项
 # Avro有很强的schema解析能力，读写时的schema不必完全一致，它们会分别忽略掉自己不关心的内容
 # 支持压缩可切分
+ 
+===核心类 ===
+# Schema
+# Schema.Parser 解析一个文件，用于生成一个Schema实例
+# GenericRecord 代表一个要持久化的对象, 由Schema而来
+# DatumWriter<T>  输出序列化
+# Encoder
+# DatumReader<T>  反序列化
+# Encoder
+{{{ class="brush:java"
+    public static void main(String[] args) throws IOException {
+        Schema.Parser parser = new Schema.Parser();
+        Schema schema = parser.parse(Demo.class.getResourceAsStream("/StringPair.avsc"));
 
 
+        GenericRecord datum = new GenericData.Record(schema);
+        datum.put("left", "L");
+        datum.put("right", "R");
 
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        DatumWriter<GenericRecord> writer = new GenericDatumWriter<GenericRecord>(schema);
+        Encoder encoder = EncoderFactory.get().binaryEncoder(out, null);
+        writer.write(datum, encoder);
+        encoder.flush();
+        out.close();
+
+        DatumReader<GenericRecord> reader = new GenericDatumReader<GenericRecord>(schema);
+        Decoder decoder = DecoderFactory.get().binaryDecoder(out.toByteArray(), null);
+        GenericRecord result = reader.read(null, decoder);
+        assertThat(result.get("left").toString(), is("L"));
+        assertThat(result.get("right").toString(), is("R"));
+        System.out.println(result.get("left").toString());
+    }
+  }}}
+  
+===Avro Data Files ===
+# 用于存储Avro 对象序列
+# 文件头会存储schema的meta data
+# 跨语言
+# 可切分，适合MapReduce快速处理
+# 和写入流类似
+# 使用DataFileWriter和DataFileReader
+# append的对象必须符合schema，不然会报错
+{{{ class="brush:java"
+
+    File file = new File("data.avro");
+    DatumWriter<GenericRecord> writer = new GenericDatumWriter<GenericRecord>(schema);
+    DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<GenericRecord>(writer);
+    dataFileWriter.create(schema, file);
+    dataFileWriter.append(datum);
+    dataFileWriter.close();
+
+    DatumReader<GenericRecord> reader = new GenericDatumReader<GenericRecord>();
+    DataFileReader<GenericRecord> dataFileReader =
+    new DataFileReader<GenericRecord>(file, reader);
+    assertThat("Schema is the same", schema, is(dataFileReader.getSchema()));
+    
+
+    GenericRecord record = null;
+    while (dataFileReader.hasNext()) {
+        record = dataFileReader.next(record);
+        // process record
+    }
+
+  }}}
+
+===Schemo Resolution ===
+# 支持写入的Schema和读入的Schema不同
+# 在Schema中增加的字段必须增加默认值
+# 在Schema中可以使用Alias,可以使读时的字段名和写入时的字段名不一致
+# Rules of the resolution:
+
+| New schema    | Writer | Reader | Action                                                                                                                                                                                                                                                                 |
+|---------------|--------|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Added field   | Old    | New    | The reader uses the default value of the new field, since it is not written by the writer.                                                                                                                                                                             |
+| \/            | New    | Old    | The reader does not know about the new field written by the writer, so it is ignored(projection).                                                                                                                                                                      |
+| Removed field | Old    | New    | The reader ignores the removed field (projection).                                                                                                                                                                                                                     |
+| \/            | New    | Old    | The removed field is not written by the writer. If the old schema had a default defined for the field, the reader uses this; otherwise, it gets an error. In this case, it is best to update the reader’s schema, either at the same time as or before the writer’s. |
+
+===Sort Order ===
+# 除Record之外的Type具有预定义的规则进行排序，大多是自然顺序排序，且用户不能修改
+# 对于Record用户可以指定 field进行排序 , 默认是按fied进行定义的顺序依次进行比较
+# 实现了高效的二进制比较，即不必反序列化就可以进行比较
