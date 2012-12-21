@@ -340,7 +340,57 @@
 * 获得当前进程的标识号
 
 ===信号管理的系统调用System Calls for Signaling===
+*收到一个未声明处理的signal:*
+* 如果一个进程收到一个 *未声明要接收的* signal时，该进程被撤消，即被杀死
+ 
+*声明要接收的signal:*
+# 使用`sigaction`   
+# 有两个参数，后两个是地址
+  * 指明signal
+  * 要处理signal的procedure地址
+  * signal原先处理procedure的地址
+   
+*进程接收到一个signal时:*
+# 将当前进程状态压栈
+# 调用指定的signal处理procedure
+# 处理结束，调用`sigreturn`,执行被signal中断的操作
 
+*signal阻塞:*
+# signal可以被阻塞
+# 阻塞的signal被扶起，直到被解除阻塞
+# `sigpromask`定义一个进程阻塞的信息集
+# `sigperding`查询因阻塞而挂起的信号集
+# `sigsuspend`进程用于设定阻塞信号位图，并将本身挂起
+
+*忽略一个signal:*
+# `SIG_IGN`
+# 忽略信号SIGINT
+  {{{ class="brush:c"
+    sigaction(SIGINT, SIG_IGN, NULL);
+    }}}
+# 需要在执行exec前执行
+
+*恢复一个signal默认处理:*
+# `SIG_DFL`
+# 恢复信号SIGINT默认行为
+  {{{ class="brush:c"
+    sigaction(SIGINT, SIG_DFL, NULL);
+    }}}
+    
+*向指定进程发送一个signal:*
+# 使用`kill`
+# signal 9(sigkill)不能被捕获或忽略
+
+*alarm系统调用:*
+# 参数：一个以秒为单位的间隔
+# 时间到达，则向该进程发送一个sigalrm
+# 任一时刻一个进程只能且个闹钟
+ 
+*pause系统调用:*
+# 挂起调用进程，直到信号到来
+# 其他进程就可以使用cpu了
+# 通常用于一个进程等待信号，又不需要什么操作时
+    
 
  
  
