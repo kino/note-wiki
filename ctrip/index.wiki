@@ -5,4 +5,7 @@
  
 ==Java平台==
 * [[java/java_teach|java_teach]]
+
+==Central Logging ==
+* [[logging/cellector|collector code]]
  

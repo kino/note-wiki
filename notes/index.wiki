@@ -30,6 +30,7 @@
 * [[mysql/mysql|MySql]]
 ==性能==
 * [[performance/performance|性能 ]]
+* [[performance/tools|工具 ]]
 ==分布式存储 ==
 * [[d_s/hadoop|Hadoop ]]
 ==复杂事件处理 ==
