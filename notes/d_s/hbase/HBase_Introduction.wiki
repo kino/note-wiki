@@ -1,0 +1,9 @@
+%title HBase 技术介绍 
+=HBase 技术介绍 =
+ http://www.searchtb.com/2011/01/understanding-hbase.html
+ 
+ http://www.alidata.org/archives/1509
+ 
+ http://blog.linezing.com/2012/03/hbase-performance-optimization
+ 
+ http://trac.nchc.org.tw/cloud/wiki/NCHCCloudCourse100929_2_USE

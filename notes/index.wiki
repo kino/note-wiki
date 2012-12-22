@@ -33,6 +33,7 @@
 * [[performance/tools|工具 ]]
 ==分布式存储 ==
 * [[d_s/hadoop|Hadoop ]]
+* [[d_s/hbase|HBase ]]
 ==复杂事件处理 ==
 * [[cep/esper|Esper ]]
 ==Operating Systems ==
