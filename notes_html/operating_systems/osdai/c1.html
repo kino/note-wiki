@@ -62,6 +62,7 @@
 <ul>
 <li><a href="#toc_1.4.1">进程管理的系统调用Process management</a>
 <li><a href="#toc_1.4.2">信号管理的系统调用System Calls for Signaling</a>
+<li><a href="#toc_1.4.3">文件管理的系统调用System Calls for File System</a>
 </ul>
 </ul>
 </ul>
@@ -817,6 +818,300 @@ signal 9(sigkill)不能被捕获或忽略
 
 <li>
 通常用于一个进程等待信号，又不需要什么操作时
+
+</ol>
+    
+<h3 id="toc_1.4.3">文件管理的系统调用System Calls for File System</h3>
+<p>
+<strong>create系统调用:</strong>
+</p>
+<ol>
+<li>
+<code>fd = create("abc", 0751)</code>
+
+<li>
+创建文件
+
+<li>
+参数为：路径名，保护模式
+
+<li>
+并同时以写的方式打开，不管模式是什么
+
+<li>
+返回fd, 通过fd可以对文件进行写操作
+
+<li>
+对于一个已存在的文件进行该系统调用，将破坏该文件
+
+<li>
+已过时，由 <strong>open</strong> 代替
+
+</ol>
+
+<p>
+<strong>mknod系统调用:</strong>
+</p>
+<ol>
+<li>
+<code>fd = mknod("/dev/tty2", 020744, 0x0402)</code>
+
+<li>
+创建设备文件
+
+<li>
+parameter 1:要创建的文件名
+
+<li>
+parameter 2:020744指明为一个字符设备文件，权限为rwxr--r--
+
+<li>
+parameter 3:高字节为主设备号4， 低字节为次设备号2
+
+<li>
+只能被超级用户调用 
+
+</ol>
+ 
+<p>
+<strong>open系统调用:</strong>
+</p>
+<ol>
+<li>
+打开文件
+
+<li>
+parameter 1:文件路径可以是绝对路径，也可以是相对路径
+
+<li>
+parameter 2:打开方式，O_RDONLY O_WRONLY O_RDWR
+
+<li>
+return :fd可用于读写操作
+
+<li>
+用完后，需要调用close系统调用进行关闭.关闭后,fd可以被后面的系统调用重用
+
+</ol>
+ 
+<p>
+<strong>read&amp;write系统调用:</strong>
+</p>
+<ol>
+<li>
+读写操作
+
+</ol>
+ 
+<p>
+<strong>lseek系统调用:</strong>
+</p>
+<ol>
+<li>
+修改文件指针，read和write就可以在文件的任一位置进行读写了
+
+<li>
+paratmer 1: fd
+
+<li>
+paratmer 2: position
+
+<li>
+paratmer 3: 上一个参数position是相对于文件开头，当前position,文件末尾
+
+<li>
+return :    被修改后的绝对位置
+
+</ol>
+
+<p>
+<strong>stat&amp;fstat系统调用:</strong>
+</p>
+<ol>
+<li>
+获取文件状态信息
+
+<li>
+都有两个参数
+
+<li>
+parameter 1:指定文件
+
+<ul>
+<li>
+stat接收一个文件名
+
+<li>
+fstat接收一个fd
+
+<li>
+fstat适合一个打开的文件
+
+</ul>
+<li>
+parameter 2:一个用来存放信息的结构
+<pre  class="brush:c">
+    struct stat{
+        short st_dev;               /* device where i-node belongs */
+        unsigned short st_ino;      /* i-node number */
+        unsigned short st_mode;     /* mode word */
+        short st_nlink;             /* number of links */
+        short st_uid;               /* user id */
+        short st_gid;               /* group id */
+        short st_rdev;              /* major/minor device for special files */
+        long st_size;               /* file size */
+        long st_atime;              /* time of last access */
+        long st_mtime;              /* time of last modification */
+        long st_ctime;              /* time of last change to i-node */
+    };
+</pre>
+
+</ol>
+
+<p>
+<strong>dup系统调用:</strong>
+</p>
+<ol>
+<li>
+用于文件描述符的操作
+
+<li>
+<code>n=dup(fd)</code>:将文件描述符n指向文件描述符fd把指向的文件，  <strong>n将是当前最小的可用的文件描述符</strong>
+
+<li>
+<code>dup2(fd, fd2)</code>:fd2为一个未被使用的文件描述符，将文件描述符fd2指向文件描述符fd把指向的文件
+
+</ol>
+ 
+<p>
+<strong>pipe系统调用:</strong>
+</p>
+<ol>
+<li>
+<code>pipe(&amp;fd[0])</code>
+
+<li>
+创建一个管道
+
+<li>
+返回两个文件描述符，放于fd[0]和fd[1]
+
+<li>
+一个用于读一个用于写
+
+</ol>
+ 
+<p>
+<strong>ioctl系统调用:</strong>
+</p>
+<ol>
+<li>
+用于设备文件
+
+<li>
+特别是字符设备文件
+
+<li>
+比如用于改变终端模式
+
+<li>
+<code>ioctl(fd, TCSETS, &amp;termios)</code>
+
+</ol>
+ 
+<p>
+<strong>终端的三种模式:</strong>
+</p>
+<ol>
+<li>
+<strong>Cooked mode:</strong>
+
+<ol>
+<li>
+删除、终止键正常工作
+
+<li>
+CTRL-S CTRL-Q 用于停止恢复终端输出
+
+<li>
+CTRL-D 文件终止符
+
+<li>
+CTRL-C interrupt signal
+
+<li>
+CTRL-\ quit signal并强制内核映象转储
+
+</ol>
+<li>
+<strong>raw mode:</strong>
+
+<ol>
+<li>
+上述功能都被禁止
+
+<li>
+数据不加处理的传给程序
+
+<li>
+从终端每读到一个字符都传给程序，而cooked会读完一行再传
+
+</ol>
+<li>
+<strong>Cbreak mode:</strong>
+
+<ol>
+<li>
+上述两者之间
+
+<li>
+删除、终止键、CTRL-D被禁止
+
+<li>
+CTRL-S, CTRL-Q, CTRL-C, and CTRL-\ 有效
+
+<li>
+同raw模式，不等一行结束，单个字符就会传给程序
+
+</ol>
+</ol>
+
+<p>
+<strong>access系统调用:</strong>
+</p>
+<ol>
+<li>
+检查对一个文件是否具有某种访问权限
+
+</ol>
+ 
+<p>
+<strong>rename系统调用:</strong>
+</p>
+<ol>
+<li>
+重命名文件 
+
+</ol>
+ 
+<p>
+<strong>fcntl系统调用:</strong>
+</p>
+<ol>
+<li>
+类似于ioctl
+
+<li>
+可用于文件加锁
+
+<li>
+可用于对文件的一部分进行加锁 解锁
+
+<li>
+可用于检测文件某部分是否被上锁
+
+<li>
+但本身不包括任何和锁相关的语义，由程序员自定义
 
 </ol>
 

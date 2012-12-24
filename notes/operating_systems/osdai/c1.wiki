@@ -391,10 +391,108 @@
 # 其他进程就可以使用cpu了
 # 通常用于一个进程等待信号，又不需要什么操作时
     
+===文件管理的系统调用System Calls for File System ===
+*create系统调用:*
+# `fd = create("abc", 0751)`
+# 创建文件
+# 参数为：路径名，保护模式
+# 并同时以写的方式打开，不管模式是什么
+# 返回fd, 通过fd可以对文件进行写操作
+# 对于一个已存在的文件进行该系统调用，将破坏该文件
+# 已过时，由 *open* 代替
 
+*mknod系统调用:*
+# `fd = mknod("/dev/tty2", 020744, 0x0402)`
+# 创建设备文件
+# parameter 1:要创建的文件名
+# parameter 2:020744指明为一个字符设备文件，权限为rwxr--r--
+# parameter 3:高字节为主设备号4， 低字节为次设备号2
+# 只能被超级用户调用 
  
+*open系统调用:*
+# 打开文件
+# parameter 1:文件路径可以是绝对路径，也可以是相对路径
+# parameter 2:打开方式，O_RDONLY O_WRONLY O_RDWR
+# return :fd可用于读写操作
+# 用完后，需要调用close系统调用进行关闭.关闭后,fd可以被后面的系统调用重用
  
-
-
-
+*read&write系统调用:*
+# 读写操作
  
+*lseek系统调用:*
+# 修改文件指针，read和write就可以在文件的任一位置进行读写了
+# paratmer 1: fd
+# paratmer 2: position
+# paratmer 3: 上一个参数position是相对于文件开头，当前position,文件末尾
+# return :    被修改后的绝对位置
+
+*stat&fstat系统调用:*
+# 获取文件状态信息
+# 都有两个参数
+# parameter 1:指定文件
+  * stat接收一个文件名
+  * fstat接收一个fd
+  * fstat适合一个打开的文件
+# parameter 2:一个用来存放信息的结构
+  {{{ class="brush:c"
+    struct stat{
+        short st_dev;               /* device where i-node belongs */
+        unsigned short st_ino;      /* i-node number */
+        unsigned short st_mode;     /* mode word */
+        short st_nlink;             /* number of links */
+        short st_uid;               /* user id */
+        short st_gid;               /* group id */
+        short st_rdev;              /* major/minor device for special files */
+        long st_size;               /* file size */
+        long st_atime;              /* time of last access */
+        long st_mtime;              /* time of last modification */
+        long st_ctime;              /* time of last change to i-node */
+    };
+    }}}
+
+*dup系统调用:*
+# 用于文件描述符的操作
+# `n=dup(fd)`:将文件描述符n指向文件描述符fd把指向的文件，  *n将是当前最小的可用的文件描述符*
+# `dup2(fd, fd2)`:fd2为一个未被使用的文件描述符，将文件描述符fd2指向文件描述符fd把指向的文件
+ 
+*pipe系统调用:*
+# `pipe(&fd[0])`
+# 创建一个管道
+# 返回两个文件描述符，放于fd[0]和fd[1]
+# 一个用于读一个用于写
+ 
+*ioctl系统调用:*
+# 用于设备文件
+# 特别是字符设备文件
+# 比如用于改变终端模式
+# `ioctl(fd, TCSETS, &termios)`
+ 
+*终端的三种模式:*
+# *Cooked mode:*
+  # 删除、终止键正常工作
+  # CTRL-S CTRL-Q 用于停止恢复终端输出
+  # CTRL-D 文件终止符
+  # CTRL-C interrupt signal
+  # CTRL-\ quit signal并强制内核映象转储
+# *raw mode:*
+  # 上述功能都被禁止
+  # 数据不加处理的传给程序
+  # 从终端每读到一个字符都传给程序，而cooked会读完一行再传
+# *Cbreak mode:*
+  # 上述两者之间
+  # 删除、终止键、CTRL-D被禁止
+  # CTRL-S, CTRL-Q, CTRL-C, and CTRL-\ 有效
+  # 同raw模式，不等一行结束，单个字符就会传给程序
+
+*access系统调用:*
+# 检查对一个文件是否具有某种访问权限
+ 
+*rename系统调用:*
+# 重命名文件 
+ 
+*fcntl系统调用:*
+# 类似于ioctl
+# 可用于文件加锁
+# 可用于对文件的一部分进行加锁 解锁
+# 可用于检测文件某部分是否被上锁
+# 但本身不包括任何和锁相关的语义，由程序员自定义
