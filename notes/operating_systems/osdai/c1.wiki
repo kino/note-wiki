@@ -496,3 +496,34 @@
 # 可用于对文件的一部分进行加锁 解锁
 # 可用于检测文件某部分是否被上锁
 # 但本身不包括任何和锁相关的语义，由程序员自定义
+ 
+===目录管理的系统调用System Calls for Directory Management ===
+
+*mkdir&rmdir系统调用:*
+# 创建或删除 *空目录*
+
+*link系统调用:*
+# `link("/usr/jim/memo", "/ur/ast/note");`
+# 使 *同一个文件* 以不同的名称出现， 往往在不同的目录下
+# Unix中每个文件拥有一个唯一的标识符，叫做`i-number`, 它是一个指向表`i-nodes`的索引值
+# 表中存储了谁拥有这个文件，及文件所占磁盘块的信息，等等
+# *目录* 也是一个文件，它由`i-number` 和 `file name`的对应信息组成, 每一个对应关系就是一个 dirctory entry
+  # 早期目录文件中的 directory entry 由16byte组成，2byte存储i-number, 14byte存储文件名
+  # 后来为了支持长文件名，使用了新的数据结构，总体来说还是i-number, file-name pair
+# 可以看出link所做的工作，就是在 *目录文件* 中添加一个directory entry, 使用指定的name和i-number
+# 系统调用`unlink`可以从 *目录文件* 中删除一个directory entry
+# 表`i-nodes`中记录了每个`i-number`被directory entry引用的次数
+  # 如果次数为0，说明没有directory entry 引用，该i-number代表的文件就可以删除了
+   
+*mount&umount系统调用:*
+
+*sync系统调用:*
+# 操作系统有一个缓存区，保存了最近经常被访问的磁盘数据，可以避免重复从磁盘读数据
+# 但当缓冲区的数据被更改时，需要写回磁盘，sync就是做这个的
+# 操作系统通常有一个后台进程（比如update），间隔地执行sync（比如30s）
+ 
+*chdir＆chroot系统调用:*
+# chdir 改变当前目录
+# chroot 改变根目录
+  # 只有root用户可以执行
+  # 执行后，绝对路径就会从这个新根目录开始
