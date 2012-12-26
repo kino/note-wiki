@@ -64,6 +64,8 @@
 <li><a href="#toc_1.4.2">信号管理的系统调用System Calls for Signaling</a>
 <li><a href="#toc_1.4.3">文件管理的系统调用System Calls for File System</a>
 <li><a href="#toc_1.4.4">目录管理的系统调用System Calls for Directory Management</a>
+<li><a href="#toc_1.4.5">保护系统调用System Calls for Protection</a>
+<li><a href="#toc_1.4.6">时间系统调用System Calls for Time Management</a>
 </ul>
 </ul>
 </ul>
@@ -836,6 +838,11 @@ signal 9(sigkill)不能被捕获或忽略
 <li>
 参数为：路径名，保护模式
 
+<ul>
+<li>
+注意并不是把文件的权限设置为了0751, 而是要和umask指定掩码的反码相与后才是真正的权限
+
+</ul>
 <li>
 并同时以写的方式打开，不管模式是什么
 
@@ -866,6 +873,11 @@ parameter 1:要创建的文件名
 <li>
 parameter 2:020744指明为一个字符设备文件，权限为rwxr--r--
 
+<ul>
+<li>
+注意并不是把文件的权限设置为了0744, 而是要和umask指定掩码的反码相与后才是真正的权限
+
+</ul>
 <li>
 parameter 3:高字节为主设备号4， 低字节为次设备号2
 
@@ -1207,6 +1219,137 @@ chroot 改变根目录
 执行后，绝对路径就会从这个新根目录开始
 
 </ol>
+</ol>
+   
+<h3 id="toc_1.4.5">保护系统调用System Calls for Protection</h3>
+
+<ol>
+<li>
+每个文件都一个 <strong>11</strong> 位的保护方式码
+
+<li>
+其中9位表示owner,group, others对文件的读、写、执行权限
+
+<li>
+系统调用 <strong>chmod</strong> 可以改变一个文件保护模式
+
+<li>
+另 <strong>2位</strong> 是 <code>02000</code> 和 <code>04000</code> 分别代表 SETGID位和SETUID位
+
+<li>
+real UID, real GID, effective UID, effective GID
+
+<ol>
+<li>
+默认都是指向 <strong>执行这个文件</strong> 的 user 和 group
+
+<li>
+若设置了SETUID(04000), effective UID就会指向文件的owner
+
+<li>
+若设置了SETGID(02000), effective GID就会指向文件的group
+
+</ol>
+</ol>
+ 
+<p>
+<strong>getuid＆getgid系统调用:</strong>
+</p>
+<ol>
+<li>
+getuid:同时返回real UID和effective UID
+
+<li>
+getgid:同时返回real GID和effective GID
+
+<li>
+有四个对应的库函数，用于返回特定的信息：getuid geteuid getgid getegid
+
+</ol>
+ 
+<p>
+<strong>setuid＆setgid系统调用:</strong>
+</p>
+<ol>
+<li>
+一般用户是不能改变uid的，除非执行了一个设置了SETUID的文件，这里就会把effective UID设置为这个文件的owner,而不是执行这个文件的用户，当然它们也可以相同
+
+<li>
+root用户可以随意修改
+
+<ol>
+<li>
+setuid：同时修改real UID和effective UID
+
+<li>
+setgid：同时修改real GID和effective GID
+
+</ol>
+</ol>
+   
+<p>
+<strong>umask系统调用:</strong>
+</p>
+<ol>
+<li>
+<code>umask(022)</code>
+
+<li>
+设置一个内部掩码，创建文件时使用(creat mknode), 用于 <strong>关掉某些模式位</strong> 
+
+<li>
+<code>creat("file", 0777)</code>:0777与022的反码相与得0755，这才是真正的权限
+
+<li>
+一般用户就可以执行，且会被子进程继承
+
+</ol>
+ 
+<p>
+<strong>access系统调用:</strong>
+</p>
+<ol>
+<li>
+检查对一个文件是否具有某种访问权限
+
+</ol>
+ 
+<h3 id="toc_1.4.6">时间系统调用System Calls for Time Management</h3>
+
+<p>
+<strong>time系统调用:</strong>
+</p>
+<ol>
+<li>
+返回距1970/01/01 00:00(这天的开始）的秒数
+
+</ol>
+
+<p>
+<strong>stime系统调用:</strong>
+</p>
+<ol>
+<li>
+设置系统时间
+
+</ol>
+
+<p>
+<strong>utime系统调用:</strong>
+</p>
+<ol>
+<li>
+允许文件owner或root设置文件在i-node表中的时间
+
+</ol>
+
+<p>
+<strong>times系统调用:</strong>
+</p>
+<ol>
+<li>
+返回进程的统计信息，比如用了多少cpu时间，操作系统用了多少cpu时间 。。。。
+
 </ol>
 
 			</div>
