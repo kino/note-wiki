@@ -53,6 +53,31 @@
 # 异常:
   # 随机睡300s
   
+*MetricsImpl:*
+#  appid hostip外,最多四个tag
+
+
+
+=Hbase Writer=
+*throttleCount:*
+# hbase client出错时，增加记数
+# 连续出错越大，睡眠时间越长，但并未停止消费chunk
+
+*LogEventProcesser:*
+# AppIdSet
+  # 启动时并未初始化
+  # 而是不停的创建添加，使之这完美！
+# log的很多column被禁掉了
+
+=HDFS Writer=
+*HDFSWriter:*
+# 每小时检查一下，是否是新的一天，如果是就rotate
+# 里面还有一个rotate策略，根据isNewFile
+# ChunkProcessor还会间隔的往Collector里发States的chunk
+# 从Collector里取chunk出现异常
+  # 前三次睡100-300ms
+  # 第四次睡2-5minutes  或 5-15分钟，断掉重连
+  # 计数归0
 
 MessageManager.startNewSender: isCoreThread?
 
