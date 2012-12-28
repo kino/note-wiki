@@ -63,6 +63,9 @@
 <li><a href="#toc_1.4.1">进程管理的系统调用Process management</a>
 <li><a href="#toc_1.4.2">信号管理的系统调用System Calls for Signaling</a>
 <li><a href="#toc_1.4.3">文件管理的系统调用System Calls for File System</a>
+<li><a href="#toc_1.4.4">目录管理的系统调用System Calls for Directory Management</a>
+<li><a href="#toc_1.4.5">保护系统调用System Calls for Protection</a>
+<li><a href="#toc_1.4.6">时间系统调用System Calls for Time Management</a>
 </ul>
 </ul>
 </ul>
@@ -835,6 +838,11 @@ signal 9(sigkill)不能被捕获或忽略
 <li>
 参数为：路径名，保护模式
 
+<ul>
+<li>
+注意并不是把文件的权限设置为了0751, 而是要和umask指定掩码的反码相与后才是真正的权限
+
+</ul>
 <li>
 并同时以写的方式打开，不管模式是什么
 
@@ -865,6 +873,11 @@ parameter 1:要创建的文件名
 <li>
 parameter 2:020744指明为一个字符设备文件，权限为rwxr--r--
 
+<ul>
+<li>
+注意并不是把文件的权限设置为了0744, 而是要和umask指定掩码的反码相与后才是真正的权限
+
+</ul>
 <li>
 parameter 3:高字节为主设备号4， 低字节为次设备号2
 
@@ -1112,6 +1125,230 @@ CTRL-S, CTRL-Q, CTRL-C, and CTRL-\ 有效
 
 <li>
 但本身不包括任何和锁相关的语义，由程序员自定义
+
+</ol>
+ 
+<h3 id="toc_1.4.4">目录管理的系统调用System Calls for Directory Management</h3>
+
+<p>
+<strong>mkdir&amp;rmdir系统调用:</strong>
+</p>
+<ol>
+<li>
+创建或删除 <strong>空目录</strong>
+
+</ol>
+
+<p>
+<strong>link系统调用:</strong>
+</p>
+<ol>
+<li>
+<code>link("/usr/jim/memo", "/ur/ast/note");</code>
+
+<li>
+使 <strong>同一个文件</strong> 以不同的名称出现， 往往在不同的目录下
+
+<li>
+Unix中每个文件拥有一个唯一的标识符，叫做<code>i-number</code>, 它是一个指向表<code>i-nodes</code>的索引值
+
+<li>
+表中存储了谁拥有这个文件，及文件所占磁盘块的信息，等等
+
+<li>
+<strong>目录</strong> 也是一个文件，它由<code>i-number</code> 和 <code>file name</code>的对应信息组成, 每一个对应关系就是一个 dirctory entry
+
+<ol>
+<li>
+早期目录文件中的 directory entry 由16byte组成，2byte存储i-number, 14byte存储文件名
+
+<li>
+后来为了支持长文件名，使用了新的数据结构，总体来说还是i-number, file-name pair
+
+</ol>
+<li>
+可以看出link所做的工作，就是在 <strong>目录文件</strong> 中添加一个directory entry, 使用指定的name和i-number
+
+<li>
+系统调用<code>unlink</code>可以从 <strong>目录文件</strong> 中删除一个directory entry
+
+<li>
+表<code>i-nodes</code>中记录了每个<code>i-number</code>被directory entry引用的次数
+
+<ol>
+<li>
+如果次数为0，说明没有directory entry 引用，该i-number代表的文件就可以删除了
+
+</ol>
+</ol>
+   
+<p>
+<strong>mount&amp;umount系统调用:</strong>
+</p>
+
+<p>
+<strong>sync系统调用:</strong>
+</p>
+<ol>
+<li>
+操作系统有一个缓存区，保存了最近经常被访问的磁盘数据，可以避免重复从磁盘读数据
+
+<li>
+但当缓冲区的数据被更改时，需要写回磁盘，sync就是做这个的
+
+<li>
+操作系统通常有一个后台进程（比如update），间隔地执行sync（比如30s）
+
+</ol>
+ 
+<p>
+<strong>chdir＆chroot系统调用:</strong>
+</p>
+<ol>
+<li>
+chdir 改变当前目录
+
+<li>
+chroot 改变根目录
+
+<ol>
+<li>
+只有root用户可以执行
+
+<li>
+执行后，绝对路径就会从这个新根目录开始
+
+</ol>
+</ol>
+   
+<h3 id="toc_1.4.5">保护系统调用System Calls for Protection</h3>
+
+<ol>
+<li>
+每个文件都一个 <strong>11</strong> 位的保护方式码
+
+<li>
+其中9位表示owner,group, others对文件的读、写、执行权限
+
+<li>
+系统调用 <strong>chmod</strong> 可以改变一个文件保护模式
+
+<li>
+另 <strong>2位</strong> 是 <code>02000</code> 和 <code>04000</code> 分别代表 SETGID位和SETUID位
+
+<li>
+real UID, real GID, effective UID, effective GID
+
+<ol>
+<li>
+默认都是指向 <strong>执行这个文件</strong> 的 user 和 group
+
+<li>
+若设置了SETUID(04000), effective UID就会指向文件的owner
+
+<li>
+若设置了SETGID(02000), effective GID就会指向文件的group
+
+</ol>
+</ol>
+ 
+<p>
+<strong>getuid＆getgid系统调用:</strong>
+</p>
+<ol>
+<li>
+getuid:同时返回real UID和effective UID
+
+<li>
+getgid:同时返回real GID和effective GID
+
+<li>
+有四个对应的库函数，用于返回特定的信息：getuid geteuid getgid getegid
+
+</ol>
+ 
+<p>
+<strong>setuid＆setgid系统调用:</strong>
+</p>
+<ol>
+<li>
+一般用户是不能改变uid的，除非执行了一个设置了SETUID的文件，这里就会把effective UID设置为这个文件的owner,而不是执行这个文件的用户，当然它们也可以相同
+
+<li>
+root用户可以随意修改
+
+<ol>
+<li>
+setuid：同时修改real UID和effective UID
+
+<li>
+setgid：同时修改real GID和effective GID
+
+</ol>
+</ol>
+   
+<p>
+<strong>umask系统调用:</strong>
+</p>
+<ol>
+<li>
+<code>umask(022)</code>
+
+<li>
+设置一个内部掩码，创建文件时使用(creat mknode), 用于 <strong>关掉某些模式位</strong> 
+
+<li>
+<code>creat("file", 0777)</code>:0777与022的反码相与得0755，这才是真正的权限
+
+<li>
+一般用户就可以执行，且会被子进程继承
+
+</ol>
+ 
+<p>
+<strong>access系统调用:</strong>
+</p>
+<ol>
+<li>
+检查对一个文件是否具有某种访问权限
+
+</ol>
+ 
+<h3 id="toc_1.4.6">时间系统调用System Calls for Time Management</h3>
+
+<p>
+<strong>time系统调用:</strong>
+</p>
+<ol>
+<li>
+返回距1970/01/01 00:00(这天的开始）的秒数
+
+</ol>
+
+<p>
+<strong>stime系统调用:</strong>
+</p>
+<ol>
+<li>
+设置系统时间
+
+</ol>
+
+<p>
+<strong>utime系统调用:</strong>
+</p>
+<ol>
+<li>
+允许文件owner或root设置文件在i-node表中的时间
+
+</ol>
+
+<p>
+<strong>times系统调用:</strong>
+</p>
+<ol>
+<li>
+返回进程的统计信息，比如用了多少cpu时间，操作系统用了多少cpu时间 。。。。
 
 </ol>
 
