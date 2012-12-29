@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Processes</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">进程　Processes</h1>
+<div class="toc">
+<ul>
+<li><a href="#toc_1">进程　Processes</a>
+<ul>
+<li><a href="#toc_1.1">进程介绍　Instruction to Processes</a>
+<ul>
+<li><a href="#toc_1.1.1">进程模型 The Process Model</a>
+<li><a href="#toc_1.1.2">进程的创建 Process Creation</a>
+<li><a href="#toc_1.1.3">进程的终结 Process Termination</a>
+<li><a href="#toc_1.1.4">进程的层次结构 Process Hierachies</a>
+<li><a href="#toc_1.1.5">进程状态 Process States</a>
+<li><a href="#toc_1.1.6">进程的实现 Implementation of Processes</a>
+</ul>
+</ul>
+</ul>
+</div>
+
+ 
+<h2 id="toc_1.1">进程介绍　Instruction to Processes</h2>
+<ol>
+<li>
+<strong>进程：对正在运行程序的抽象</strong>
+
+<li>
+操作系统的所有的其他内容都是围绕着进程
+
+</ol>
+
+<h3 id="toc_1.1.1">进程模型 The Process Model</h3>
+<ol>
+<li>
+计算机中所以可运行的软件，通常包括操作系统在内，被组织成若干 <strong>连续的进程(Sequential Processes)</strong> ，简称 <strong>进程(Processes)</strong>
+
+<li>
+一个进程就是一个正在运行的程序，包括：程序计数器，寄存器，变量(Program Counter, Registers, Variables)
+
+<li>
+进程和程序的区别很微妙，但很重要
+
+<ul>
+<li>
+程序: 以适当的形式的算法
+
+<li>
+进程: 正在运行的上下状态和上下文
+
+</ul>
+<li>
+关键思想
+
+<ul>
+<li>
+进程是某种类型的一个活动Activity
+
+<li>
+它拥有:程序Program, input, output, 和状态state
+
+<li>
+Cpu被多个进程共享
+
+<li>
+有一个调度算法来决定cpu如何服务于进程：何时停止对一个进程的服务，并开始服务于另一个进程
+
+</ul>
+</ol>
+
+<h3 id="toc_1.1.2">进程的创建 Process Creation</h3>
+<ol>
+<li>
+创建进程的四种场景
+
+<ul>
+<li>
+系统初始化时 System Initailization
+
+<li>
+一个正在运行的进程调用了一个创建进程的系统调用
+
+<li>
+接到用户创建进程的请求Request
+
+<li>
+批处理工作初始化时 Initailization of a batch job
+
+</ul>
+<li>
+系统启动时
+
+<ul>
+<li>
+通常会有若干进程创建
+
+<li>
+一些是前台进程，用于和用户进行交互的进程
+
+<li>
+一些是后台进程，比如用于等待处理http请求的进程
+
+<li>
+后台进程被称作daemons, 也称作守护进程
+
+</ul>
+<li>
+在上面所有的创建场景中：
+
+<ul>
+<li>
+<strong>一个进程的创建都是由一个已存在的进程调用了一个创建进程的系统调用</strong>(第一个进程肯定是特殊的init)
+
+<li>
+这个已存在的进程可能是：一个用户进程，一个系统进程，一个批处理管理的进程
+
+</ul>
+<li>
+fork()系统调用
+
+<ul>
+<li>
+MINX3 中唯一用于创建进程的系统调用
+
+<li>
+用于创建一个新进程，这个进程是调用fork系统调用的进程的精确拷贝
+
+<li>
+调用完fork后，就会有两个进程，父子进程，它们有相同的内存映象，环境变量，打开的文件
+
+<li>
+此后，子进程可以执行不同的系统调用，运行程序，改变自己
+
+</ul>
+<li>
+进程创建后，父子进程拥有各自的地址空间address space
+
+<ul>
+<li>
+任何一个进程在它地址空间内作的改变，对其他进程都是不可见的
+
+<li>
+子进程的地址空间拷贝自创建它的父进程, 但它们是不同的两个地址空间
+
+<li>
+不可写内存共享的，所以子进程可以共享它父进程的open files
+
+</ul>
+</ol>
+   
+<h3 id="toc_1.1.3">进程的终结 Process Termination</h3>
+<ol>
+<li>
+进程终结的四种场景
+
+<ul>
+<li>
+正常退出 Nomal Exit(Voluntary)
+
+<li>
+出错了自动退出Error Exit(Voluntary)
+
+<li>
+出错了，导演终止Fatal Error(Involuntary)
+
+<li>
+被其他进程杀死Killed by another process(Involuntary)
+
+</ul>
+<li>
+系统调用<code>exit</code>用于结束一个进程
+
+<li>
+系统调用<code>kill</code>可用于告诉操作系统杀死一个进程
+
+</ol>
+ 
+<h3 id="toc_1.1.4">进程的层次结构 Process Hierachies</h3>
+<ol>
+<li>
+一个进程只有一个父进程
+
+<li>
+一个进程可以有０个，１个，..多个子进程
+
+<li>
+一个进程，和它的子进程，和它的更远的后代进程，可以组成一个进程级process group.
+
+<li>
+两个特殊进程<code>reincarnation server</code>和<code>init</code>,  它们在boot image中
+
+<ul>
+<li>
+<code>reincarnation server</code>用于启动或重启drivers and servers, 它一开始处于阻塞状态中，等待消息告诉它做什么 
+
+<li>
+<code>init</code>用于运行在/etc/rc下的脚本, 用来告诉<code>reincarnation server</code>运行不在boot image中的drivers and servers
+
+<li>
+此后，<code>init</code>会读取配置文件/etc/ttytab
+
+<ol>
+<li>
+为每一终端fork一个进程getty，用于显示一个登录提示, 等待输入
+
+<li>
+当有输入时，exec一个登录进程login
+
+<li>
+登录成功，exec一个shell
+
+<li>
+shell是init的儿子
+
+<li>
+用户的命令用于创建shell的儿子 
+
+<li>
+这些进程组成一个棵进程树 
+
+</ol>
+</ul>
+</ol>
+
+<h3 id="toc_1.1.5">进程状态 Process States</h3>
+<ol>
+<li>
+进程是独立的实体
+
+<li>
+进程间需要交互，通信，同步
+
+</ol>
+ 
+<p>
+<strong>进程会阻塞:</strong>
+</p>
+<ol>
+<li>
+进程会阻塞，但分两种情况：
+
+<ul>
+<li>
+进程逻辑上无法进行下去，比如等待一个输入
+
+<li>
+无法分得cpu时间片
+
+</ul>
+<li>
+这两种阻塞情况是截然不同的：
+
+<ul>
+<li>
+第一种是程序内在固有的阻塞，属于程序逻辑的一部分
+
+<li>
+第二种不由程序控制，是操作系统实现的技术细节
+
+</ul>
+</ol>
+   
+<p>
+<strong>进程的三种状态:</strong>
+</p>
+<ol>
+<li>
+Running (actually using the CPU at that instant).
+
+<li>
+Ready (runnable; temporarily stopped to let another process run).
+
+<li>
+Blocked (unable to run until some external event happens).
+
+</ol>
+<p>
+<img src="process_states.png" />
+</p>
+<ol>
+<li>
+前两种状态类似，进程本身都 <strong>想要运行</strong>, 只是第二种状态暂时没有有效的时间片
+
+<li>
+第三种状态是进程无法运行，哪怕有有效的时间片
+
+</ol>
+ 
+<p>
+<strong>进程状态转换:</strong>
+</p>
+<ol>
+<li>
+进程的三种状态是可以相互转换的(就绪无法转换成阻塞，阻塞无法转换成运行）
+
+<li>
+转换1:有些系统需要调用<code>block和pause</code>触发，有些系统自动触发，比如等待有效输入
+
+<li>
+转换2、3由调度进程自动处理（process scheduler), 它有自己的高度算法
+
+<li>
+转换４由外部事件触发
+
+</ol>
+ 
+<p>
+<strong>调度进程 Process Scheduler:</strong>
+</p>
+<ol>
+<li>
+处在操作系统的最底层
+
+<li>
+它隐藏了所有中断处理，启动和中止进程的具体细节
+
+<li>
+非常短小
+
+<li>
+操作系统的剩余部分被很好的组织成进程形式
+
+</ol>
+<p>
+<img src="process_scheduler.png" />
+</p>
+
+<h3 id="toc_1.1.6">进程的实现 Implementation of Processes</h3>
+<ol>
+<li>
+操作系统维护了一张进程表 <strong>process table</strong>
+
+<li>
+其中的每一项every entry代表一个进程，每一项也可以叫做process control blocks
+
+<li>
+每一项保存了进程的：state, program counter,statck pointer, memory allocation, status of its open files ...
+
+<li>
+保存了一切进程从ready到running状态可能用到的信息
+
+</ol>
+<table>
+<tr>
+<th>
+Kernel
+</th>
+<th>
+Process  management
+</th>
+<th>
+File management
+</th>
+</tr>
+<tr>
+<td>
+Registers
+</td>
+<td>
+Pointer to text segment
+</td>
+<td>
+UMASK mask
+</td>
+</tr>
+<tr>
+<td>
+Program counter
+</td>
+<td>
+Pointer to data segment
+</td>
+<td>
+Root directory
+</td>
+</tr>
+<tr>
+<td>
+Program status word
+</td>
+<td>
+Pointer to bss segment
+</td>
+<td>
+Working directory
+</td>
+</tr>
+<tr>
+<td>
+Stack pointer
+</td>
+<td>
+Exit status
+</td>
+<td>
+File descriptors
+</td>
+</tr>
+<tr>
+<td>
+Process state
+</td>
+<td>
+Signal status
+</td>
+<td>
+Real id
+</td>
+</tr>
+<tr>
+<td>
+Current scheduling priority
+</td>
+<td>
+Process ID
+</td>
+<td>
+Effective UID
+</td>
+</tr>
+<tr>
+<td>
+Maximum scheduling priority
+</td>
+<td>
+Parent process
+</td>
+<td>
+Real GID
+</td>
+</tr>
+<tr>
+<td>
+Scheduling ticks left
+</td>
+<td>
+Process group
+</td>
+<td>
+Effective GID
+</td>
+</tr>
+<tr>
+<td>
+Quantum size
+</td>
+<td>
+Children's CPU time
+</td>
+<td>
+Controlling tty
+</td>
+</tr>
+<tr>
+<td>
+CPU time used
+</td>
+<td>
+Real UID
+</td>
+<td>
+Save area for read/write
+</td>
+</tr>
+<tr>
+<td>
+Message queuepointers
+</td>
+<td>
+Effective UID
+</td>
+<td>
+System call parameters
+</td>
+</tr>
+<tr>
+<td>
+Pending signal bits
+</td>
+<td>
+Real GID
+</td>
+<td>
+Various flag bits
+</td>
+</tr>
+<tr>
+<td>
+Various flag bits
+</td>
+<td>
+Effective GID Process name
+</td>
+<td>
+File info for sharing text
+</td>
+</tr>
+<tr>
+<td>
+&nbsp;
+</td>
+<td>
+Bitmaps for signals
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+&nbsp;
+</td>
+<td>
+Various flag bits
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+&nbsp;
+</td>
+<td>
+Process name
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+</table>
+
+<p>
+<strong>interrupt descriptor table:</strong>
+</p>
+<ol>
+<li>
+比如每个io设备在此表中有一个对应项entry
+
+<li>
+这个表里的每一项通常叫做中断向量interrupt vector
+
+<li>
+这个entry里保存了中断服务的入口地址，interrupt service procedure
+
+</ol>
+
+
+<p>
+<strong>当一个中断发生时，假设为一个disk interrupt:</strong>
+</p>
+<ol>
+<li>
+当前会有也仅有一个进程在running状态,称之为当前进程好了
+
+<li>
+接下来的动作会分为两部分：硬件操作和软件操作
+
+<li>
+硬件操作
+
+<ol>
+<li>
+把当前进程的program counter, program status word, 可能还有registers进行压栈操作，即放入当前进程的stack中
+
+<li>
+然后跳到中断向量指向的中断服务地址
+
+<li>
+接下来开始软件操作，即运行为相应的中断服务
+
+</ol>
+<li>
+软件操作，即相应的中断服务
+
+<ol>
+<li>
+把current process的所有registers存入process table
+
+<li>
+current process number和指向相应process table entry的指针放入全局变量，这样可以快速访问
+
+<li>
+把硬件操作中存栈的信息清除，并将process handler的栈指针指向一个临时栈
+
+<li>
+上面的工作都是汇编做的（c还做不了)，接下来是c的工作
+
+<li>
+构建一个信息发往disk进程，这个进程正处于blocked状态,因为它在等待这个消息.这个消息告诉它一个中断产生了
+
+<li>
+disk进程状态会从blocked状态转换为ready
+
+<li>
+process scheduler被调用
+
+<li>
+按priority决定哪个进程进入running状态
+
+<li>
+从c返回到汇编
+
+</ol>
+</ol>
+  
+<p>
+<strong>中断处理与调度:</strong>
+</p>
+<ol>
+<li>
+Hardware stacks program counter, etc.
+
+<li>
+Hardware loads new program counter from interrupt vector.
+
+<li>
+Assembly language procedure saves registers.
+
+<li>
+Assembly language procedure sets up new stack.
+
+<li>
+C interrupt service constructs and sends message.
+
+<li>
+Message passing code marks waiting message recipient ready.
+
+<li>
+Scheduler decides which process is to run next.
+
+<li>
+C procedure returns to the assembly code.
+
+<li>
+Assembly language procedure starts up new current process.
+
+</ol>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

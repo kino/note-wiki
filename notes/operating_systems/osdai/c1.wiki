@@ -574,3 +574,10 @@
 
 *times系统调用:*
 # 返回进程的统计信息，比如用了多少cpu时间，操作系统用了多少cpu时间 。。。。
+ 
+==操作系统结构 Operating System Structure ==
+
+* 整体式结构 Monolithic Systems
+* 层次式结构 Layered Systems
+* 虚拟机结构 Virtural Machines
+* 服务器客户端结构 Server-Client Model
