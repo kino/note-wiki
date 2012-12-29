@@ -61,6 +61,11 @@
 <li><a href="#toc_1.4.1">核心类 </a>
 <li><a href="#toc_1.4.2">Avro Data Files</a>
 <li><a href="#toc_1.4.3">Schemo Resolution</a>
+<li><a href="#toc_1.4.4">Sort Order</a>
+</ul>
+<li><a href="#toc_1.5">基于文件的数据结构 File-Based Data Structure</a>
+<ul>
+<li><a href="#toc_1.5.1">SequenceFile</a>
 </ul>
 </ul>
 </ul>
@@ -1403,6 +1408,9 @@ append的对象必须符合schema，不然会报错
 在Schema中增加的字段必须增加默认值
 
 <li>
+在Schema中可以使用Alias,可以使读时的字段名和写入时的字段名不一致
+
+<li>
 Rules of the resolution:
 
 </ol>
@@ -1473,6 +1481,244 @@ The removed field is not written by the writer. If the old schema had a default 
 </td>
 </tr>
 </table>
+
+<h3 id="toc_1.4.4">Sort Order</h3>
+<ol>
+<li>
+除Record之外的Type具有预定义的规则进行排序，大多是自然顺序排序，且用户不能修改
+
+<li>
+对于Record用户可以指定 field进行排序 , 默认是按fied进行定义的顺序依次进行比较
+
+<li>
+实现了高效的二进制比较，即不必反序列化就可以进行比较
+
+</ol>
+ 
+<h2 id="toc_1.5">基于文件的数据结构 File-Based Data Structure</h2>
+
+<h3 id="toc_1.5.1">SequenceFile</h3>
+<ul>
+<li>
+提供一种持久化存储 <strong>二进制键值对</strong> 的数据结构
+
+<li>
+用其包装小文件，可对提高对小文件的处理效率，因为hadoop和mapreduce对处理大文件进行了优化
+
+</ul>
+
+<p>
+<strong>Writing a SequenceFile:</strong>
+</p>
+<ol>
+<li>
+关键：FileSystem, Path, Configuration, SequenceFile.Writer, SequenceFile.createWriter(...)
+
+<li>
+writer.getLength()返回文件的当前位置 
+<pre  class="brush:java">
+    public class SequenceFileWriteDemo {
+        private static final String[] DATA = {
+            "One, two, buckle my shoe",
+            "Three, four, shut the door",
+            "Five, six, pick up sticks",
+            "Seven, eight, lay them straight",
+            "Nine, ten, a big fat hen"
+        };
+        public static void main(String[] args) throws IOException {
+            String uri = args[0];
+            Configuration conf = new Configuration();
+            FileSystem fs = FileSystem.get(URI.create(uri), conf);
+            Path path = new Path(uri);
+            IntWritable key = new IntWritable();
+            Text value = new Text();
+            SequenceFile.Writer writer = null;
+            try {
+                writer = SequenceFile.createWriter(fs, conf, path,
+                        key.getClass(), value.getClass());
+                for (int i = 0; i &lt; 100; i++) {
+                    key.set(100 - i);
+                    value.set(DATA[i % DATA.length]);
+                    System.out.printf("[%s]\t%s\t%s\n", writer.getLength(), key, value);
+                    writer.append(key, value);
+                }
+            } finally {
+                IOUtils.closeStream(writer);
+            }
+        }
+    }
+</pre>
+
+</ol>
+
+<p>
+<strong>Reading a SequenceFlie:</strong>
+</p>
+<ol>
+<li>
+非Writable序列化的使用下列两个方法：
+
+<ul>
+<li>
+public Object next(Object key) throws IOException
+
+<li>
+public Object getCurrentValue(Object val) throws IOException
+
+</ul>
+<li>
+如果使用了压缩，记得正确设置属性io.serializations
+
+<li>
+<strong>sync point:</strong>
+
+<ol>
+<li>
+sync point 就是在流中一个可以重新同步的位置，与记录的边界的对齐
+
+<li>
+SequenceFile.sync()每隔一段时间会插入一个特殊项sync point
+
+<li>
+有两种方法可以到达sequencefile的指定文置：
+
+<li>
+seek(position):到达文件指定的位置，但这个位置不是记录边界，读数据时会异常
+
+<li>
+sync(position):到达position后的第一个sync点，如果没有到达末尾
+<pre  class="brush:java">
+    public class SequenceFileReadDemo {
+        public static void main(String[] args) throws IOException {
+            String uri = args[0];
+            Configuration conf = new Configuration();
+            FileSystem fs = FileSystem.get(URI.create(uri), conf);
+            Path path = new Path(uri);
+            SequenceFile.Reader reader = null;
+            try {
+                reader = new SequenceFile.Reader(fs, path, conf);
+                Writable key = (Writable)
+                    ReflectionUtils.newInstance(reader.getKeyClass(), conf);
+                Writable value = (Writable)
+                    ReflectionUtils.newInstance(reader.getValueClass(), conf);
+                long position = reader.getPosition();
+                while (reader.next(key, value)) {
+                    String syncSeen = reader.syncSeen() ? "*" : ";
+                    System.out.printf("[%s%s]\t%s\t%s\n", position, syncSeen, key, value);
+                    position = reader.getPosition(); // beginning of next record
+                }
+            } finally {
+                IOUtils.closeStream(reader);
+            }
+        }
+    }
+</pre>
+
+</ol>
+</ol>
+  
+<p>
+<strong>Displaying a SequenceFlie with a command-line interface:</strong>
+</p>
+<ol>
+<li>
+<code>hadoop fs -text</code>
+
+<li>
+可以识别gzipped files和sequence files, 其它的会假定为plain text
+
+</ol>
+
+<p>
+<strong>Sorting and Merging SequenceFiles:</strong>
+</p>
+<ol>
+<li>
+使用MapReduce
+
+<li>
+使用比MapReduce更底层的：SequenceFile.Sorter
+
+</ol>
+
+<p>
+<strong>The SequenceFile format:</strong>
+</p>
+<ol>
+<li>
+文件由一个Header后跟一个或多个Record组成
+
+<li>
+Header:
+
+<ul>
+<li>
+前三个字节是SEQ，作为magic number
+
+<li>
+第四个字节是version number
+
+<li>
+其他字段：the names of the key and value classes, compression details, user-defined metadata, sync marker.
+
+</ul>
+<li>
+后面Record的存储与是否启用压缩相关，启用压缩又与是record压缩还是block压缩相关
+
+<li>
+无压缩
+
+<ul>
+<li>
+record由四部分组成：record length, key length, key, value
+
+<li>
+length由四字节组成
+
+</ul>
+<li>
+Record压缩：
+
+<ul>
+<li>
+和无压缩的结构一样
+
+<li>
+只是value通过header中指定的压缩方式压缩过了
+
+<li>
+key是无压缩的
+
+</ul>
+<li>
+Block压缩：
+
+<ul>
+<li>
+一次压缩多条record,放入一个block中，压缩效率高，更紧凑
+
+<li>
+可以向一个block中不断压入record，直到它的大小达到一个最小值，通过<code>io.seqfile.compress.blocksize</code>指定
+
+<li>
+每一个block后会插入一个sync marker
+
+<li>
+一个block的内部结构由五部分组成(后四个为压缩数据）：nubmer of records, the key lengths, the keys, the value lengths, the values. 
+
+</ul>
+</ol>
+<p>
+<img src="./sequence-file-format.png" />
+</p>
+
+<p>
+<strong>Block Compression:</strong>
+</p>
+
+<p>
+<img src="./sequence-file-block-compression.png" />
+</p>
 
 			</div>
 
