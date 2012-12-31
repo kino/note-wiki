@@ -1,0 +1,70 @@
+%title Processes
+=进程　Processes=
+%toc
+
+ 
+==进程介绍　Instruction to Processes==
+# *进程：对正在运行程序的抽象*
+# 操作系统的所有的其他内容都是围绕着进程
+
+===进程模型 The Process Model===
+# 计算机中所以可运行的软件，通常包括操作系统在内，被组织成若干 *连续的进程(Sequential Processes)* ，简称 *进程(Processes)*
+# 一个进程就是一个正在运行的程序，包括：程序计数器，寄存器，变量(Program Counter, Registers, Variables)
+# 进程和程序的区别很微妙，但很重要
+  * 程序: 以适当的形式的算法
+  * 进程: 正在运行的上下状态和上下文
+# 关键思想
+  * 进程是某种类型的一个活动Activity
+  * 它拥有:程序Program, input, output, 和状态state
+  * Cpu被多个进程共享
+  * 有一个调度算法来决定cpu如何服务于进程：何时停止对一个进程的服务，并开始服务于另一个进程
+
+===进程的创建 Process Creation===
+# 创建进程的四种场景
+  * 系统初始化时 System Initailization
+  * 一个正在运行的进程调用了一个创建进程的系统调用
+  * 接到用户创建进程的请求Request
+  * 批处理工作初始化时 Initailization of a batch job
+# 系统启动时
+  * 通常会有若干进程创建
+  * 一些是前台进程，用于和用户进行交互的进程
+  * 一些是后台进程，比如用于等待处理http请求的进程
+  * 后台进程被称作daemons, 也称作守护进程
+# 在上面所有的创建场景中：
+  * *一个进程的创建都是由一个已存在的进程调用了一个创建进程的系统调用*(第一个进程肯定是特殊的init)
+  * 这个已存在的进程可能是：一个用户进程，一个系统进程，一个批处理管理的进程
+# fork()系统调用
+  * MINX3 中唯一用于创建进程的系统调用
+  * 用于创建一个新进程，这个进程是调用fork系统调用的进程的精确拷贝
+  * 调用完fork后，就会有两个进程，父子进程，它们有相同的内存映象，环境变量，打开的文件
+  * 此后，子进程可以执行不同的系统调用，运行程序，改变自己
+# 进程创建后，父子进程拥有各自的地址空间address space
+  * 任何一个进程在它地址空间内作的改变，对其他进程都是不可见的
+  * 子进程的地址空间拷贝自创建它的父进程, 但它们是不同的两个地址空间
+  * 不可写内存共享的，所以子进程可以共享它父进程的open files
+   
+===进程的终结 Process Termination===
+# 进程终结的四种场景
+  * 正常退出 Nomal Exit(Voluntary)
+  * 出错了自动退出Error Exit(Voluntary)
+  * 出错了，导演终止Fatal Error(Involuntary)
+  * 被其他进程杀死Killed by another process(Involuntary)
+# 系统调用`exit`用于结束一个进程
+# 系统调用`kill`可用于告诉操作系统杀死一个进程
+ 
+===进程的层次结构 Process Hierachies===
+# 一个进程只有一个父进程
+# 一个进程可以有０个，１个，..多个子进程
+# 一个进程，和它的子进程，和它的更远的后代进程，可以组成一个进程级process group.
+# 两个特殊进程`reincarnation server`和`init`,  它们在boot image中
+  * `reincarnation server`用于启动或重启drivers and servers, 它一开始处于阻塞状态中，等待消息告诉它做什么 
+  * `init`用于运行在/etc/rc下的脚本, 用来告诉`reincarnation server`运行不在boot image中的drivers and servers
+  * 此后，`init`会读取配置文件/etc/ttytab
+    # 为每一终端fork一个进程getty，用于显示一个登录提示, 等待输入
+    # 当有输入时，exec一个登录进程login
+    # 登录成功，exec一个shell
+    # shell是init的儿子
+    # 用户的命令用于创建shell的儿子 
+    # 这些进程组成一个棵进程树 
+
+===进程模型 The Thread===
