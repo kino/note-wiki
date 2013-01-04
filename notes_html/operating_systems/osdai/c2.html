@@ -45,7 +45,7 @@
 <li><a href="#toc_1.1.2">进程的创建 Process Creation</a>
 <li><a href="#toc_1.1.3">进程的终结 Process Termination</a>
 <li><a href="#toc_1.1.4">进程的层次结构 Process Hierachies</a>
-<li><a href="#toc_1.1.5">进程模型 The Thread</a>
+<li><a href="#toc_1.1.5">进程状态 Process States</a>
 </ul>
 </ul>
 </ul>
@@ -254,7 +254,108 @@ shell是init的儿子
 </ul>
 </ol>
 
-<h3 id="toc_1.1.5">进程模型 The Thread</h3>
+<h3 id="toc_1.1.5">进程状态 Process States</h3>
+<ol>
+<li>
+进程是独立的实体
+
+<li>
+进程间需要交互，通信，同步
+
+</ol>
+ 
+<p>
+<strong>进程会阻塞:</strong>
+</p>
+<ol>
+<li>
+进程会阻塞，但分两种情况：
+
+<ul>
+<li>
+进程逻辑上无法进行下去，比如等待一个输入
+
+<li>
+无法分得cpu时间片
+
+</ul>
+<li>
+这两种阻塞情况是截然不同的：
+
+<ul>
+<li>
+第一种是程序内在固有的阻塞，属于程序逻辑的一部分
+
+<li>
+第二种不由程序控制，是操作系统实现的技术细节
+
+</ul>
+</ol>
+   
+<p>
+<strong>进程的三种状态:</strong>
+</p>
+<ol>
+<li>
+Running (actually using the CPU at that instant).
+
+<li>
+Ready (runnable; temporarily stopped to let another process run).
+
+<li>
+Blocked (unable to run until some external event happens).
+
+</ol>
+<p>
+<img src="process_states.png" />
+</p>
+<ol>
+<li>
+前两种状态类似，进程本身都 <strong>想要运行</strong>, 只是第二种状态暂时没有有效的时间片
+
+<li>
+第三种状态是进程无法运行，哪怕有有效的时间片
+
+</ol>
+ 
+<p>
+<strong>进程状态转换:</strong>
+</p>
+<ol>
+<li>
+进程的三种状态是可以相互转换的(就绪无法转换成阻塞，阻塞无法转换成运行）
+
+<li>
+转换1:有些系统需要调用<code>block和pause</code>触发，有些系统自动触发，比如等待有效输入
+
+<li>
+转换2、3由调度进程自动处理（process scheduler), 它有自己的高度算法
+
+<li>
+转换４由外部事件触发
+
+</ol>
+ 
+<p>
+<strong>调度进程 Process Scheduler:</strong>
+</p>
+<ol>
+<li>
+处在操作系统的最底层
+
+<li>
+它隐藏了所有中断处理，启动和中止进程的具体细节
+
+<li>
+非常短小
+
+<li>
+操作系统的剩余部分被很好的组织成进程形式
+
+</ol>
+<p>
+<img src="process_scheduler.png" />
+</p>
 
 			</div>
 

@@ -67,4 +67,35 @@
     # 用户的命令用于创建shell的儿子 
     # 这些进程组成一个棵进程树 
 
-===进程模型 The Thread===
+===进程状态 Process States===
+# 进程是独立的实体
+# 进程间需要交互，通信，同步
+ 
+*进程会阻塞:*
+# 进程会阻塞，但分两种情况：
+  * 进程逻辑上无法进行下去，比如等待一个输入
+  * 无法分得cpu时间片
+# 这两种阻塞情况是截然不同的：
+  * 第一种是程序内在固有的阻塞，属于程序逻辑的一部分
+  * 第二种不由程序控制，是操作系统实现的技术细节
+   
+*进程的三种状态:*
+# Running (actually using the CPU at that instant).
+# Ready (runnable; temporarily stopped to let another process run).
+# Blocked (unable to run until some external event happens).
+{{process_states.png}}
+# 前两种状态类似，进程本身都 *想要运行*, 只是第二种状态暂时没有有效的时间片
+# 第三种状态是进程无法运行，哪怕有有效的时间片
+ 
+*进程状态转换:*
+# 进程的三种状态是可以相互转换的(就绪无法转换成阻塞，阻塞无法转换成运行）
+# 转换1:有些系统需要调用`block和pause`触发，有些系统自动触发，比如等待有效输入
+# 转换2、3由调度进程自动处理（process scheduler), 它有自己的高度算法
+# 转换４由外部事件触发
+ 
+*调度进程 Process Scheduler:*
+# 处在操作系统的最底层
+# 它隐藏了所有中断处理，启动和中止进程的具体细节
+# 非常短小
+# 操作系统的剩余部分被很好的组织成进程形式
+{{process_scheduler.png}}
