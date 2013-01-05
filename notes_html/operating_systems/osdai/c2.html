@@ -46,6 +46,7 @@
 <li><a href="#toc_1.1.3">进程的终结 Process Termination</a>
 <li><a href="#toc_1.1.4">进程的层次结构 Process Hierachies</a>
 <li><a href="#toc_1.1.5">进程状态 Process States</a>
+<li><a href="#toc_1.1.6">进程的实现 Implementation of Processes</a>
 </ul>
 </ul>
 </ul>
@@ -356,6 +357,318 @@ Blocked (unable to run until some external event happens).
 <p>
 <img src="process_scheduler.png" />
 </p>
+
+<h3 id="toc_1.1.6">进程的实现 Implementation of Processes</h3>
+<ol>
+<li>
+操作系统维护了一张进程表 <strong>process table</strong>
+
+<li>
+其中的每一项every entry代表一个进程，每一项也可以叫做process control blocks
+
+<li>
+每一项保存了进程的：state, program counter,statck pointer, memory allocation, status of its open files ...
+
+<li>
+保存了一切进程从ready到running状态可能用到的信息
+
+</ol>
+<table>
+<tr>
+<th>
+Kernel
+</th>
+<th>
+Process  management
+</th>
+<th>
+File management
+</th>
+</tr>
+<tr>
+<td>
+Registers
+</td>
+<td>
+Pointer to text segment
+</td>
+<td>
+UMASK mask
+</td>
+</tr>
+<tr>
+<td>
+Program counter
+</td>
+<td>
+Pointer to data segment
+</td>
+<td>
+Root directory
+</td>
+</tr>
+<tr>
+<td>
+Program status word
+</td>
+<td>
+Pointer to bss segment
+</td>
+<td>
+Working directory
+</td>
+</tr>
+<tr>
+<td>
+Stack pointer
+</td>
+<td>
+Exit status
+</td>
+<td>
+File descriptors
+</td>
+</tr>
+<tr>
+<td>
+Process state
+</td>
+<td>
+Signal status
+</td>
+<td>
+Real id
+</td>
+</tr>
+<tr>
+<td>
+Current scheduling priority
+</td>
+<td>
+Process ID
+</td>
+<td>
+Effective UID
+</td>
+</tr>
+<tr>
+<td>
+Maximum scheduling priority
+</td>
+<td>
+Parent process
+</td>
+<td>
+Real GID
+</td>
+</tr>
+<tr>
+<td>
+Scheduling ticks left
+</td>
+<td>
+Process group
+</td>
+<td>
+Effective GID
+</td>
+</tr>
+<tr>
+<td>
+Quantum size
+</td>
+<td>
+Children's CPU time
+</td>
+<td>
+Controlling tty
+</td>
+</tr>
+<tr>
+<td>
+CPU time used
+</td>
+<td>
+Real UID
+</td>
+<td>
+Save area for read/write
+</td>
+</tr>
+<tr>
+<td>
+Message queuepointers
+</td>
+<td>
+Effective UID
+</td>
+<td>
+System call parameters
+</td>
+</tr>
+<tr>
+<td>
+Pending signal bits
+</td>
+<td>
+Real GID
+</td>
+<td>
+Various flag bits
+</td>
+</tr>
+<tr>
+<td>
+Various flag bits
+</td>
+<td>
+Effective GID Process name
+</td>
+<td>
+File info for sharing text
+</td>
+</tr>
+<tr>
+<td>
+&nbsp;
+</td>
+<td>
+Bitmaps for signals
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+&nbsp;
+</td>
+<td>
+Various flag bits
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+&nbsp;
+</td>
+<td>
+Process name
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+</table>
+
+<p>
+<strong>interrupt descriptor table:</strong>
+</p>
+<ol>
+<li>
+比如每个io设备在此表中有一个对应项entry
+
+<li>
+这个表里的每一项通常叫做中断向量interrupt vector
+
+<li>
+这个entry里保存了中断服务的入口地址，interrupt service procedure
+
+</ol>
+
+
+<p>
+<strong>当一个中断发生时，假设为一个disk interrupt:</strong>
+</p>
+<ol>
+<li>
+当前会有也仅有一个进程在running状态,称之为当前进程好了
+
+<li>
+接下来的动作会分为两部分：硬件操作和软件操作
+
+<li>
+硬件操作
+
+<ol>
+<li>
+把当前进程的program counter, program status word, 可能还有registers进行压栈操作，即放入当前进程的stack中
+
+<li>
+然后跳到中断向量指向的中断服务地址
+
+<li>
+接下来开始软件操作，即运行为相应的中断服务
+
+</ol>
+<li>
+软件操作，即相应的中断服务
+
+<ol>
+<li>
+把current process的所有registers存入process table
+
+<li>
+current process number和指向相应process table entry的指针放入全局变量，这样可以快速访问
+
+<li>
+把硬件操作中存栈的信息清除，并将process handler的栈指针指向一个临时栈
+
+<li>
+上面的工作都是汇编做的（c还做不了)，接下来是c的工作
+
+<li>
+构建一个信息发往disk进程，这个进程正处于blocked状态,因为它在等待这个消息.这个消息告诉它一个中断产生了
+
+<li>
+disk进程状态会从blocked状态转换为ready
+
+<li>
+process scheduler被调用
+
+<li>
+按priority决定哪个进程进入running状态
+
+<li>
+从c返回到汇编
+
+</ol>
+</ol>
+  
+<p>
+<strong>中断处理与调度:</strong>
+</p>
+<ol>
+<li>
+Hardware stacks program counter, etc.
+
+<li>
+Hardware loads new program counter from interrupt vector.
+
+<li>
+Assembly language procedure saves registers.
+
+<li>
+Assembly language procedure sets up new stack.
+
+<li>
+C interrupt service constructs and sends message.
+
+<li>
+Message passing code marks waiting message recipient ready.
+
+<li>
+Scheduler decides which process is to run next.
+
+<li>
+C procedure returns to the assembly code.
+
+<li>
+Assembly language procedure starts up new current process.
+
+</ol>
 
 			</div>
 

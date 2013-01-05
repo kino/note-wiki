@@ -99,3 +99,62 @@
 # 非常短小
 # 操作系统的剩余部分被很好的组织成进程形式
 {{process_scheduler.png}}
+
+===进程的实现 Implementation of Processes===
+# 操作系统维护了一张进程表 *process table*
+# 其中的每一项every entry代表一个进程，每一项也可以叫做process control blocks
+# 每一项保存了进程的：state, program counter,statck pointer, memory allocation, status of its open files ...
+# 保存了一切进程从ready到running状态可能用到的信息
+| Kernel                      | Process  management        | File management            |
+|-----------------------------|----------------------------|----------------------------|
+| Registers                   | Pointer to text segment    | UMASK mask                 |
+| Program counter             | Pointer to data segment    | Root directory             |
+| Program status word         | Pointer to bss segment     | Working directory          |
+| Stack pointer               | Exit status                | File descriptors           |
+| Process state               | Signal status              | Real id                    |
+| Current scheduling priority | Process ID                 | Effective UID              |
+| Maximum scheduling priority | Parent process             | Real GID                   |
+| Scheduling ticks left       | Process group              | Effective GID              |
+| Quantum size                | Children's CPU time        | Controlling tty            |
+| CPU time used               | Real UID                   | Save area for read/write   |
+| Message queuepointers       | Effective UID              | System call parameters     |
+| Pending signal bits         | Real GID                   | Various flag bits          |
+| Various flag bits           | Effective GID Process name | File info for sharing text |
+|                             | Bitmaps for signals        |                            |
+|                             | Various flag bits          |                            |
+|                             | Process name               |                            |
+
+*interrupt descriptor table:*
+# 比如每个io设备在此表中有一个对应项entry
+# 这个表里的每一项通常叫做中断向量interrupt vector
+# 这个entry里保存了中断服务的入口地址，interrupt service procedure
+
+
+*当一个中断发生时，假设为一个disk interrupt:*
+# 当前会有也仅有一个进程在running状态,称之为当前进程好了
+# 接下来的动作会分为两部分：硬件操作和软件操作
+# 硬件操作
+  # 把当前进程的program counter, program status word, 可能还有registers进行压栈操作，即放入当前进程的stack中
+  # 然后跳到中断向量指向的中断服务地址
+  # 接下来开始软件操作，即运行为相应的中断服务
+# 软件操作，即相应的中断服务
+  # 把current process的所有registers存入process table
+  # current process number和指向相应process table entry的指针放入全局变量，这样可以快速访问
+  # 把硬件操作中存栈的信息清除，并将process handler的栈指针指向一个临时栈
+  # 上面的工作都是汇编做的（c还做不了)，接下来是c的工作
+  # 构建一个信息发往disk进程，这个进程正处于blocked状态,因为它在等待这个消息.这个消息告诉它一个中断产生了
+  # disk进程状态会从blocked状态转换为ready
+  # process scheduler被调用
+  # 按priority决定哪个进程进入running状态
+  # 从c返回到汇编
+  
+*中断处理与调度:*
+# Hardware stacks program counter, etc.
+# Hardware loads new program counter from interrupt vector.
+# Assembly language procedure saves registers.
+# Assembly language procedure sets up new stack.
+# C interrupt service constructs and sends message.
+# Message passing code marks waiting message recipient ready.
+# Scheduler decides which process is to run next.
+# C procedure returns to the assembly code.
+# Assembly language procedure starts up new current process.
