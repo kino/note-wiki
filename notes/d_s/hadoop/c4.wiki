@@ -595,3 +595,10 @@ Hadoop使用自己的序列化格式Writable, 紧凑，快速，但很难被其�
 {{./sequence-file-block-compression.png}}
 
 
+===MappedFile===
+# MappedFile就是排好序的SequenceFile
+# 有两个文件组成：一个是数据文件，一个索引文件index file
+# index file中存放key和key在数据文件中的postion的键值对，index file中key是排好序的
+# 并不是每一个key都存在index　file中，因为index file会整个加载进内存。
+# 通过设置一个interval属性，来决定每隔几个key，存一个key到index文件中。
+# 当根据key从文件中获取值时，先从index file中获取最接近key的位置，从这个位置开始查找
