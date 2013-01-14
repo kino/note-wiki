@@ -47,6 +47,7 @@
 <li><a href="#toc_1.1.4">进程的层次结构 Process Hierachies</a>
 <li><a href="#toc_1.1.5">进程状态 Process States</a>
 <li><a href="#toc_1.1.6">进程的实现 Implementation of Processes</a>
+<li><a href="#toc_1.1.7">线程 Threads</a>
 </ul>
 </ul>
 </ul>
@@ -667,6 +668,258 @@ C procedure returns to the assembly code.
 
 <li>
 Assembly language procedure starts up new current process.
+
+</ol>
+ 
+<h3 id="toc_1.1.7">线程 Threads</h3>
+
+<p>
+<strong>进程的三个部分:</strong>
+</p>
+<ol>
+<li>
+进程通常包括程序、资源、执行三部分
+
+<li>
+执行通常理解为执行的上下文，指令执行体，也就是我们所说的线程thread
+
+<li>
+一个进程通常只有一个指令执行体，也就是只有一个线程
+
+</ol>
+
+<p>
+<strong>为什么需要线程:</strong>
+</p>
+<ol>
+<li>
+但经常有一些情形，需要多个线程并行运行并使用相同的地址空间address space,就像它们是不同的进程一样
+
+<li>
+这就是线程thread,也通常叫做轻进程lightweight process
+
+<li>
+线各上下文切换要比进程小的多
+
+</ol>
+
+<p>
+<strong>进程:</strong>
+</p>
+<ol>
+<li>
+进程可以被看做将相关资源组织起来的一种方式
+
+<li>
+一个进程拥有一个地址空间，地址空间里有：program text and data, open files, child processes, pending alarms, signal handlers, accounting information,
+
+<li>
+将这些资源以进程的方式组织起来，很容易进行管理
+
+</ol>
+
+<p>
+<strong>线程的组成:</strong>
+</p>
+<ol>
+<li>
+program counter程序计数器，指向下一条执行的指令
+
+<li>
+registers寄存器，持有当前的变量
+
+<li>
+stack栈，包含了执行的历史，一个栈桢代表一个被调用了的但还未返回的过程procedure
+
+</ol>
+
+<p>
+<strong>进程与线程的区别:</strong>
+</p>
+<ol>
+<li>
+进程被用来组织管理资源
+
+<li>
+线程是在cpu上调度执行的实体entities
+
+</ol>
+
+<p>
+<strong>线程表thread table:</strong>
+</p>
+<ol>
+<li>
+在单个进程中引入多线程概念后，原先进程表中的字段可能变为每个线程拥有
+
+</ol>
+
+<table>
+<tr>
+<th>
+Per process items
+</th>
+<th>
+Per thread items
+</th>
+</tr>
+<tr>
+<td>
+Address space
+</td>
+<td>
+Program counter
+</td>
+</tr>
+<tr>
+<td>
+Global variables
+</td>
+<td>
+Registers
+</td>
+</tr>
+<tr>
+<td>
+Open files
+</td>
+<td>
+Stack
+</td>
+</tr>
+<tr>
+<td>
+Child processes
+</td>
+<td>
+State
+</td>
+</tr>
+<tr>
+<td>
+Pending alarms
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+Signals and signal dhandlers
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+Accounting information
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+</table>
+
+<p>
+<strong>实现线程的方法:</strong>
+</p>
+<ol>
+<li>
+用户级线程模型：
+
+<ol>
+<li>
+操作系统不知道线程的存在
+
+<li>
+线程的管理完全在用户进程区
+
+</ol>
+<li>
+内核级线程模型:
+
+<ol>
+<li>
+内核知道每个进程的线程
+
+<li>
+并由内核负责线程的高度执行
+
+<li>
+内核维护一张类似进程表的线程表
+
+</ol>
+<li>
+两者的不同：
+
+<ol>
+<li>
+用户级线程上下文切换要比内核级线程快
+
+<li>
+但对于用户级线程，如果一个线程被IO阻塞，整个进程都会被阻塞，因为对于操作系统来说，就是进程被阻塞了
+
+<li>
+所以很多操作系统混合使用
+
+</ol>
+</ol>
+
+<p>
+<strong>线程引入了很多问题:</strong>
+</p>
+<ol>
+<li>
+fork一个多线程的进程，子进程是否应该拥有这些线程
+
+<ol>
+<li>
+如果不，子进程可能不能正确运行
+
+<li>
+如果可以，当一个线程被读阻塞时，另一个对应的线程是否也应该阻塞
+
+</ol>
+<li>
+一个进程中的线程被共享很多数据
+
+<ol>
+<li>
+两个线程都发现有空余内存，都支申请分配内存
+
+</ol>
+<li>
+system call系统调用的结果状态
+
+<ol>
+<li>
+执行一个系统调用时，会将结果状态存入一个全局变量中errorno
+
+<li>
+如果一个进程中的多个线程同时执行了system call
+
+</ol>
+<li>
+中断信号的处理
+
+<li>
+栈的管理
+
+</ol>
+
+<p>
+<strong>Linux线程的实现:</strong>
+</p>
+<ol>
+<li>
+使用轻量进程来表示线程
+
+<li>
+Linux实现了轻量进程
+
+<li>
+轻量进程可以和其他进程共享一部分资源, 如文件，信号，数据内存，甚至代码
 
 </ol>
 

@@ -158,3 +158,72 @@
 # Scheduler decides which process is to run next.
 # C procedure returns to the assembly code.
 # Assembly language procedure starts up new current process.
+ 
+===线程 Threads===
+
+*进程的三个部分:*
+# 进程通常包括程序、资源、执行三部分
+# 执行通常理解为执行的上下文，指令执行体，也就是我们所说的线程thread
+# 一个进程通常只有一个指令执行体，也就是只有一个线程
+
+*为什么需要线程:*
+# 但经常有一些情形，需要多个线程并行运行并使用相同的地址空间address space,就像它们是不同的进程一样
+# 这就是线程thread,也通常叫做轻进程lightweight process
+# 线各上下文切换要比进程小的多
+
+*进程:*
+# 进程可以被看做将相关资源组织起来的一种方式
+# 一个进程拥有一个地址空间，地址空间里有：program text and data, open files, child processes, pending alarms, signal handlers, accounting information,
+# 将这些资源以进程的方式组织起来，很容易进行管理
+
+*线程的组成:*
+# program counter程序计数器，指向下一条执行的指令
+# registers寄存器，持有当前的变量
+# stack栈，包含了执行的历史，一个栈桢代表一个被调用了的但还未返回的过程procedure
+
+*进程与线程的区别:*
+# 进程被用来组织管理资源
+# 线程是在cpu上调度执行的实体entities
+
+*线程表thread table:*
+# 在单个进程中引入多线程概念后，原先进程表中的字段可能变为每个线程拥有
+
+| Per process items            | Per thread items |
+|------------------------------|------------------|
+| Address space                | Program counter  |
+| Global variables             | Registers        |
+| Open files                   | Stack            |
+| Child processes              | State            |
+| Pending alarms               |                  |
+| Signals and signal dhandlers |                  |
+| Accounting information       |                  |
+
+*实现线程的方法:*
+# 用户级线程模型：
+  # 操作系统不知道线程的存在
+  # 线程的管理完全在用户进程区
+# 内核级线程模型:
+  # 内核知道每个进程的线程
+  # 并由内核负责线程的高度执行
+  # 内核维护一张类似进程表的线程表
+# 两者的不同：
+  # 用户级线程上下文切换要比内核级线程快
+  # 但对于用户级线程，如果一个线程被IO阻塞，整个进程都会被阻塞，因为对于操作系统来说，就是进程被阻塞了
+  # 所以很多操作系统混合使用
+
+*线程引入了很多问题:*
+# fork一个多线程的进程，子进程是否应该拥有这些线程
+  # 如果不，子进程可能不能正确运行
+  # 如果可以，当一个线程被读阻塞时，另一个对应的线程是否也应该阻塞
+# 一个进程中的线程被共享很多数据
+  # 两个线程都发现有空余内存，都支申请分配内存
+# system call系统调用的结果状态
+  # 执行一个系统调用时，会将结果状态存入一个全局变量中errorno
+  # 如果一个进程中的多个线程同时执行了system call
+# 中断信号的处理
+# 栈的管理
+
+*Linux线程的实现:*
+# 使用轻量进程来表示线程
+# Linux实现了轻量进程
+# 轻量进程可以和其他进程共享一部分资源, 如文件，信号，数据内存，甚至代码
