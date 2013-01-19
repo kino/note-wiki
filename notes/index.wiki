@@ -10,6 +10,7 @@
 * [[vim/vim|vim]]
 ==Java==
 * [[java/nio|Nio]]
+* [[java/jmx|JMX ]]
 * [[java/frq|杂 ]]
 ==C ==
 * [[c/cpl|C Programming Language]]
