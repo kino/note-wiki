@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Mapper Reduce</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<div class="toc">
+<ul>
+<li><a href="#toc_1">Mapper Reduce</a>
+<ul>
+<li><a href="#toc_1.1">MapReduce Job</a>
+</ul>
+</ul>
+</div>
+
+<p>
+Sun Jan 20 05:40:31 CST 2013
+</p>
+
+<h1 id="toc_1">Mapper Reduce</h1>
+
+<ol>
+<li>
+MapReduce将处理过程分为两个阶段：map, reduce
+
+<li>
+每个阶段都以key-value作为输入和输出。类型可能由开发者来决定。
+
+<li>
+开发者需要开发两个函数：map funciton, reduce function
+
+<li>
+reduce function的输入类型必须和map function的输出类型对应起来
+
+</ol>
+
+<h2 id="toc_1.1">MapReduce Job</h2>
+<ol>
+<li>
+代表用户想要做的一件工作
+
+<li>
+由三部分组成：做为输入的数据input data, MapReduce program(工作程序), 配置信息configuration
+
+<li>
+Hadoop将一个job分解成task
+
+<li>
+有两类task:map task, reduce task
+
+<li>
+有两种结点来控制job的执行：一个jobtracker, 多个tasktracker
+
+<li>
+jobtracker负责将task分配给tasktracker, 以此来协调整个job的执行
+
+<li>
+tasktracker负责运行task,并将进度报告传给jobtracker
+
+<li>
+jobtracker记录了个一个job所有task的progress
+
+<li>
+一个task失败了，jobtracker可以将这个task重新分配给一个tasktracker
+
+</ol>
+
+<p>
+<strong>Input Splits:</strong>
+</p>
+<ol>
+<li>
+hadoop将一个job的输入，切分成固定大小的数据片
+
+<li>
+数据片的大小最好就是HDFS block的大小, 这是保证数据在单一结点的最大的单位
+
+<li>
+因为hadoop为尽力在输入数据所在的结点运行map task,可以节省网络带宽 这就是data locality opertimization
+
+<li>
+如果输入数据所在所有结点都在运行其他map task, hadoop 会在同一机架中寻找可能的结点运行map task
+
+<li>
+如果这也不行，只能跨机架运行了
+
+</ol>
+<p>
+<img src="data_and_maptask.png" />
+</p>
+
+
+<p>
+<strong>map task:</strong>
+</p>
+<ol>
+<li>
+map task输出写入本地磁盘
+
+<li>
+map task的输出是中间值，它将作为reduce task的输入
+
+<li>
+整个job完成就可以丢弃了
+
+</ol>
+
+<p>
+<strong>reduce task:</strong>
+</p>
+<ol>
+<li>
+reduce task并不具备data locality特性
+
+<li>
+因为一个trace task的输入可能来自所有的map task
+
+<li>
+排好序的map task输出将通过网络传输结reduce task所在的结点, 然后merge数据，再传给reduce function
+
+<li>
+reduce task的结果将存入HDFS,这是为了保证数据的可靠性
+
+<li>
+reduce task的数量将不是能输入的大小决定的，而是单独指定的
+
+</ol>
+ 
+<p>
+<strong>多reduce task时:</strong>
+</p>
+<ol>
+<li>
+每个map task会将输出进行切分，为每一个reduce task创建一份数据
+
+<li>
+每一份数据可能包含多个key和其对应的value
+
+<li>
+但同一个key的所有数据必须属于同一份数据
+
+<li>
+用户可以指定切分的函数，默认的是以hash切分的，工作的挺好
+
+</ol>
+
+
+<p>
+<strong>Combiner Function:</strong>
+</p>
+<ol>
+<li>
+MapReduce最大的限制将在网络带宽
+
+<li>
+应当尽力减少map task与reduce task之间的数据传输 
+
+<li>
+combiner function不能代替reduce funcition
+
+<li>
+它用来减少map task与reduce task之间的数据传输
+
+<li>
+所以创建一个MapReduce job时，最好考虑一下能否使用一个combiner function
+
+</ol>
+
+<p>
+<img src="mapreduce_data_flow.png" />
+</p>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>
