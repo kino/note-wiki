@@ -72,3 +72,87 @@ Mon Jan 21 02:24:57 CST 2013
   }}}
   
 *GenericOptionParser,Tool,ToolRunner:*
+
+
+==Writing a Unit Test with MRUnit==
+*Mapper:*
+{{{ class="brush:java"
+    import java.io.IOException;                              
+    import org.apache.hadoop.io.*;                           
+    import org.apache.hadoop.mrunit.mapreduce.MapDriver;     
+    import org.junit.*;                                      
+    public class MaxTemperatureMapperTest {
+        @Test
+            public void processesValidRecord() throws IOException, InterruptedException {
+                Text value = new Text("0043011990999991950051518004+68750+023550FM-12+0382" +
+                        // Year ^^^^
+                        "99999V0203201N00261220001CN9999999N9-00111+99999999999");
+                        // Temperature ^^^^^
+                new MapDriver<LongWritable, Text, Text, IntWritable>()
+                    .withMapper(new MaxTemperatureMapper())
+                    .withInputValue(value)
+                    .withOutput(new Text("1950"), new IntWritable(-11))
+                    .runTest();
+            }
+    }
+  }}}
+
+*Reducer:*
+{{{ class="brush:java"
+       @Test
+       public void returnsMaximumIntegerInValues() throws IOException, InterruptedException {
+           new ReduceDriver<Text, IntWritable, Text, IntWritable>()
+               .withReducer(new MaxTemperatureReducer())
+               .withInputKey(new Text("1950"))
+               .withInputValues(Arrays.asList(new IntWritable(10), new IntWritable(5)))
+               .withOutput(new Text("1950"), new IntWritable(10))
+               .runTest();
+       }
+  }}}
+  
+==Running Locally on Test Data==
+===Running a job in a local job runner===
+{{{ class="brush:java"
+    public class MaxTemperatureDriver extends Configured implements Tool {
+    
+            @Override
+            public int run(String[] args) throws Exception {
+                if (args.length != 2) {
+                    System.err.printf("Usage: %s [generic options] <input> <output>\n", 
+                            getClass().getSimpleName());
+                    ToolRunner.printGenericCommandUsage(System.err);
+                    return -1;
+                }
+                
+                Job job = new Job(getConf(), "Max temperature");
+                job.setJarByClass(getClass());
+                
+                FileInputFormat.addInputPath(job, new Path(args[0]));
+                FileOutputFormat.setOutputPath(job, new Path(args[1]));
+                
+                job.setMapperClass(MaxTemperatureMapper.class);
+                job.setCombinerClass(MaxTemperatureReducer.class);
+                job.setReducerClass(MaxTemperatureReducer.class);
+                
+                //input type 由input format确定，默认是TextInputFormat:(LongWritable , Text)
+                
+                job.setOutputKeyClass(Text.class);
+                job.setOutputValueClass(IntWritable.class);
+                
+                return job.waitForCompletion(true) ? 0 : 1;
+            }
+            
+            public static void main(String[] args) throws Exception {
+                int exitCode = ToolRunner.run(new MaxTemperatureDriver(), args);
+                System.exit(exitCode);
+            }
+    }
+  }}}
+ 
+# Hadoop提供了一个local job runner, 这是一个简化版的MapReduce执行引擎
+# 将配置属性`mapred.job.tracker`(YARN MapReduce中的属性是`mapreduce.framework.name`)设置为`local`将激活这个local job runner.job将在进程内运行
+ 
+==Running on a Cluster==
+
+===Packaging===
+# 在一个分布式环境中，需要将job打包，发往集群中

@@ -40,6 +40,15 @@
 <ul>
 <li><a href="#toc_1.1">The Configuration API</a>
 <li><a href="#toc_1.2">Setting up the Development Environment</a>
+<li><a href="#toc_1.3">Writing a Unit Test with MRUnit</a>
+<li><a href="#toc_1.4">Running Locally on Test Data</a>
+<ul>
+<li><a href="#toc_1.4.1">Running a job in a local job runner</a>
+</ul>
+<li><a href="#toc_1.5">Running on a Cluster</a>
+<ul>
+<li><a href="#toc_1.5.1">Packaging</a>
+</ul>
 </ul>
 </ul>
 </div>
@@ -165,6 +174,104 @@ Hadoop在HDFS中作用的用户权限由client端的<code>whoami</code>决定的
 <p>
 <strong>GenericOptionParser,Tool,ToolRunner:</strong>
 </p>
+
+
+<h2 id="toc_1.3">Writing a Unit Test with MRUnit</h2>
+<p>
+<strong>Mapper:</strong>
+</p>
+<pre  class="brush:java">
+    import java.io.IOException;                              
+    import org.apache.hadoop.io.*;                           
+    import org.apache.hadoop.mrunit.mapreduce.MapDriver;     
+    import org.junit.*;                                      
+    public class MaxTemperatureMapperTest {
+        @Test
+            public void processesValidRecord() throws IOException, InterruptedException {
+                Text value = new Text("0043011990999991950051518004+68750+023550FM-12+0382" +
+                        // Year ^^^^
+                        "99999V0203201N00261220001CN9999999N9-00111+99999999999");
+                        // Temperature ^^^^^
+                new MapDriver&lt;LongWritable, Text, Text, IntWritable&gt;()
+                    .withMapper(new MaxTemperatureMapper())
+                    .withInputValue(value)
+                    .withOutput(new Text("1950"), new IntWritable(-11))
+                    .runTest();
+            }
+    }
+</pre>
+
+<p>
+<strong>Reducer:</strong>
+</p>
+<pre  class="brush:java">
+       @Test
+       public void returnsMaximumIntegerInValues() throws IOException, InterruptedException {
+           new ReduceDriver&lt;Text, IntWritable, Text, IntWritable&gt;()
+               .withReducer(new MaxTemperatureReducer())
+               .withInputKey(new Text("1950"))
+               .withInputValues(Arrays.asList(new IntWritable(10), new IntWritable(5)))
+               .withOutput(new Text("1950"), new IntWritable(10))
+               .runTest();
+       }
+</pre>
+  
+<h2 id="toc_1.4">Running Locally on Test Data</h2>
+<h3 id="toc_1.4.1">Running a job in a local job runner</h3>
+<pre  class="brush:java">
+    public class MaxTemperatureDriver extends Configured implements Tool {
+    
+            @Override
+            public int run(String[] args) throws Exception {
+                if (args.length != 2) {
+                    System.err.printf("Usage: %s [generic options] &lt;input&gt; &lt;output&gt;\n", 
+                            getClass().getSimpleName());
+                    ToolRunner.printGenericCommandUsage(System.err);
+                    return -1;
+                }
+                
+                Job job = new Job(getConf(), "Max temperature");
+                job.setJarByClass(getClass());
+                
+                FileInputFormat.addInputPath(job, new Path(args[0]));
+                FileOutputFormat.setOutputPath(job, new Path(args[1]));
+                
+                job.setMapperClass(MaxTemperatureMapper.class);
+                job.setCombinerClass(MaxTemperatureReducer.class);
+                job.setReducerClass(MaxTemperatureReducer.class);
+                
+                //input type 由input format确定，默认是TextInputFormat:(LongWritable , Text)
+                
+                job.setOutputKeyClass(Text.class);
+                job.setOutputValueClass(IntWritable.class);
+                
+                return job.waitForCompletion(true) ? 0 : 1;
+            }
+            
+            public static void main(String[] args) throws Exception {
+                int exitCode = ToolRunner.run(new MaxTemperatureDriver(), args);
+                System.exit(exitCode);
+            }
+    }
+</pre>
+ 
+<ol>
+<li>
+Hadoop提供了一个local job runner, 这是一个简化版的MapReduce执行引擎
+
+<li>
+将配置属性<code>mapred.job.tracker</code>(YARN MapReduce中的属性是<code>mapreduce.framework.name</code>)设置为<code>local</code>将激活这个local job runner.job将在进程内运行
+
+</ol>
+ 
+<h2 id="toc_1.5">Running on a Cluster</h2>
+
+<h3 id="toc_1.5.1">Packaging</h3>
+<ol>
+<li>
+在一个分布式环境中，需要将job打包，发往集群中
+
+</ol>
 
 			</div>
 
