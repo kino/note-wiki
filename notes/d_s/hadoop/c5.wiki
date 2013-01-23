@@ -1,0 +1,158 @@
+%title Developing a MapRduce Application
+%toc
+
+Mon Jan 21 02:24:57 CST 2013
+
+=Developing a MapRduce Application=
+
+==The Configuration API ==
+# Hadoop中的组件都使用Hadoop自身的配置api进行配置，类Configuration的一个实例
+# Configuration从xml文件中读取配置，xml文件中是一个简单的name-value的结构文件
+# 属性的类型并不需要在配置文件中指定，而是在读取时可以指定
+# 可以加载多个配置文件，并且多个文件可以对同一属性进行配置，后加载的覆盖先前加载的。
+# 如果先加载的配置文件对属性设置了final为true,后加载的文件就不能覆盖这个属性的定义
+{{{class="brush:xml"
+    <?xml version="1.0"?>
+    <configuration>
+        <property>
+            <name>color</name>
+            <value>yellow</value>
+            <description>Color</description>
+        </property>
+        <property>
+            <name>size</name>
+            <value>10</value>
+            <description>Size</description>
+        </property>
+        <property>
+            <name>weight</name>
+            <value>heavy</value>
+            <final>true</final>
+            <description>Weight</description>
+        </property>
+        <property>
+            <name>size-weight</name>
+            <value>${size},${weight}</value>
+            <description>Size and weight</description>
+        </property>
+    </configuration>
+  }}}
+{{{class="brush:java"
+    Configuration conf = new Configuration();
+    conf.addResource("configuration-1.xml");
+    assertThat(conf.get("color"), is("yellow"));
+    assertThat(conf.getInt("size", 0), is(10));
+    assertThat(conf.get("breadth", "wide"), is("wide"));
+    }}}
+  
+*变量扩展Variable Expansion:*
+# 属性配置可以有由其他属性组合成，也可以取system的属性
+# system设置的优先级就高于配置文件中的
+  * 这样就可以在jvm参数中覆盖属性设置了: `-Dproperty=value`
+  {{{class="brush:java"
+    conf.get("size-weight");//10,heavy
+    
+    System.setProperty("size", "14");
+    conf.get("size-weight");//14,heavy
+    }}}
+    
+==Setting up the Development Environment ==
+
+*设置用户:*
+# Hadoop在HDFS中作用的用户权限由client端的`whoami`决定的, 同样组信息由`groups`决定
+# 然而，Hadoop中的用户并不等同于客户机中的用户
+# 可以明确指出要使用Hadoop中要使用的用户和组：
+  * *hadoop.job.ugi*: 以逗号分隔的列表，第一个为用户，后面的为组
+# 通过属性可以设置HDFS页面中所使用的用户：
+  * *dfs.web.ugi*
+  
+*如果启动job中不使用-conf选项，将使用$HADOOP_INSTALL中conf子文件夹中的配置信息*
+{{{ class="brush:bash"
+    $ hadoop fs -conf conf/hadoop-local.xml -ls .
+  }}}
+  
+*GenericOptionParser,Tool,ToolRunner:*
+
+
+==Writing a Unit Test with MRUnit==
+*Mapper:*
+{{{ class="brush:java"
+    import java.io.IOException;                              
+    import org.apache.hadoop.io.*;                           
+    import org.apache.hadoop.mrunit.mapreduce.MapDriver;     
+    import org.junit.*;                                      
+    public class MaxTemperatureMapperTest {
+        @Test
+            public void processesValidRecord() throws IOException, InterruptedException {
+                Text value = new Text("0043011990999991950051518004+68750+023550FM-12+0382" +
+                        // Year ^^^^
+                        "99999V0203201N00261220001CN9999999N9-00111+99999999999");
+                        // Temperature ^^^^^
+                new MapDriver<LongWritable, Text, Text, IntWritable>()
+                    .withMapper(new MaxTemperatureMapper())
+                    .withInputValue(value)
+                    .withOutput(new Text("1950"), new IntWritable(-11))
+                    .runTest();
+            }
+    }
+  }}}
+
+*Reducer:*
+{{{ class="brush:java"
+       @Test
+       public void returnsMaximumIntegerInValues() throws IOException, InterruptedException {
+           new ReduceDriver<Text, IntWritable, Text, IntWritable>()
+               .withReducer(new MaxTemperatureReducer())
+               .withInputKey(new Text("1950"))
+               .withInputValues(Arrays.asList(new IntWritable(10), new IntWritable(5)))
+               .withOutput(new Text("1950"), new IntWritable(10))
+               .runTest();
+       }
+  }}}
+  
+==Running Locally on Test Data==
+===Running a job in a local job runner===
+{{{ class="brush:java"
+    public class MaxTemperatureDriver extends Configured implements Tool {
+    
+            @Override
+            public int run(String[] args) throws Exception {
+                if (args.length != 2) {
+                    System.err.printf("Usage: %s [generic options] <input> <output>\n", 
+                            getClass().getSimpleName());
+                    ToolRunner.printGenericCommandUsage(System.err);
+                    return -1;
+                }
+                
+                Job job = new Job(getConf(), "Max temperature");
+                job.setJarByClass(getClass());
+                
+                FileInputFormat.addInputPath(job, new Path(args[0]));
+                FileOutputFormat.setOutputPath(job, new Path(args[1]));
+                
+                job.setMapperClass(MaxTemperatureMapper.class);
+                job.setCombinerClass(MaxTemperatureReducer.class);
+                job.setReducerClass(MaxTemperatureReducer.class);
+                
+                //input type 由input format确定，默认是TextInputFormat:(LongWritable , Text)
+                
+                job.setOutputKeyClass(Text.class);
+                job.setOutputValueClass(IntWritable.class);
+                
+                return job.waitForCompletion(true) ? 0 : 1;
+            }
+            
+            public static void main(String[] args) throws Exception {
+                int exitCode = ToolRunner.run(new MaxTemperatureDriver(), args);
+                System.exit(exitCode);
+            }
+    }
+  }}}
+ 
+# Hadoop提供了一个local job runner, 这是一个简化版的MapReduce执行引擎
+# 将配置属性`mapred.job.tracker`(YARN MapReduce中的属性是`mapreduce.framework.name`)设置为`local`将激活这个local job runner.job将在进程内运行
+ 
+==Running on a Cluster==
+
+===Packaging===
+# 在一个分布式环境中，需要将job打包，发往集群中

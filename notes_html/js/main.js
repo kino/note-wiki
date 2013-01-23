@@ -55,6 +55,7 @@ $(document).ready(function(){
 		  'java  '+rootPath+'/js/sh/scripts/shBrushJava.js',
 		  'c cpp  '+rootPath+'/js/sh/scripts/shBrushCpp.js',
 		  'perl  '+rootPath+'/js/sh/scripts/shBrushPerl.js',
+		  'xml  '+rootPath+'/js/sh/scripts/shBrushXml.js',
 		  'css  '+rootPath+'/js/sh/scripts/shBrushCss.js'
 		);
 	 

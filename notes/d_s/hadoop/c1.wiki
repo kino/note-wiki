@@ -1,0 +1,20 @@
+%title Meet Hadoop
+%toc
+
+Sun Jan 20 05:17:35 CST 2013
+
+=Meet Hadoop=
+
+==数据存储与分析==
+# 从单一磁盘对数据进行取是很慢的，写就更慢了
+# 减少读取时间的一种方法就是从多个磁盘同时读取
+
+*问题:*
+# 硬件错误，防止数据丢失
+  * 多拷贝，每份数据，系统存放了多个拷贝
+# 分析往往需要将所有数据合并在一起
+# 引入Map/Reduce
+  * 一种编程模型
+  * 将问题抽象为：从磁盘读写数据，将数据以key/value的形式传输给computation
+  * computation分为两部分：map和reduce. 两者之间，数据会被"mixing"
+  * MapReduce会尝试将数据与计算结点接合起来，即在数据存储结点进行运算，data locality, 这是MapReduce高效的核心

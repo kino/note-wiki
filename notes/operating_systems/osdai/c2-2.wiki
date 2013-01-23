@@ -1,0 +1,12 @@
+%title Processes - Interprocess Communication
+=进程　Processes=
+%toc
+
+==进程间通信　Interprocess Communication==
+
+*三个要考虑的问题:*
+# 一个进程如何传递消息给另一个进程
+# 两个或多个进程参与临界活动critical activities时，如何不互相影响
+# 存在信赖关系时，如何确定合适的次序
+
+这三个问题中的后两个同样对线程生效。因为线程共享地址空间，所以第一个问题简单

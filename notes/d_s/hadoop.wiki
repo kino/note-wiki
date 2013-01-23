@@ -1,7 +1,8 @@
 %title Hadoop
 
-# [[hadoop/c1|c1]]
+# [[hadoop/c1|Meet Hadoop]]
 # [[hadoop/c2|Mapper Reduce ]]
 # [[hadoop/c3|Hadoop File System ]]
 # [[hadoop/c4|Hadoop I/O ]]
+# [[hadoop/c5|Developing a MapRduce Application ]]
 # [[hadoop/c6|temp ]]
