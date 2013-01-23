@@ -9,4 +9,5 @@
 ==Central Logging ==
 * [[logging/cellector|collector code]]
 * [[logging|doc]]
+* [[logging/gadget_framework|Gadget Framework]]
  
