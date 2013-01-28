@@ -40,15 +40,23 @@
 <ul>
 <li><a href="#toc_1.1">The Configuration API</a>
 <li><a href="#toc_1.2">Setting up the Development Environment</a>
-<li><a href="#toc_1.3">Writing a Unit Test with MRUnit</a>
-<li><a href="#toc_1.4">Running Locally on Test Data</a>
+<li><a href="#toc_1.3">GenricOptionsParser, Tool, and ToolRunner</a>
+<li><a href="#toc_1.4">Writing a Unit Test with MRUnit</a>
+<li><a href="#toc_1.5">Running Locally on Test Data</a>
 <ul>
-<li><a href="#toc_1.4.1">Running a job in a local job runner</a>
+<li><a href="#toc_1.5.1">Running a job in a local job runner</a>
 </ul>
-<li><a href="#toc_1.5">Running on a Cluster</a>
+<li><a href="#toc_1.6">Running on a Cluster</a>
 <ul>
-<li><a href="#toc_1.5.1">Packaging</a>
+<li><a href="#toc_1.6.1">Packaging</a>
+<li><a href="#toc_1.6.2">运行一个Job</a>
 </ul>
+<li><a href="#toc_1.7">MapReduce的web页面</a>
+<ul>
+<li><a href="#toc_1.7.1">job tracker页面</a>
+<li><a href="#toc_1.7.2">job 页面</a>
+</ul>
+<li><a href="#toc_1.8">获得job的运行结果</a>
 </ul>
 </ul>
 </div>
@@ -171,12 +179,54 @@ Hadoop在HDFS中作用的用户权限由client端的<code>whoami</code>决定的
     $ hadoop fs -conf conf/hadoop-local.xml -ls .
 </pre>
   
+<h2 id="toc_1.3">GenricOptionsParser, Tool, and ToolRunner</h2>
+<ol>
+<li>
+GenericOptionsParser将hadoop命令行参数转换成配置信息Configuration
+
+<li>
+Tool接口，程序实现此接口，支持命令行参数
+
+<li>
+ToolRunner, 工具类，用于运行Tool实例
+<pre  class="brush:java">
+    public class ConfigurationPrinter extends Configured implements Tool {
+        static {
+            Configuration.addDefaultResource("hdfs-default.xml");
+            Configuration.addDefaultResource("hdfs-site.xml");
+            Configuration.addDefaultResource("mapred-default.xml");
+            Configuration.addDefaultResource("mapred-site.xml");
+        }
+        @Override
+            public int run(String[] args) throws Exception {
+                Configuration conf = getConf();
+                for (Entry&lt;String, String&gt; entry: conf) {
+                    System.out.printf("%s=%s\n", entry.getKey(), entry.getValue());
+                }
+                return 0;
+            }
+        public static void main(String[] args) throws Exception {
+            int exitCode = ToolRunner.run(new ConfigurationPrinter(), args);
+            System.exit(exitCode);
+        }
+    }
+</pre>
+
+</ol>
+  
 <p>
-<strong>GenericOptionParser,Tool,ToolRunner:</strong>
+<strong>配置:</strong>
 </p>
+<ol>
+<li>
+有些配置在client端配置无效，比如<code>mapred.tasktracker.map.tasks.maximum</code>
 
+<li>
+在命令行中通过<code>-D</code>设置的参数，优先级高于配置文件中的
 
-<h2 id="toc_1.3">Writing a Unit Test with MRUnit</h2>
+</ol>
+
+<h2 id="toc_1.4">Writing a Unit Test with MRUnit</h2>
 <p>
 <strong>Mapper:</strong>
 </p>
@@ -216,8 +266,8 @@ Hadoop在HDFS中作用的用户权限由client端的<code>whoami</code>决定的
        }
 </pre>
   
-<h2 id="toc_1.4">Running Locally on Test Data</h2>
-<h3 id="toc_1.4.1">Running a job in a local job runner</h3>
+<h2 id="toc_1.5">Running Locally on Test Data</h2>
+<h3 id="toc_1.5.1">Running a job in a local job runner</h3>
 <pre  class="brush:java">
     public class MaxTemperatureDriver extends Configured implements Tool {
     
@@ -264,12 +314,265 @@ Hadoop提供了一个local job runner, 这是一个简化版的MapReduce执行�
 
 </ol>
  
-<h2 id="toc_1.5">Running on a Cluster</h2>
+<h2 id="toc_1.6">Running on a Cluster</h2>
 
-<h3 id="toc_1.5.1">Packaging</h3>
+<h3 id="toc_1.6.1">Packaging</h3>
 <ol>
 <li>
 在一个分布式环境中，需要将job打包，发往集群中
+
+<li>
+Hadoop会自动在类路径中找到这个包
+
+<li>
+如果一个jar中只有一个job,可以在manifest中指定main函数类
+
+<li>
+如果不在manifest中指定，就需要执行时在命令行中指定
+
+</ol>
+
+<p>
+<strong>客户端Classpah的组成:</strong>
+</p>
+<ol>
+<li>
+job jar文件
+
+<li>
+jar文件中lib目录中的jar,和classes目录中的类
+
+<li>
+环境变量HADOOP_CLASSPATH指定的包
+
+</ol>
+ 
+<p>
+<strong>运行task时Classpah的组成:</strong>
+</p>
+<ol>
+<li>
+job jar文件
+
+<li>
+jar文件中lib目录中的jar,和classes目录中的类
+
+<li>
+任何添加到distruted cache中的文件
+
+<ul>
+<li>
+命令行中可以通过-libjars添加
+
+<li>
+通过类Job的addFileToClassPath()方法添加
+
+</ul>
+</ol>
+   
+<p>
+<strong>处理依赖:</strong>
+</p>
+<ol>
+<li>
+方法一：直接将依赖打入job jar中，文件jar文件中lib目录下
+
+<li>
+方法二：与job jar隔离。
+
+<ul>
+<li>
+在客户端可以通过HADOOP_CLASSPATH添加
+
+<li>
+task可通过-libjars添加
+
+</ul>
+</ol>
+
+<p>
+<strong>控制classpath优先级:</strong>
+</p>
+<ol>
+<li>
+在客户端设置环境变量HADOOP_USER_CLASSPATH_FIRST,可以让hadoop所用户的classpath放到前面
+
+<li>
+task classpath的可能通过设置属性<code>mapreduce.task.classpath.first</code>
+
+</ol>
+
+<h3 id="toc_1.6.2">运行一个Job</h3>
+<ol>
+<li>
+运行一个job时，需要指定要运行的类，和要运行job的集群
+
+<li>
+指定集群，有两中方法：
+
+<ol>
+<li>
+配置文件：在配置文件中指定，运行时通过-conf指定配置文件
+
+<li>
+命令行选项：<code>-fs -jt</code>
+<pre  class="brush:bash">
+    % unset HADOOP_CLASSPATH
+    % hadoop jar hadoop-examples.jar v3.MaxTemperatureDriver  -conf conf/hadoop-cluster.xml input/ncdc/all max-temp
+</pre>
+
+</ol>
+</ol>
+  
+  
+<p>
+<strong>job id:</strong>
+</p>
+<ol>
+<li>
+job id有两部分组成，都和运行该job的jobtracker有关
+
+<ul>
+<li>
+第一部分jobtracker的启动时间
+
+<li>
+第二部分是该jobtracker给该job分配的一个标识符，一般是递增的数字
+
+</ul>
+<li>
+一个job id的例子： <code>job_200904110811_0002</code>
+
+</ol>
+ 
+<p>
+<strong>task id:</strong>
+</p>
+<ol>
+<li>
+一个task属于一个job,所以task id会以job id为前缀
+
+<li>
+后跟一个数字，代表该task是该job的第几个task,从零开始计数
+
+<li>
+一个task id的例子： <code>task_200904110811_0002_m_000003</code>(第４个map task)
+
+</ol>
+ 
+<p>
+<strong>task attempt id:</strong>
+</p>
+<ol>
+<li>
+一个task不一定执行一次，比如失败了，重试
+
+<li>
+task的每次试图运行，都会生成一个id
+
+<ul>
+<li>
+该id以task id为前缀
+
+<li>
+后跟一个数字，代表第几次运行，从０开始计数
+
+</ul>
+<li>
+一个task attempt id的例子： <code>task_200904110811_0002_m_000003_0</code>(第一次运行)
+
+</ol>
+
+<h2 id="toc_1.7">MapReduce的web页面</h2>
+<p>
+hadoop提供一组web页面，是很有用的，你可以：
+</p>
+<ol>
+<li>
+查看一个正在运行job的状态
+
+<li>
+查看一个完成job的统计信息和日志
+
+<li>
+页面地址：<a href="http://jobtracker-host:50030">http://jobtracker-host:50030</a>
+
+</ol>
+
+<h3 id="toc_1.7.1">job tracker页面</h3>
+<ol>
+<li>
+属性<code>mapred.jobtracker.completeuserjobs.maximum</code>可以控制每页显示的job数
+
+</ol>
+
+<p>
+<strong>job history:</strong>
+</p>
+<ol>
+<li>
+job history指一个已完成job的事件和配置信息
+
+<li>
+job history的文件存储在本地系统，存储在jobtracker主机logs目录下一个名为history的子目录下
+
+<ul>
+<li>
+可以通过属性<code>hadoop.job.history.location</code>更改
+
+</ul>
+<li>
+job history的文件还有一份拷贝存在job输出目录中的_logs/history目录下
+
+<ul>
+<li>
+可以通过属性<code>hadoop.job.history.user.location</code>更改
+
+</ul>
+<li>
+job histor文件包括：job task attempt。所有这些相信在一个文本文件中
+
+<li>
+job history有两种方式查看
+
+<ul>
+<li>
+通过web页面看
+
+<li>
+通过命令行:'hadoop job -history job输出目录`
+
+</ul>
+</ol>
+   
+<h3 id="toc_1.7.2">job 页面</h3>
+
+<p>
+<strong>reduce task分为三个阶段:</strong>
+</p>
+<ol>
+<li>
+copy (when the map outputs are being transferred to the reduce’s tasktracker), 
+
+<li>
+sort (when the reduce inputs are being merged) 
+
+<li>
+reduce (when the reduce function is being run to produce the final output)
+
+</ol>
+
+<h2 id="toc_1.8">获得job的运行结果</h2>
+<ol>
+<li>
+获得job的运行结果的两种方式：
+<pre  class="brush:bash">
+      # 方法一：将结果合成一个文件
+      % hadoop fs -getmerge max-temp max-temp-local
+      
+      # 方法二： 适用于输出较少的情况
+      % hadoop fs -cat max-temp/*
+</pre>
 
 </ol>
 

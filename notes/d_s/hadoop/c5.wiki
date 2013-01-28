@@ -71,8 +71,36 @@ Mon Jan 21 02:24:57 CST 2013
     $ hadoop fs -conf conf/hadoop-local.xml -ls .
   }}}
   
-*GenericOptionParser,Tool,ToolRunner:*
-
+==GenricOptionsParser, Tool, and ToolRunner == 
+# GenericOptionsParser将hadoop命令行参数转换成配置信息Configuration
+# Tool接口，程序实现此接口，支持命令行参数
+# ToolRunner, 工具类，用于运行Tool实例
+{{{ class="brush:java"
+    public class ConfigurationPrinter extends Configured implements Tool {
+        static {
+            Configuration.addDefaultResource("hdfs-default.xml");
+            Configuration.addDefaultResource("hdfs-site.xml");
+            Configuration.addDefaultResource("mapred-default.xml");
+            Configuration.addDefaultResource("mapred-site.xml");
+        }
+        @Override
+            public int run(String[] args) throws Exception {
+                Configuration conf = getConf();
+                for (Entry<String, String> entry: conf) {
+                    System.out.printf("%s=%s\n", entry.getKey(), entry.getValue());
+                }
+                return 0;
+            }
+        public static void main(String[] args) throws Exception {
+            int exitCode = ToolRunner.run(new ConfigurationPrinter(), args);
+            System.exit(exitCode);
+        }
+    }
+  }}}
+  
+*配置:*
+# 有些配置在client端配置无效，比如`mapred.tasktracker.map.tasks.maximum`
+# 在命令行中通过`-D`设置的参数，优先级高于配置文件中的
 
 ==Writing a Unit Test with MRUnit==
 *Mapper:*
@@ -156,3 +184,94 @@ Mon Jan 21 02:24:57 CST 2013
 
 ===Packaging===
 # 在一个分布式环境中，需要将job打包，发往集群中
+# Hadoop会自动在类路径中找到这个包
+# 如果一个jar中只有一个job,可以在manifest中指定main函数类
+# 如果不在manifest中指定，就需要执行时在命令行中指定
+
+*客户端Classpah的组成:*
+# job jar文件
+# jar文件中lib目录中的jar,和classes目录中的类
+# 环境变量HADOOP_CLASSPATH指定的包
+ 
+*运行task时Classpah的组成:*
+# job jar文件
+# jar文件中lib目录中的jar,和classes目录中的类
+# 任何添加到distruted cache中的文件
+  * 命令行中可以通过-libjars添加
+  * 通过类Job的addFileToClassPath()方法添加
+   
+*处理依赖:*
+# 方法一：直接将依赖打入job jar中，文件jar文件中lib目录下
+# 方法二：与job jar隔离。
+  * 在客户端可以通过HADOOP_CLASSPATH添加
+  * task可通过-libjars添加
+
+*控制classpath优先级:*
+# 在客户端设置环境变量HADOOP_USER_CLASSPATH_FIRST,可以让hadoop所用户的classpath放到前面
+# task classpath的可能通过设置属性`mapreduce.task.classpath.first`
+
+===运行一个Job===
+# 运行一个job时，需要指定要运行的类，和要运行job的集群
+# 指定集群，有两中方法：
+  # 配置文件：在配置文件中指定，运行时通过-conf指定配置文件
+  # 命令行选项：`-fs -jt`
+{{{ class="brush:bash"
+    % unset HADOOP_CLASSPATH
+    % hadoop jar hadoop-examples.jar v3.MaxTemperatureDriver  -conf conf/hadoop-cluster.xml input/ncdc/all max-temp
+  }}}
+  
+  
+*job id:*
+# job id有两部分组成，都和运行该job的jobtracker有关
+  * 第一部分jobtracker的启动时间
+  * 第二部分是该jobtracker给该job分配的一个标识符，一般是递增的数字
+# 一个job id的例子： `job_200904110811_0002`
+ 
+*task id:*
+# 一个task属于一个job,所以task id会以job id为前缀
+# 后跟一个数字，代表该task是该job的第几个task,从零开始计数
+# 一个task id的例子： `task_200904110811_0002_m_000003`(第４个map task)
+ 
+*task attempt id:*
+# 一个task不一定执行一次，比如失败了，重试
+# task的每次试图运行，都会生成一个id
+  * 该id以task id为前缀
+  * 后跟一个数字，代表第几次运行，从０开始计数
+# 一个task attempt id的例子： `task_200904110811_0002_m_000003_0`(第一次运行)
+
+==MapReduce的web页面 ==
+hadoop提供一组web页面，是很有用的，你可以：
+# 查看一个正在运行job的状态
+# 查看一个完成job的统计信息和日志
+# 页面地址：http://jobtracker-host:50030
+
+===job tracker页面 ===
+# 属性`mapred.jobtracker.completeuserjobs.maximum`可以控制每页显示的job数
+
+*job history:*
+# job history指一个已完成job的事件和配置信息
+# job history的文件存储在本地系统，存储在jobtracker主机logs目录下一个名为history的子目录下
+  * 可以通过属性`hadoop.job.history.location`更改
+# job history的文件还有一份拷贝存在job输出目录中的_logs/history目录下
+  * 可以通过属性`hadoop.job.history.user.location`更改
+# job histor文件包括：job task attempt。所有这些相信在一个文本文件中
+# job history有两种方式查看
+  * 通过web页面看
+  * 通过命令行:'hadoop job -history job输出目录`
+   
+===job 页面 ===
+
+*reduce task分为三个阶段:*
+# copy (when the map outputs are being transferred to the reduce’s tasktracker), 
+# sort (when the reduce inputs are being merged) 
+# reduce (when the reduce function is being run to produce the final output)
+
+==获得job的运行结果 ==
+# 获得job的运行结果的两种方式：
+  {{{ class="brush:bash"
+      # 方法一：将结果合成一个文件
+      % hadoop fs -getmerge max-temp max-temp-local
+      
+      # 方法二： 适用于输出较少的情况
+      % hadoop fs -cat max-temp/*
+    }}}
