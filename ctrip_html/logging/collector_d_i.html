@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Collector Design and Implementation</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../style.css">
+<link rel="Stylesheet" type="text/css" href="../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<div class="toc">
+<ul>
+<li><a href="#toc_1">Collector Design and Implementation</a>
+<ul>
+<li><a href="#toc_1.1">功能</a>
+<li><a href="#toc_1.2">数据流 </a>
+<ul>
+<li><a href="#toc_1.2.1">三种角色</a>
+<li><a href="#toc_1.2.2">问题</a>
+<li><a href="#toc_1.2.3">Collector的实现 </a>
+<li><a href="#toc_1.2.4">为什么不用引用Queue</a>
+</ul>
+<li><a href="#toc_1.3">架构图 </a>
+<ul>
+<li><a href="#toc_1.3.1">Server Client模式</a>
+<li><a href="#toc_1.3.2">Collector内部实现</a>
+</ul>
+<li><a href="#toc_1.4">运行时对象图</a>
+<li><a href="#toc_1.5">时序图 </a>
+<li><a href="#toc_1.6">metrics</a>
+<li><a href="#toc_1.7">jmx</a>
+<li><a href="#toc_1.8">qeue</a>
+<li><a href="#toc_1.9">配置</a>
+</ul>
+</ul>
+</div>
+<h1 id="toc_1">Collector Design and Implementation</h1>
+
+
+<h2 id="toc_1.1">功能</h2>
+<p>
+Collector负责从Agent端接收数据，缓存到本地，然后供Writer端消费.
+<img src="collector_do.png" />
+</p>
+
+<ul>
+<li>
+大量Agent会将自己采集的到的数据发往Collector
+
+<li>
+Collector会将收到的数据进行缓存
+
+<li>
+Writer会来消费Collector的数据
+
+<li>
+Collector的会将Writer消费掉的数据清除掉
+
+</ul>
+
+<h2 id="toc_1.2">数据流 </h2>
+<p>
+上面说了Collector的主要功能，下面当前Collector实现中的数据流：
+<img src="collector_data_flow.png" />
+</p>
+
+<h3 id="toc_1.2.1">三种角色</h3>
+<ul>
+<li>
+<strong>Agent:</strong> 嵌入到应用中，采集日志并发往Collector
+
+<li>
+<strong>Collector:</strong> 从Agent接收数据，并等待Writer消费
+
+<li>
+<strong>Writer:</strong> 消费Collector消费数据，并地发往最终的目的地
+
+</ul>
+
+<h3 id="toc_1.2.2">问题</h3>
+<ul>
+<li>
+Writer需要把数据发往多种目的地
+
+<li>
+就要考虑到发往任何一个目的地失败时，如何为这个特有的目的地缓存数据
+
+<li>
+Writer本应实现缓存功能，这样就会使Writer复杂化，且Collector已经有了缓存功能
+
+<li>
+扩展Collector解决该问题
+
+<ol>
+<li>
+Collector 根据配置可以将一份数据缓存多份
+
+<li>
+每份数据用作不同的用途
+
+<li>
+Writer消费时指明消费哪份数据
+
+</ol>
+<li>
+好处
+
+<ol>
+<li>
+简化了Writer的设计
+
+<li>
+缓存集中在Collector处理，方便维护与扩展
+
+</ol>
+</ul>
+   
+<h3 id="toc_1.2.3">Collector的实现 </h3>
+<ul>
+<li>
+Collector为每种用途建立了一个Queue实例
+
+<li>
+Agent过来的每份数据，放入每一个Queue实例
+
+<li>
+Writer每次消费时，指明要消费的Queue实例
+
+</ul>
+
+<h3 id="toc_1.2.4">为什么不用引用Queue</h3>
+<ul>
+<li>
+可以看出当前的解决的方案积大的浪费了空间
+
+<li>
+这是因为早期所需的Queue实例不多
+
+<li>
+关键是这种方案简单，可维护性，前期可以提高开发速度
+
+<li>
+随着目的地的增多，某个时候可以改变实现方案，使用引用queue
+
+</ul>
+
+<h2 id="toc_1.3">架构图 </h2>
+<h3 id="toc_1.3.1">Server Client模式</h3>
+<p>
+上面看了数据流图，但不能被数据流误导，在实现上Collector与Agents Writer的关系实际是Server-Client的关系：
+</p>
+
+<p>
+<img src="collector_structure_sc.png" />
+</p>
+
+<h3 id="toc_1.3.2">Collector内部实现</h3>
+
+<h2 id="toc_1.4">运行时对象图</h2>
+<h2 id="toc_1.5">时序图 </h2>
+<h2 id="toc_1.6">metrics</h2>
+<h2 id="toc_1.7">jmx</h2>
+<h2 id="toc_1.8">qeue</h2>
+<h2 id="toc_1.9">配置</h2>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

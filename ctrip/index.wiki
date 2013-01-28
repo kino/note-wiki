@@ -10,4 +10,5 @@
 * [[logging/cellector|collector code]]
 * [[logging|doc]]
 * [[logging/gadget_framework|Gadget Framework]]
+* [[logging/collector_d_i|Collector Design and Implementation]]
  
