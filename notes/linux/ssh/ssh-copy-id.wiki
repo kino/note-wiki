@@ -1,0 +1,15 @@
+%title ssh-copy-id当端口号不是22时
+%toc
+
+当前日期: 01/28/2013 Mon 
+
+=ssh-copy-id当端口号不是22时 =
+* 使用命令`ssh-copy-id`可以将自己的公钥拷到ssh服务器，登录时就不需要密码了
+  {{{ class="brush:bash"
+    ssh-copy-id useranme@ssh-server
+    }}}
+* 但当ssh服务器的端口号不是默认端口22时，使用上就以所不同了，如下：
+  {{{ class="brush:bash"
+    ssh-copy-id -i ~/.ssh/id_rsa.pub "-p 1022 useranme@ssh-server"
+    }}}
+

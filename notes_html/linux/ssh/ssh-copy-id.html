@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>ssh-copy-id当端口号不是22时</title>
+<meta http-equiv="Content-Type" content="text/html; charset=cp936">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">鐑傜瑪澶�</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<div class="toc">
+<ul>
+<li><a href="#toc_1">ssh-copy-id当端口号不是22时</a>
+</ul>
+</div>
+
+<p>
+当前日期: 01/28/2013 Mon 
+</p>
+
+<h1 id="toc_1">ssh-copy-id当端口号不是22时</h1>
+<ul>
+<li>
+使用命令<code>ssh-copy-id</code>可以将自己的公钥拷到ssh服务器，登录时就不需要密码了
+<pre  class="brush:bash">
+    ssh-copy-id useranme@ssh-server
+</pre>
+
+<li>
+但当ssh服务器的端口号不是默认端口22时，使用上就以所不同了，如下：
+<pre  class="brush:bash">
+    ssh-copy-id -i ~/.ssh/id_rsa.pub "-p 1022 useranme@ssh-server"
+</pre>
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 鐜嬪叴鏈�
+			</div>
+		</div>
+	<div>
+</body>
+</html>

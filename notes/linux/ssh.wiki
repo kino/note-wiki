@@ -2,5 +2,6 @@
 
 =SSH相关列表=
 
-# [[ssh/sshfs|使用sshfs通过ssh的方式挂载远程目录]]
+# [[ssh/sshfs|使用sshfs通过ssh的方式挂载远程目录 ]]
 # [[ssh/remote_cmd|通过ssh执行远程命令]]
+# [[ssh/ssh-copy-id|ssh-copy-id当端口号不是22时 ]]
