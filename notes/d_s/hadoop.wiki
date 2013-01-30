@@ -5,4 +5,5 @@
 # [[hadoop/c3|Hadoop File System ]]
 # [[hadoop/c4|Hadoop I/O ]]
 # [[hadoop/c5|Developing a MapRduce Application ]]
+# [[hadoop/c6|How MapRduce Works ]]
 # [[hadoop/c6|temp ]]

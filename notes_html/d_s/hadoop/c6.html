@@ -2,7 +2,7 @@
 <html>
 <head>
 
-<title>c6</title>
+<title> How MapReduce Works</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
@@ -34,59 +34,17 @@
 			</div>
 			<div id="middle">
 				
-<h2 id="toc_0.1">GenricOptionsParser, Tool, and ToolRunner</h2>
-<ol>
-<li>
-GenericOptionsParser将hadoop命令行参数转换成配置信息Configuration
+<div class="toc">
+<ul>
+<li><a href="#toc_1">How MapReduce Works</a>
+</ul>
+</div>
 
-<li>
-Tool接口，程序实现此接口，支持命令行参数
 
-<li>
-ToolRunner, 工具类，用于运行Tool实例
-<pre  class = "java">
-    public class ConfigurationPrinter extends Configured implements Tool {
-        static {
-            Configuration.addDefaultResource("hdfs-default.xml");
-            Configuration.addDefaultResource("hdfs-site.xml");
-            Configuration.addDefaultResource("mapred-default.xml");
-            Configuration.addDefaultResource("mapred-site.xml");
-        }
-        @Override
-            public int run(String[] args) throws Exception {
-                Configuration conf = getConf();
-                for (Entry&lt;String, String&gt; entry: conf) {
-                    System.out.printf("%s=%s\n", entry.getKey(), entry.getValue());
-                }
-                return 0;
-            }
-        public static void main(String[] args) throws Exception {
-            int exitCode = ToolRunner.run(new ConfigurationPrinter(), args);
-            System.exit(exitCode);
-        }
-    }
-</pre>
-
-</ol>
-  
 <p>
-<strong>配置:</strong>
+当前日期: 01/30/2013 Wed 
 </p>
-<ol>
-<li>
-有些配置在client端配置无效，比如<code>mapred.tasktracker.map.tasks.maximum</code>
-
-<li>
-在命令行中通过<code>-D</code>设置的参数，优先级高于配置文件中的
-
-</ol>
-
-<h2 id="toc_0.2">使用MRUnit进行单元测试</h2>
-<ol>
-<li>
-MRUnit是一个测试框架，使用测试MapReduce Job
-
-</ol>
+<h1 id="toc_1">How MapReduce Works</h1>
 
 			</div>
 

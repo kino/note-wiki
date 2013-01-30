@@ -56,7 +56,21 @@
 <li><a href="#toc_1.7.1">job tracker页面</a>
 <li><a href="#toc_1.7.2">job 页面</a>
 </ul>
-<li><a href="#toc_1.8">获得job的运行结果</a>
+<li><a href="#toc_1.8">获得job的运行结果 </a>
+<li><a href="#toc_1.9">调试一个job</a>
+<ul>
+<li><a href="#toc_1.9.1">Task页面</a>
+<li><a href="#toc_1.9.2">Hadoop 日志</a>
+<li><a href="#toc_1.9.3">远程调试</a>
+</ul>
+<li><a href="#toc_1.10">job的调优 </a>
+<ul>
+<li><a href="#toc_1.10.1">Profiling Tasks</a>
+</ul>
+<li><a href="#toc_1.11">MapReduce工作流 </a>
+<ul>
+<li><a href="#toc_1.11.1">Apache Oozie</a>
+</ul>
 </ul>
 </ul>
 </div>
@@ -219,10 +233,10 @@ ToolRunner, 工具类，用于运行Tool实例
 </p>
 <ol>
 <li>
-有些配置在client端配置无效，比如<code>mapred.tasktracker.map.tasks.maximum</code>
+有些配置在client端配置无效，比如 <code>mapred.tasktracker.map.tasks.maximum</code>
 
 <li>
-在命令行中通过<code>-D</code>设置的参数，优先级高于配置文件中的
+在命令行中通过 <code>-D</code> 设置的参数，优先级高于配置文件中的
 
 </ol>
 
@@ -310,7 +324,7 @@ ToolRunner, 工具类，用于运行Tool实例
 Hadoop提供了一个local job runner, 这是一个简化版的MapReduce执行引擎
 
 <li>
-将配置属性<code>mapred.job.tracker</code>(YARN MapReduce中的属性是<code>mapreduce.framework.name</code>)设置为<code>local</code>将激活这个local job runner.job将在进程内运行
+将配置属性 <code>mapred.job.tracker</code> (YARN MapReduce中的属性是 <code>mapreduce.framework.name</code> )设置为 <code>local</code> 将激活这个local job runner.job将在进程内运行
 
 </ol>
  
@@ -398,7 +412,7 @@ task可通过-libjars添加
 在客户端设置环境变量HADOOP_USER_CLASSPATH_FIRST,可以让hadoop所用户的classpath放到前面
 
 <li>
-task classpath的可能通过设置属性<code>mapreduce.task.classpath.first</code>
+task classpath的可能通过设置属性 <code>mapreduce.task.classpath.first</code>
 
 </ol>
 
@@ -415,7 +429,7 @@ task classpath的可能通过设置属性<code>mapreduce.task.classpath.first</c
 配置文件：在配置文件中指定，运行时通过-conf指定配置文件
 
 <li>
-命令行选项：<code>-fs -jt</code>
+命令行选项：`-fs -jt`
 <pre  class="brush:bash">
     % unset HADOOP_CLASSPATH
     % hadoop jar hadoop-examples.jar v3.MaxTemperatureDriver  -conf conf/hadoop-cluster.xml input/ncdc/all max-temp
@@ -456,7 +470,7 @@ job id有两部分组成，都和运行该job的jobtracker有关
 后跟一个数字，代表该task是该job的第几个task,从零开始计数
 
 <li>
-一个task id的例子： <code>task_200904110811_0002_m_000003</code>(第４个map task)
+一个task id的例子： <code>task_200904110811_0002_m_000003</code> (第４个map task)
 
 </ol>
  
@@ -479,7 +493,7 @@ task的每次试图运行，都会生成一个id
 
 </ul>
 <li>
-一个task attempt id的例子： <code>task_200904110811_0002_m_000003_0</code>(第一次运行)
+一个task attempt id的例子： <code>task_200904110811_0002_m_000003_0</code> (第一次运行)
 
 </ol>
 
@@ -495,14 +509,14 @@ hadoop提供一组web页面，是很有用的，你可以：
 查看一个完成job的统计信息和日志
 
 <li>
-页面地址：<a href="http://jobtracker-host:50030">http://jobtracker-host:50030</a>
+页面地址：http://jobtracker-host:50030
 
 </ol>
 
 <h3 id="toc_1.7.1">job tracker页面</h3>
 <ol>
 <li>
-属性<code>mapred.jobtracker.completeuserjobs.maximum</code>可以控制每页显示的job数
+属性 <code>mapred.jobtracker.completeuserjobs.maximum</code> 可以控制每页显示的job数
 
 </ol>
 
@@ -518,7 +532,7 @@ job history的文件存储在本地系统，存储在jobtracker主机logs目录�
 
 <ul>
 <li>
-可以通过属性<code>hadoop.job.history.location</code>更改
+可以通过属性 <code>hadoop.job.history.location</code> 更改
 
 </ul>
 <li>
@@ -526,7 +540,7 @@ job history的文件还有一份拷贝存在job输出目录中的_logs/history�
 
 <ul>
 <li>
-可以通过属性<code>hadoop.job.history.user.location</code>更改
+可以通过属性 <code>hadoop.job.history.user.location</code> 更改
 
 </ul>
 <li>
@@ -540,7 +554,7 @@ job history有两种方式查看
 通过web页面看
 
 <li>
-通过命令行:'hadoop job -history job输出目录`
+通过命令行: <code>hadoop job -history job输出目录</code>
 
 </ul>
 </ol>
@@ -562,7 +576,7 @@ reduce (when the reduce function is being run to produce the final output)
 
 </ol>
 
-<h2 id="toc_1.8">获得job的运行结果</h2>
+<h2 id="toc_1.8">获得job的运行结果 </h2>
 <ol>
 <li>
 获得job的运行结果的两种方式：
@@ -574,6 +588,404 @@ reduce (when the reduce function is being run to produce the final output)
       % hadoop fs -cat max-temp/*
 </pre>
 
+</ol>
+    
+<h2 id="toc_1.9">调试一个job</h2>
+<ol>
+<li>
+输出错误日志，并在task状态信息中提示我们查看错误日志
+
+<li>
+每当需要调试时，首先考虑是否可以使用一个计数器counter来说明正在发生的事情
+
+</ol>
+
+<h3 id="toc_1.9.1">Task页面</h3>
+<ol>
+<li>
+有一列"Actions",可以杀死一个task,需要通过属性开启
+
+<li>
+属性： <code>webinterface.private.actions</code>
+
+<ul>
+<li>
+这将允许任何可以访问web页面的人删除文件
+
+<li>
+属性 <code>dfs.web.ugi</code> 批明了运行web页面的用户
+
+</ul>
+</ol>
+   
+<h3 id="toc_1.9.2">Hadoop 日志</h3>
+<table>
+<tr>
+<th>
+Logs
+</th>
+<th>
+Primary audience
+</th>
+<th>
+Description
+</th>
+<th>
+Further information
+</th>
+</tr>
+<tr>
+<td>
+System daemon logs
+</td>
+<td>
+Administrators
+</td>
+<td>
+Each Hadoop daemon produces a logfile (using log4j) and another file that combines standard out and error. Written in the directory defined by the HADOOP_LOG_DIR environment variable.
+</td>
+<td>
+“System logfiles” 
+</td>
+</tr>
+<tr>
+<td>
+HDFS audit logs
+</td>
+<td>
+Administrators
+</td>
+<td>
+A log of all HDFS requests, turned off by default.  Written to the namenode’s log, although this is configurable.
+</td>
+<td>
+“Audit Logging” 
+</td>
+</tr>
+<tr>
+<td>
+MapReduce job history logs
+</td>
+<td>
+Users
+</td>
+<td>
+A log of the events (such as task completion) that occur in the course of running a job.  Saved centrally on the jobtracker and in the job’s output directory in a _logs/history subdirectory.
+</td>
+<td>
+“Job History” 
+</td>
+</tr>
+<tr>
+<td>
+MapReduce task logs
+</td>
+<td>
+Users
+</td>
+<td>
+Each tasktracker child process produces a logfile using log4j (called syslog), a file for data sent to standard out (stdout), and a file for standard error (stderr). Written in the userlogs subdirectory of the directory defined by the HADOOP_LOG_DIR environment variable.
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+</table>
+
+
+<ol>
+<li>
+日志级别：默认为 <code>INFO</code>
+
+<ul>
+<li>
+通过属性 <code>mapred.map.child.log.level</code> 改变
+
+<li>
+通过属性 <code>mapred.reduce.child.log.level</code> 改变
+
+</ul>
+<li>
+日志删除
+
+<ul>
+<li>
+默认在最少24小时后删除
+
+<li>
+通过属性 <code>mapred.userlog.retain.hours</code> 修改
+
+</ul>
+<li>
+日志文件大小
+
+<ul>
+<li>
+通过属性 <code>mapred.userlog.limit.kb</code> 修改
+
+<li>
+默认为0, 无限制
+
+</ul>
+</ol>
+  
+<h3 id="toc_1.9.3">远程调试</h3>
+<p>
+当一个job失败，又没有足够信息时：
+</p>
+<ol>
+<li>
+使用本地job重现错误
+
+<ul>
+<li>
+将出错的文件在本地跑job查看
+
+</ul>
+<li>
+使用JVM调试参数
+
+<ul>
+<li>
+通常是内存溢出错误
+
+<li>
+在属性 <code>mapred.child.java.opts</code>  包含 <code>-XX:-HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/path/to/dumps </code>
+
+<li>
+使用jhat等工具进行分析
+
+</ul>
+<li>
+使用Hadoop提供的task profiling
+
+<li>
+保存失败task的临时文件
+
+<ul>
+<li>
+通过属性 <code>keep.failed.task.files</code> 设置为true保留
+
+</ul>
+<li>
+保存成功task的临时文件
+
+<ul>
+<li>
+通过属性 <code>keep.task.files.pattern</code> 保留
+
+<li>
+task id匹配的就会保留
+
+</ul>
+<li>
+task的临时文件存放地
+
+<ul>
+<li>
+在运行task的node上
+
+<li>
+通过属性 <code>mapred.local.dir</code> 指定
+
+</ul>
+</ol>
+
+<h2 id="toc_1.10">job的调优 </h2>
+<p>
+job能不能运行的更快？
+</p>
+
+
+<table>
+<tr>
+<th>
+Area
+</th>
+<th>
+Best practice
+</th>
+<th>
+Further information
+</th>
+</tr>
+<tr>
+<td>
+Number of mappers
+</td>
+<td>
+How long are your mappers running for? If they are only running for a few seconds on average, you should see whether there’s a way to have fewer mappers and make them all run longer, a minute or so, as a rule of thumb. The extent to which this is possible depends on the input format you are using.
+</td>
+<td>
+“Small files and CombineFileInputFormat” 
+</td>
+</tr>
+<tr>
+<td>
+Number of reducers
+</td>
+<td>
+For maximum performance, the number of reducers should be slightly less than the number of reduce slots in the cluster. This allows the reducers to finish in one wave and fully utilizes the cluster during the reduce phase.
+</td>
+<td>
+“Choosing the Number of Reducers” 
+</td>
+</tr>
+<tr>
+<td>
+Combiners
+</td>
+<td>
+Check whether your job can take advantage of a combiner to reduce the amount of data passing through the shuffle.
+</td>
+<td>
+“Combiner Functions” 
+</td>
+</tr>
+<tr>
+<td>
+Intermediate compression
+</td>
+<td>
+Job execution time can almost always benefit from enabling map output compression.
+</td>
+<td>
+“Compressing map output” 
+</td>
+</tr>
+<tr>
+<td>
+Custom serialization
+</td>
+<td>
+If you are using your own custom Writable objects or custom comparators, make sure you have implemented RawComparator.
+</td>
+<td>
+“Implementing a RawComparator for speed” 
+</td>
+</tr>
+<tr>
+<td>
+Shuffle tweaks
+</td>
+<td>
+The MapReduce shuffle exposes around a dozen tuning parameters for memory management, which may help you wring out the last bit of performance.
+</td>
+<td>
+“Configuration Tuning” 
+</td>
+</tr>
+</table>
+
+<h3 id="toc_1.10.1">Profiling Tasks</h3>
+<p>
+<strong>使用HPROF:</strong>
+</p>
+<ol>
+<li>
+随jdk发布的一个小工具
+
+<li>
+通过属性 <code>mapred.task.profile</code> 开启,默认关闭
+<pre  class="brush:java">
+  Configuration conf = getConf();
+  conf.setBoolean("mapred.task.profile", true);
+  conf.set("mapred.task.profile.params", "-agentlib:hprof=cpu=samples," +
+      "heap=sites,depth=6,force=n,thread=y,verbose=n,file=%s");
+  conf.set("mapred.task.profile.maps", "0-2");
+  conf.set("mapred.task.profile.reduces", "); // no reduces
+  Job job = new Job(conf, "Max temperature");
+</pre>
+
+<li>
+开启后，一个task将使用一个独立的jvm运行，即使设置了重用jvm
+
+<li>
+选取要profile的task
+
+<ul>
+<li>
+通过设置属性 <code>mapred.task.profile.maps</code> 
+
+<li>
+通过设置属性 <code>mapred.task.profile.reduces</code> 
+
+<li>
+task的id范围 ,比如： 0-1,4,6-
+
+</ul>
+<li>
+在运行结束后，在运行job的目录将有profile的输出文件
+
+</ol>
+  
+<h2 id="toc_1.11">MapReduce工作流 </h2>
+<ol>
+<li>
+创建更多的job来代替创建一个复杂的job
+
+<li>
+ChainMapper和ChainReducer
+
+<ul>
+<li>
+执行一个mapper链，再执行一个reducer
+
+</ul>
+</ol>
+
+<p>
+<strong>当有多个job时，如何保证job的运行顺序:</strong>
+</p>
+<ol>
+<li>
+顺序执行，执行完一个job再执行下一个
+
+<li>
+使用JobControl
+
+<ul>
+<li>
+维护job之间人依赖关系
+
+<li>
+在一线程中按依赖顺序执行job
+
+<li>
+结束后，可以查看job的状态和错误信息
+
+<li>
+当一个job失败时，依赖它的job就不会被执行
+
+</ul>
+</ol>
+
+<h3 id="toc_1.11.1">Apache Oozie</h3>
+<ol>
+<li>
+用于运行有依赖关系的job工作流
+
+<li>
+有两部分组成
+
+<ol>
+<li>
+a workflow engine
+
+<ul>
+<li>
+用于运行由hadoop job组成的工作流（mapreduce hive pig etc.)
+
+</ul>
+<li>
+a coordinator engine
+
+<ul>
+<li>
+根据预定义的时间表和数据的有效情况运行工作流中的job
+
+</ul>
+</ol>
 </ol>
 
 			</div>
