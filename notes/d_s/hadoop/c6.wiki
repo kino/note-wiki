@@ -23,10 +23,95 @@
   # *Step 2:* 向jobtracker请求一个新的job ID (`getNewJobId()`)
   # 查看job的输出设置条件是否满足，比如输出文件夹是否存在，不存在不能运行
   # 计算输入的分片，不能分片不能运行，比如输入路径不存在
-  # 拷贝job的相关资源到jobtracker的文件系统（jar,configuration,分片结果等），jar文件会有很多份
+  # *Step 3:* 拷贝job的相关资源到jobtracker的文件系统（jar,configuration,分片结果等），jar文件会有很多份
     * 通过属性 `mapred.submit.replication` 指定，默认为10
-    * *Step 3:* 当运行Task时，可以很快速从集群中获得
+    * 当运行Task时，可以很快速从集群中获得
   # *Step 4:* 告诉Jobtracker,job已准备好运行（调用JobTracker的submitJob() ).
+
+*初始化Job:*
+# Jobtracker收到submitJob()的请求后，会把job放入一个队列里
+# job scheduler会从队列里取出并初始化
+# *Step 5:* 创建一个代表job的对象
+  * 包含task信息
+  * 进度和状态信息
+# *Step 6:* 接受由client计算出的分片信息，创建要运行的task列表
+  * 为每一个分片创建一个map task
+  * 属性 `mapred.reduce.tasks` 确定reduce task的数目
+  * 此时所有的task都会被分配id
+  * 还有两个额外的task会被创建：job setup task 和 job clean up task
+    * 用于在任何map　task前启动一个job
+    * 用于在所有reduce task后，清理工作
+
+*分配Task:*
+# *Step 7:* task tracker 会不间隔向job tracker发送心跳heart beat(使用一个循环体）
+  * 告诉job tracker,它还活着
+  * 也可以用于交换信息
+  * 比如告诉job　tracker,已经准备好接收新的task, job tracker 就会分配给它一个新的任务
+# task tracker 会有一定数量的map task和reduce task的槽位
+  * 这两种槽位是相互独立的
+  * 具体的数量由cpu 核数和内存决定
+  * task tracker 会优先使用map task的槽位
+# 对于reduce task, job tracker只是简单的取出运行
+# 对于map task, job tracker会尽量选取距数据最近的task tracker运行，最好在同一个data node 上
+
+*运行Task:*
+# task tracker 分配到一个task, 接下来就是运行这个task
+# *Step 8:* 接收所需的文件
+  # 将job jar和所需要的一切文件拷到本地系统
+  # 为task创建一个本地目录，并将jar解压
+  # 创建一个　TaskRunner 实例，用于运行task
+# *Step 9:* 启动一个新的JVM
+# *Step 10:* 运行task
+# 子进程会每隔几秒钟向父进程回报一下task进度，直到task完成
+# 每一个task都会运行setup和cleanup操作
+
+*进度与状态报告:*
+# 当一个task运行时，会记录它的进度
+# 当task进度发生变化时，会设置一个flag,表明需要向task tracker汇报进度
+# 有一个独立线程会每隔３s检查一个这个flag,如果需要就通知task tracker当前的进度
+# task tracker会每５s向job tracker发送一个心跳，如果有信息会随着一起发送
+# client的job每秒向job tracker拉一次状态
+{{mapreduce_classic_progress.png}}
+
+*Job完成:*
+# job tracker收到最后一个task的完成通知后(cleanup task)
+# 将job设为成功
+# 属性 `job.end.notification.url` 可以配置一个需要http通知的url
+
+===二代:Yarn(MapReduce 2) ===
+在4000个结点以上的集群中，上述方案的水平扩展就会遇到瓶颈，所以有了YARN:
+* Yet Another Resource Negotiator
+* YARN Application Resource Negotiator
+
+# YARN通过分解Jobtracker的工作来达到扩大水平扩展能力的手段。jobtracker 的两项职责：
+  # job scheduling 分配task给tasktracker
+  # 监视task的执行进度
+# YARN将这两项职责分给两个独立的后台进程：
+  * *Resource Manager:* 管理集群上资源的使用
+  * *Application Master:* 管理运行于集群上的application的生命周期，application对应job 
+  
+*基本思路:*
+# 此处的application就是mapreduce job
+# `application master` 与 `resource manager` 协商集群上的资源
+# 资源表现为容器 `containers` , 它有一定的内存限制
+# application的进程就运行于这些 `containers` 上
+# 这些 `containers` 会被运行于集群结点上的  `node manager` 监管，避免application使用超过分配给它的资源
+# 目前集群上的资源就是内存
+
+*与jobtracker相比，每一个application拥有自己的* `application master` , *运行于application的期间，application就是mapreduce job*
+  
+{{mapreduce_yarn.png}}
+
+*参与者:*
+* *Client:*, MapReduce Job的提交者
+* *YARN resource manager:* 管理协调集群上的计算资源
+* *YARN node managers:*  启动并监视其所在结点上的计算容器
+* *MapReduce application master:* 管理协调一个mapreduce job的所有task. application master 和 job的 task运行于由 `resource manager` 调度安排并由 `node manager` 管理的计算容器中
+* *Distributed Filesystem:* 通常HDFS,用于共享Job相关的文件
+
+
+ 
+*提交Job:*
 
 *初始化Job:*
 
@@ -37,8 +122,6 @@
 *进度与状态报告:*
 
 *Job完成:*
-
-===二代:Yarn(MapReduce 2) ===
 
 ==处理失败 ==
 
