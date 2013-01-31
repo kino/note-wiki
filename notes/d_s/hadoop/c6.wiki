@@ -4,3 +4,46 @@
 
 当前日期: 01/30/2013 Wed 
 =How MapReduce Works=
+
+==MapReduce工作机制 ==
+
+===经典的MapReduce(MapReduce 1) ===
+{{mapreduce_classic.png}}
+
+*参与者:*
+* *Client:*, MapReduce Job的提交者
+* *Jobtracker:*, 负责安排Job的运行，对应的 class 是 JobTracker.
+* *Tasktrackers:* 负责运行由Job分解出的Task, 对应的 class 是 TaskTracker.
+* *Distributed Filesystem:* 通常HDFS,用于共享Job相关的文件
+
+*提交Job:*
+# *Step 1:* 创建一个JobSubmitter实例，并调用其方法submitJobInternal(). (由Job的方法submit()触发)
+# 方法`waitForCompletion()`会每秒拉一次Job的状态与进度
+# 提交的具体步骤：
+  # *Step 2:* 向jobtracker请求一个新的job ID (`getNewJobId()`)
+  # 查看job的输出设置条件是否满足，比如输出文件夹是否存在，不存在不能运行
+  # 计算输入的分片，不能分片不能运行，比如输入路径不存在
+  # 拷贝job的相关资源到jobtracker的文件系统（jar,configuration,分片结果等），jar文件会有很多份
+    * 通过属性 `mapred.submit.replication` 指定，默认为10
+    * *Step 3:* 当运行Task时，可以很快速从集群中获得
+  # *Step 4:* 告诉Jobtracker,job已准备好运行（调用JobTracker的submitJob() ).
+
+*初始化Job:*
+
+*分配Task:*
+
+*运行Task:*
+
+*进度与状态报告:*
+
+*Job完成:*
+
+===二代:Yarn(MapReduce 2) ===
+
+==处理失败 ==
+
+==Job的调度 ==
+
+==Shuffle和排序 ==
+
+==Task的运行 ==

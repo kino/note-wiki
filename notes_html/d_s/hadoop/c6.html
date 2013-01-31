@@ -37,6 +37,17 @@
 <div class="toc">
 <ul>
 <li><a href="#toc_1">How MapReduce Works</a>
+<ul>
+<li><a href="#toc_1.1">MapReduce工作机制</a>
+<ul>
+<li><a href="#toc_1.1.1">经典的MapReduce(MapReduce 1)</a>
+<li><a href="#toc_1.1.2">二代:Yarn(MapReduce 2)</a>
+</ul>
+<li><a href="#toc_1.2">处理失败</a>
+<li><a href="#toc_1.3">Job的调度 </a>
+<li><a href="#toc_1.4">Shuffle和排序 </a>
+<li><a href="#toc_1.5">Task的运行 </a>
+</ul>
 </ul>
 </div>
 
@@ -45,6 +56,101 @@
 当前日期: 01/30/2013 Wed 
 </p>
 <h1 id="toc_1">How MapReduce Works</h1>
+
+<h2 id="toc_1.1">MapReduce工作机制</h2>
+
+<h3 id="toc_1.1.1">经典的MapReduce(MapReduce 1)</h3>
+<p>
+<img src="mapreduce_classic.png" />
+</p>
+
+<p>
+<strong>参与者:</strong>
+</p>
+<ul>
+<li>
+<strong>Client:</strong>, MapReduce Job的提交者
+
+<li>
+<strong>Jobtracker:</strong>, 负责安排Job的运行，对应的 class 是 JobTracker.
+
+<li>
+<strong>Tasktrackers:</strong> 负责运行由Job分解出的Task, 对应的 class 是 TaskTracker.
+
+<li>
+<strong>Distributed Filesystem:</strong> 通常HDFS,用于共享Job相关的文件
+
+</ul>
+
+<p>
+<strong>提交Job:</strong>
+</p>
+<ol>
+<li>
+<strong>Step 1:</strong> 创建一个JobSubmitter实例，并调用其方法submitJobInternal(). (由Job的方法submit()触发)
+
+<li>
+方法<code>waitForCompletion()</code>会每秒拉一次Job的状态与进度
+
+<li>
+提交的具体步骤：
+
+<ol>
+<li>
+<strong>Step 2:</strong> 向jobtracker请求一个新的job ID (<code>getNewJobId()</code>)
+
+<li>
+查看job的输出设置条件是否满足，比如输出文件夹是否存在，不存在不能运行
+
+<li>
+计算输入的分片，不能分片不能运行，比如输入路径不存在
+
+<li>
+拷贝job的相关资源到jobtracker的文件系统（jar,configuration,分片结果等），jar文件会有很多份
+
+<ul>
+<li>
+通过属性 <code>mapred.submit.replication</code> 指定，默认为10
+
+<li>
+<strong>Step 3:</strong> 当运行Task时，可以很快速从集群中获得
+
+</ul>
+<li>
+<strong>Step 4:</strong> 告诉Jobtracker,job已准备好运行（调用JobTracker的submitJob() ).
+
+</ol>
+</ol>
+
+<p>
+<strong>初始化Job:</strong>
+</p>
+
+<p>
+<strong>分配Task:</strong>
+</p>
+
+<p>
+<strong>运行Task:</strong>
+</p>
+
+<p>
+<strong>进度与状态报告:</strong>
+</p>
+
+<p>
+<strong>Job完成:</strong>
+</p>
+
+<h3 id="toc_1.1.2">二代:Yarn(MapReduce 2)</h3>
+
+<h2 id="toc_1.2">处理失败</h2>
+
+<h2 id="toc_1.3">Job的调度 </h2>
+
+<h2 id="toc_1.4">Shuffle和排序 </h2>
+
+<h2 id="toc_1.5">Task的运行 </h2>
 
 			</div>
 
