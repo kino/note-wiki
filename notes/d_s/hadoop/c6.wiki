@@ -108,12 +108,29 @@
 * *YARN node managers:*  启动并监视其所在结点上的计算容器
 * *MapReduce application master:* 管理协调一个mapreduce job的所有task. application master 和 job的 task运行于由 `resource manager` 调度安排并由 `node manager` 管理的计算容器中
 * *Distributed Filesystem:* 通常HDFS,用于共享Job相关的文件
-
-
  
 *提交Job:*
+# *Step 1:* 创建一个JobSubmitter实例，并调用其方法submitJobInternal(). (由Job的方法submit()触发)
+  * 和MapReduce 1使用一样的api
+  * 通过属性 `mapreduce.framework.name` 设置为yarn激活YARN
+# *Step 2:* 从 `resource manager` 获取一个新的application id
+# client 计算分片
+  * 分片也可以在集群中计算
+  * 通过属性 `yarn.app.mapreduce.am.compute-splits-in-cluster` 激活
+# *Step 3:* 拷贝application的相关资源到HDFS（jar,configuration,分片结果等），jar文件会有很多份
+# *Step 4:* 在 `resource manager` 调用 submitApplication() 提交一个application
 
 *初始化Job:*
+# *Step 5a:* scheduler 分配一个 `container`
+# *Step 5b:* `resource manager` 在这个 `container` 上运行 `application master`, 并在 `node manager` 的管理下
+# *Step 6:* `applicaiton master` 初始化一个application
+  * `applicaiton master` 对应类  MRAppMaster
+  * 创建一系列对象追踪job的进度 
+  * 稍后它会从task处得到进度和完成信息
+# *Step 7:* `applicaiton master` 从分布式系统中获取计算好的splits
+#  `application master` 创建tasks:
+  * 为每一个split创建一个map task
+  * 创建redeuce task, 数量由属性 `mapreduce.job.reduces` 指定
 
 *分配Task:*
 
