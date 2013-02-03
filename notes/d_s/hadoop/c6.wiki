@@ -131,8 +131,21 @@
 #  `application master` 创建tasks:
   * 为每一个split创建一个map task
   * 创建redeuce task, 数量由属性 `mapreduce.job.reduces` 指定
+#  如果是一个小的job,`application master` 将会在它自身的jvm上运行些task,如果判定这是一个小的job :
+  * `mapreduce.job.ubertask.maxmaps` 默认值10
+  * `mapreduce.job.ubertask.maxreduces` 默认值1
+  * `mapreduce.job.ubertask.maxbytes` 默认值HDFS Block
+  * `mapreduce.job.ubertask.enable` 默认值true
 
 *分配Task:*
+# *Step 7:* `applicaiton master` 向 `resource manager` 申请运行map task和reduce task所需的资源 `containers`
+# 为task分配内存,通过下列属性来指定
+  * `mapreduce.map.memory.mb` map task的内存  默认:1024M
+  * `mapreduce.reduce.memory.mb` reduce task的内存   默认:1024M
+  * `yarn.scheduler.capacity.minimum-allocation-mb` 最小值限制，默认为1G
+  * `yarn.scheduler.capacity.maximum-allocation-mb`  最大值限制，默认为10G
+  * ``
+  * ``
 
 *运行Task:*
 
