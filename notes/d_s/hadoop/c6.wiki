@@ -144,14 +144,31 @@
   * `mapreduce.reduce.memory.mb` reduce task的内存   默认:1024M
   * `yarn.scheduler.capacity.minimum-allocation-mb` 最小值限制，默认为1G
   * `yarn.scheduler.capacity.maximum-allocation-mb`  最大值限制，默认为10G
-  * ``
-  * ``
+  * 分配给task的内存必须在最小值和最大值之间，且是最小值的整数倍
+  * 如果不是整数倍，会自动上升为整数倍
 
 *运行Task:*
+# task被分配了一个资源 `container` 
+# *Step 9a:* `application master` 通知相应的 `node manager` 运行这个 `container`
+# *Step 9b:* 通过类YarnChild启动一个新jvm
+# *Step 10:* 从分布式缓存中获取运行task所需的资源：jar configuration etc.
+# *Step 11:* 运行这个task
 
 *进度与状态报告:*
+# task向 `application master` 汇报进度与状态
+# `application master` 每三秒绘聚一次整个job的概况
+# client 每秒向 `application master` 拉取一次job的进度与状态
+  * 可能通过属性 `mapreduce.client.progressmonitor.pollinterval` 修改这个时间值 
+{{mapreduce_yarn_report.png}}
 
 *Job完成:*
+# client会向 `application master` 轮询job是否完成
+  * 通过调用Job的方法waitForCompletion()
+  * 间隔时间通过属性 `mapreduce.client.completion.pollinterval` 指定
+# 一旦完成：
+  # `application master` 和 `containers` 执行cleanup操作
+  # 调用OutputCommiter的cleanup方法
+  # job的信息被job history server归档
 
 ==处理失败 ==
 

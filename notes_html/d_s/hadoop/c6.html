@@ -450,23 +450,131 @@ client 计算分片
 创建redeuce task, 数量由属性 <code>mapreduce.job.reduces</code> 指定
 
 </ul>
+<li>
+ 如果是一个小的job,<code>application master</code> 将会在它自身的jvm上运行些task,如果判定这是一个小的job :
+
+<ul>
+<li>
+<code>mapreduce.job.ubertask.maxmaps</code> 默认值10
+
+<li>
+<code>mapreduce.job.ubertask.maxreduces</code> 默认值1
+
+<li>
+<code>mapreduce.job.ubertask.maxbytes</code> 默认值HDFS Block
+
+<li>
+<code>mapreduce.job.ubertask.enable</code> 默认值true
+
+</ul>
 </ol>
 
 <p>
 <strong>分配Task:</strong>
 </p>
+<ol>
+<li>
+<strong>Step 7:</strong> <code>applicaiton master</code> 向 <code>resource manager</code> 申请运行map task和reduce task所需的资源 <code>containers</code>
+
+<li>
+为task分配内存,通过下列属性来指定
+
+<ul>
+<li>
+<code>mapreduce.map.memory.mb</code> map task的内存  默认:1024M
+
+<li>
+<code>mapreduce.reduce.memory.mb</code> reduce task的内存   默认:1024M
+
+<li>
+<code>yarn.scheduler.capacity.minimum-allocation-mb</code> 最小值限制，默认为1G
+
+<li>
+<code>yarn.scheduler.capacity.maximum-allocation-mb</code>  最大值限制，默认为10G
+
+<li>
+分配给task的内存必须在最小值和最大值之间，且是最小值的整数倍
+
+<li>
+如果不是整数倍，会自动上升为整数倍
+
+</ul>
+</ol>
 
 <p>
 <strong>运行Task:</strong>
 </p>
+<ol>
+<li>
+task被分配了一个资源 <code>container</code> 
+
+<li>
+<strong>Step 9a:</strong> <code>application master</code> 通知相应的 <code>node manager</code> 运行这个 <code>container</code>
+
+<li>
+<strong>Step 9b:</strong> 通过类YarnChild启动一个新jvm
+
+<li>
+<strong>Step 10:</strong> 从分布式缓存中获取运行task所需的资源：jar configuration etc.
+
+<li>
+<strong>Step 11:</strong> 运行这个task
+
+</ol>
 
 <p>
 <strong>进度与状态报告:</strong>
+</p>
+<ol>
+<li>
+task向 <code>application master</code> 汇报进度与状态
+
+<li>
+<code>application master</code> 每三秒绘聚一次整个job的概况
+
+<li>
+client 每秒向 <code>application master</code> 拉取一次job的进度与状态
+
+<ul>
+<li>
+可能通过属性 <code>mapreduce.client.progressmonitor.pollinterval</code> 修改这个时间值 
+
+</ul>
+</ol>
+<p>
+<img src="mapreduce_yarn_report.png" />
 </p>
 
 <p>
 <strong>Job完成:</strong>
 </p>
+<ol>
+<li>
+client会向 <code>application master</code> 轮询job是否完成
+
+<ul>
+<li>
+通过调用Job的方法waitForCompletion()
+
+<li>
+间隔时间通过属性 <code>mapreduce.client.completion.pollinterval</code> 指定
+
+</ul>
+<li>
+一旦完成：
+
+<ol>
+<li>
+<code>application master</code> 和 <code>containers</code> 执行cleanup操作
+
+<li>
+调用OutputCommiter的cleanup方法
+
+<li>
+job的信息被job history server归档
+
+</ol>
+</ol>
 
 <h2 id="toc_1.2">处理失败</h2>
 
