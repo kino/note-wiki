@@ -287,8 +287,8 @@
   * 如果缓存满了，mapper就会阻塞
   * 磁盘目录由属性 `mapred.local.dir` 指定
 # 写入磁盘前，会将数据根据它们最终的去向(reducer)进行分组(partition)
-  * 针对每一组，有一后台线程在内存中就会对它根据kep排序
-  * 如果指定了combinber function,就会对这些排好序的数据运行
+  * 针对每一组，有一后台线程在内存中就会对它根据key排序
+  * 如果指定了combiner function,就会对这些排好序的数据运行
   * 将会得到更紧凑的数据，更少的数据写入磁盘,更少的数据传到reducer
 # 每当缓存到达阀值，都会产生一个新的spill文件
 # mapper结束时，就会得到多个spill文件
@@ -301,7 +301,42 @@
   * `mapred.map.output.compression.codec` 指定压缩算法
 
 ===Reduce阶段 ===
+# Reducer需要将自己所要的分组数据从多个mapper处拷过来
+# Reducer有一组copy线程来做这个，默认为5个线程
+  * 可以通过属性 `mapred.reduce.parallel.copies` 调节
+# Reducer如何知道从哪些机器上获取数据
+  * Mapper工作时会通知tasktracker,tasktracker再通知jobtracker(yarn中是application master)
+  * 针对一个job, jobtracker(yarn中是application master)会知道这些信息
+  * reducer会不停的询问这些信息，直到获取所有的数据
+# 从Mapper过来的数据会先放到内存中的一个缓冲区中
+  * 缓冲区大小由 `mapred.job.shuffle.input.buffer.percent` 指定内存堆中多少比例用作缓冲区
+# 缓冲区到达一个阀值，就会merge并写到磁盘上
+  * `mapred.job.shuffle.merge.percent` 缓冲区的大小到达一个阀值 
+  * `mapred.inmem.merge.threthold` map input的个数到达一个阀值
+  * merge并写入磁盘时会运行combiner,如果存在的话
+# 随着磁盘上的文件增多，一个后台线程会不停的将这些文件合并排序成更大的文件，为最终的merge做优化
+# 如果mapper过来的数据是压缩过的，内存中就会进行解压
+# 所有mapper的数据都过来后，进行最终的merge
+  * 这个过程是循环来做的
+  * 每次只将指定数目的文件merge成一个, 数目通过属性 `io.sort.factor` 指定, 默认为10
+  * 但最后一轮merge并不会写入磁盘，而是将内存与磁盘数据进行merge并传给reducer
+# 针对合并已排序的数据，reducer function会依次对每个key调用
+# 输出写入文件系统，通常是hdfs
 
 ===配置调整 ===
 
 ==Task的运行 ==
+
+===Speculative Task 推测式任务 ===
+# mapreduce是通过将一个job分解成很多并行task来缩短整个job的时间
+# 但这些并行task中有一个和几个由于不明原因运行慢就会加大整个job的时间
+# mapreduce会推测识别出这些task，并另外启动一个task，谁先完成就用谁，另一个杀掉
+# 推测式任务策略并不是为每一个任务建立一个镜像任务来实现的，这将是极大的资源浪费
+# 推测式任务策略是在所有任务都开始一段时间后，某个任务进度明显小于所有任务平均进度时，就会为它建立一个任务，做为备选。
+
+
+===跳过不合法记录 ===
+# 通过属性 `` 开启此功能
+# 如果一个task因为一条记录失败两次，第三次尝试时，就会跳过该记录
+# 所以默认的情况下，一个task只能跳过一条记录（默认最大尝试次数为4）
+# 可以调大task的尝试次数，来应付更多的不合法记录
