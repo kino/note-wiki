@@ -273,5 +273,35 @@
 # 每个queue在fifo
 
 ==Shuffle和排序 ==
+# MapReduce保证到达reducer的输入是按key排好序的
+# 排序并将map的输出作为输入传给reducer的这个处理过程称之为 `shuffle`
+ 
+===Map阶段 ===
+{{mapreduce_shuffle_mapside.png}}
+# mapper会将输出写入一段缓存，并进行一些预排序
+# mapper默认拥有一个默认100m的缓存
+  * 可能通过属性 `io.sort.mb` 调节
+# 当缓存中的大小到达一个阀值，就会启动一个后台线程，将数据写入磁盘
+  * 这个阀值通过属性 `io.sort.spill.percent` 控制 
+  * 这时mapper的输出还是直接写入缓存，后台线程再将数据从缓存写入磁盘
+  * 如果缓存满了，mapper就会阻塞
+  * 磁盘目录由属性 `mapred.local.dir` 指定
+# 写入磁盘前，会将数据根据它们最终的去向(reducer)进行分组(partition)
+  * 针对每一组，有一后台线程在内存中就会对它根据kep排序
+  * 如果指定了combinber function,就会对这些排好序的数据运行
+  * 将会得到更紧凑的数据，更少的数据写入磁盘,更少的数据传到reducer
+# 每当缓存到达阀值，都会产生一个新的spill文件
+# mapper结束时，就会得到多个spill文件
+# 这些文件会合并成一个分组且排好序的文件
+  * 属性 `io.sort.factor` 控制最大有多少流用于merge操作，默认为10
+# 如果已经有至少3个spill文件，输出写入前，对其再次进行combiner操作
+  * 属性 `min.num.spills.for.combiner`
+# 对mapper输出启用压缩是一个不错的主意
+  * `mapred.compress.map.output` 设置为true启用压缩
+  * `mapred.map.output.compression.codec` 指定压缩算法
+
+===Reduce阶段 ===
+
+===配置调整 ===
 
 ==Task的运行 ==
