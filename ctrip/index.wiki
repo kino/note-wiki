@@ -11,4 +11,5 @@
 * [[logging|doc]]
 * [[logging/gadget_framework|Gadget Framework]]
 * [[logging/collector_d_i|Collector Design and Implementation]]
+* [[logging/agent_design|Agent Design and Implementation]]
  
