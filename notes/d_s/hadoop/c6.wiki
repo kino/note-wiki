@@ -172,7 +172,105 @@
 
 ==处理失败 ==
 
+===经典MapReduce(MapReduce 1)的失败 ===
+*task失败:*
+# RuntimeException
+  * 退出前通知tasktracker
+  * 将这个task attempt标记为失败
+  * tasktracker释放一个task slot,等待新的任务
+# 流式task非0退出码
+  * 通过属性 `stream.non.zero.exit.is.failure` 设置
+# jvm进程突然结束
+  * tasktracker发现task进程结束
+  * 将这次task attemp标记为失败
+# task长时间挂起
+  * tasktracker在一定时间内收不到进度报告，标记为失败
+  * 通过属性 `mepred.task.timeout` 设置超时时间
+  * 0这关掉该特性，永不超时
+# jobtracker 发现一个 task attempt 失败
+  * 重新高度这个task
+  * 会尽量避免使用这个task上次失败所在的tasktracker
+  * 同一个task默认失败4次，就不会在重试
+  * 可以通过属性 `mapred.map.max.attempts` 和 `mapred.reduce.max.attempts` 设置
+# task失败达到一定比例后，才会标记一个job的失败,job退出执行
+  * 通过属性 `mapred.max.map.failures.percent` 和 `mapred.max.reduce.failures.percent` 设置
+
+*tasktracker失败:*
+# tasktracker失败，就不会向jobtracker发送心跳
+# jobtracker长时间收不到tasktracker的心跳，就会标记tasktracker失败
+  * 通过属性设置这个时间 `mapred.tasktracker.expiry.interval` 默认为10分钟
+# jobtracker会将该tasktracker从池中移出，不再参与task的分配
+# 在那个tasktracker上所有未完成job的所有task都会重新执行，因为那个tasktracker的所在机器很可能不能访问了
+# tasktracker 黑名单
+  # 同一个job的task失败数超过4个，就会标记该tasktracker失败，通过属性 `mapred.max.tracker.failures` 设置 
+  # 一个tasktracker失败超过4次，就会加入黑名单, 通过属性 `mapred.max.tracker.blacklists` 设置 
+  # 黑名单中的tasktracker不参与task的分配
+  # 黑名单有过期时间，为1天
+
+
+*jobtracker失败:*
+# 这是很严重的错误，单点错误，没有有效的应对方案
+# 一个失败的jobtracker重启后，会尝试恢复相关的job
+  # 通过属性 `mapred.jobtracker.restart.recover` 开启这项功能，默认是关闭
+  # 但这项功能并不可靠，不见意使用
+
+===YARN(MapReduce 2)中的失败 ===
+*task失败:*
+# RuntimeException
+  * 退出前通知 `application master` 
+  * 将这个task attempt标记为失败
+# 流式task非0退出码
+  * 通过属性 `stream.non.zero.exit.is.failure` 设置
+# jvm进程突然结束
+  * `application master` 发现task进程结束
+  * 将这次task attemp标记为失败
+# task长时间挂起
+  * `application master` 在一定时间内收不到进度报告，标记为失败
+  * 通过属性 `mepred.task.timeout` 设置超时时间
+  * 0这关掉该特性，永不超时
+# 如何确定一个task的失败
+  * 重试4次,还不成功
+  * 可以通过属性 `mapred.map.max.attempts` 和 `mapred.reduce.max.attempts` 设置
+# task失败达到一定比例后，才会标记一个job的失败,job退出执行
+  * 通过属性 `mapred.max.map.failures.percent` 和 `mapred.max.reduce.failures.percent` 设置
+
+*application master失败:*
+# 实际上就是job的失败
+# job可以有重试一次，默认是一次
+  * 可以通过属性 `yarn.resourcemanager.am.max-retries` 修改
+# 重试
+  # resource manager会分配一个新的container运行一个新的applicaiton master
+  # application master会重新运行所有的task
+  # 但application master可以只运行那些还未成功的task
+  # 通过属性 `yarn.app.mapreduce.am.job.recovery.enable` 开启这个功能
+  # client 会经历一个timeout后，从resource manager获取新 application master 的地址
+
+*node manager失败:*
+# node manager 失败
+# 就不会向resource manager发送心跳
+# resouce manager长时间收不到心跳
+  * 通过属性 `yarn.resourcemanager.ns.liveness-monitor.expiry-interval-ms` 设置
+# resouce manager就会将结点从结点列表中去除
+# 而在该结点上所有的task和application master都会根据前面的规则进行recovery
+# node manager黑名单
+  * 超过三个task失败
+  * 通过属性 `mapreduce.job.maxtaskfailures.per.tracker` 设置
+   
+*resource manager失败:*
+# resouce manager被设计成可以持久化保持状态
+# resouce manager失败后
+# resouce manager会重启并恢复状态
+# 状态信息由node managers和正在运行的job组成
+
 ==Job的调度 ==
+默认是FIFO，只能串行
+
+===公平调度 ===
+# 每个用户获得相同的资源
+
+===容量调度 ===
+# 按容量分成不同的queue
+# 每个queue在fifo
 
 ==Shuffle和排序 ==
 # MapReduce保证到达reducer的输入是按key排好序的
@@ -189,8 +287,8 @@
   * 如果缓存满了，mapper就会阻塞
   * 磁盘目录由属性 `mapred.local.dir` 指定
 # 写入磁盘前，会将数据根据它们最终的去向(reducer)进行分组(partition)
-  * 针对每一组，有一后台线程在内存中就会对它根据kep排序
-  * 如果指定了combinber function,就会对这些排好序的数据运行
+  * 针对每一组，有一后台线程在内存中就会对它根据key排序
+  * 如果指定了combiner function,就会对这些排好序的数据运行
   * 将会得到更紧凑的数据，更少的数据写入磁盘,更少的数据传到reducer
 # 每当缓存到达阀值，都会产生一个新的spill文件
 # mapper结束时，就会得到多个spill文件
@@ -203,7 +301,42 @@
   * `mapred.map.output.compression.codec` 指定压缩算法
 
 ===Reduce阶段 ===
+# Reducer需要将自己所要的分组数据从多个mapper处拷过来
+# Reducer有一组copy线程来做这个，默认为5个线程
+  * 可以通过属性 `mapred.reduce.parallel.copies` 调节
+# Reducer如何知道从哪些机器上获取数据
+  * Mapper工作时会通知tasktracker,tasktracker再通知jobtracker(yarn中是application master)
+  * 针对一个job, jobtracker(yarn中是application master)会知道这些信息
+  * reducer会不停的询问这些信息，直到获取所有的数据
+# 从Mapper过来的数据会先放到内存中的一个缓冲区中
+  * 缓冲区大小由 `mapred.job.shuffle.input.buffer.percent` 指定内存堆中多少比例用作缓冲区
+# 缓冲区到达一个阀值，就会merge并写到磁盘上
+  * `mapred.job.shuffle.merge.percent` 缓冲区的大小到达一个阀值 
+  * `mapred.inmem.merge.threthold` map input的个数到达一个阀值
+  * merge并写入磁盘时会运行combiner,如果存在的话
+# 随着磁盘上的文件增多，一个后台线程会不停的将这些文件合并排序成更大的文件，为最终的merge做优化
+# 如果mapper过来的数据是压缩过的，内存中就会进行解压
+# 所有mapper的数据都过来后，进行最终的merge
+  * 这个过程是循环来做的
+  * 每次只将指定数目的文件merge成一个, 数目通过属性 `io.sort.factor` 指定, 默认为10
+  * 但最后一轮merge并不会写入磁盘，而是将内存与磁盘数据进行merge并传给reducer
+# 针对合并已排序的数据，reducer function会依次对每个key调用
+# 输出写入文件系统，通常是hdfs
 
 ===配置调整 ===
 
 ==Task的运行 ==
+
+===Speculative Task 推测式任务 ===
+# mapreduce是通过将一个job分解成很多并行task来缩短整个job的时间
+# 但这些并行task中有一个和几个由于不明原因运行慢就会加大整个job的时间
+# mapreduce会推测识别出这些task，并另外启动一个task，谁先完成就用谁，另一个杀掉
+# 推测式任务策略并不是为每一个任务建立一个镜像任务来实现的，这将是极大的资源浪费
+# 推测式任务策略是在所有任务都开始一段时间后，某个任务进度明显小于所有任务平均进度时，就会为它建立一个任务，做为备选。
+
+
+===跳过不合法记录 ===
+# 通过属性 `` 开启此功能
+# 如果一个task因为一条记录失败两次，第三次尝试时，就会跳过该记录
+# 所以默认的情况下，一个task只能跳过一条记录（默认最大尝试次数为4）
+# 可以调大task的尝试次数，来应付更多的不合法记录
