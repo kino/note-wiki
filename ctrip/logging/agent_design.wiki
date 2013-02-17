@@ -59,6 +59,74 @@
   # 如果需要记录，就将该LogEvent传给ITracer的实例
 
 ===采集Trace ===
+====核心类 ====
+* *TraceManager:* 提供静态方法，获取一个ITrace实例
+* *ITrace:* 接口，代表了一次Trace, 提供了记录log, 开启span, 清空追踪链的api
+* *ISpan:* 接口，用于表示一次追踪中的一次需要关注的调用
+* *ISample:* 接口，代表采样率，调用ITrace的startSpan时，传入这个接口的一个实例，决定是否对该span采样
+* *ITraceSender:* 接口，负责将数据发往目的地
+ 
+====ISample如何生效 ====
+# 调用ITrace的startSpan时，传入这个接口的一个实例，决定是否对该span采样
+# 如果对一个span决定了不采样，该span中内嵌的所有span将都不会采样
+# 最佳实践就是对top span使用采样率
+# 如果不指定采样率，默认使用AlwaysSample,总是采样
+ 
+====FreewayTracer ====
+* 接口ITrace的默认实现
+* *主要职责:*
+  # 提供开启span的api，当前span（如果存在）会作为新开启span的父span, 从而组成链式结构
+  # 包含一个静态的ThreadLocal变量，存放当前线程内的current span, 线程内的span会组成一个链式结构
+  # 提供记录日志的api, 如果当前已开启追踪，则日志会挂在当前span的下面，并为对应的LogEvent设置一个traceId，如上一节的日志专用接口ILog记录的日志也会转由该类负责
+  # 根据条件触发，将数据交由ITraceSender处理
+   
+====何时触发清理数据 ====
+* 调用ISpan的stop方法
+  # 会触发ITrace的pop(ISpan)方法
+  # 将该ISpan下所有未关闭的子ISpan传给ITraceSender发送出去
+  # 将该ISpan传给ITraceSender发送出去
+* 调用ITrace的clear方法, 该方法属于保护方法
+  # 如果存在current span, 将从current span开始，依次将整个span链将由ITraceSender处理 
+  # 防止死循环，处理span链的最大长度为50
+  # 清空current span
+* 调用ITrace的log方法，线程上下文中又不存在span时
+ 
+====ISpan的实现 ====
+* *MilliSpan:* 代表一个普通的span
+* *RootMilliSpan:* 代表top span, span链中的第一个span
+* *NullSpan:* 特殊span, 对span不采样时，由该类填空
+ 
+====FreewayTracer的startSpan方法 ====
+# 如果不存在current span, 创建一个RootMilliSpan, 并设为current span
+# 如果存在current span, 创建一个MilliSpan, 并将其parent span指向current span, 再将其设为current span
+ 
+====FreewayTracer的continueSpan方法 ====
+# 第一个开启的span是没有父span的，通过该方法可以人为的指定一个parentId, 和traceId
+# *注意:调用该方法时，如果已开启过追踪，该追踪将会丢失，会以该span为根重新开启一个追踪 * 
+
+====FreewayTraceSender ====
+* ITraceSender的默认实现类
+* send(Span)方法：
+  # 根据ConfigManager判定是否开启Trace
+  # 开启，将span发给MessageConsumer
+  # 未开启， 将span中类型为App的LogEvent抽取出来，发往MessageConsumer
+* send(LogEvent)方法：
+  # 看LogEvent的类型是否是App
+  # 不是，根据ConfigManager中是否开启trace来决定该log是否需要记录
+  # 是，根据ConfigManager中对log的配置来决定是否需要记录
+  # 若需要记录，将log发往MessageConsumer
+* LogEventUtil:
+  # 上面两个方法都会对LogEvent进行检查处理，超过设置的将会被截短
+  # 对LogEvent的限制：
+    * titile: 32字符，  agent里硬编码，在发送进截掉过长的
+    * essage: 32k, 可配置的
+    * additional info:
+        * 最多8对
+        * key最长32字符
+        * value最多2k
+        * 都就在agent里硬编码
+    * 生产上默认不保存Debug Log
+
 ===采集Metrics ===
 ====核心类 ====
 * *MetricManager:* 提供静态方法获取一个IMetric实例 
@@ -67,6 +135,8 @@
 ====IMetricImpl====
 * 接口IMetric的实现
 * 主要方法writerMetric()
+    # 根据ConfigManager判定是否开启Metrics
+    # 未开启，直接返回
     # 负责组装一个MetricEvent对象
     # MetricEvent的 *自定义Tag只能添加4个 * ，超出的会丢弃（总数最多为8个）
     # 如果需要添加AppIdTag
@@ -74,9 +144,105 @@
     # 将MetricEvent传给MessageConsumer
 
 ==MessageConsumer ==
+访类是Agent中的一个核心类。
+
+====主要职责 ====
+# 提供api:process(LogEvent)、process(Span)、process(MetricEvent), 主要供FreewayTraceSender和IMetricImpl使用
+# 持有两个Queue:MessageList, ChunkQueue
+# 启动一个线程，不断将MessageList中成员打包成一个chunk放入ChunkQueue
+ 
+====接收数据 ====
+# 通过api:process(LogEvent)、process(Span)、process(MetricEvent) 接收数据
+# 接收的数据放入MessageList
+
+====两个Queue====
+* *MessageList:*
+  # 用于存放原始数据：LogEvent Span MetricEvent
+  # 维护了一个内部状态size = LogEvent的数量 + Span中LogEvent的数量 + MetricEvent数量
+  # 最大容量：100000
+  # 超过最大容量，直接丢弃，不做任何记录
+   
+* *ChunkQueue:*
+  # 存放Chunk对象
+  # Queue是最大为1000，这是在MessageConsumer里可配的，目前在MessageManager里指定的
+  # 超过这个大小，chunk直接丢弃，MessageConsumer会记录丢弃的数量，并转换为Metrics
+  # 这个Queue是由MessageManager创建的
+
+====一个线程 ====
+* 一个轮循线程，负责将MessageList中的原始灵气打包成一个chunk,放入ChunkQueue
+* 触发打包chunk有两个条件：
+  # 每隔一定时间，触发一次，该时间由服务端指定，通过ConfigManager可以获得，默认为
+  # 当MessageList的size大小超过50时触发，该值在MessageConsumer里是可配的，目前是在MessageManager里指定的
+  # 打包时最多将MessageList里的600个对象(Span中的每个LogEvent都会参与计数)打包成一个chunk, 该值是可配的，目前在AgentManager里指定
+* *所以这里有一个问题，只要ChunkQueue满了，哪怕MessageList不满，也会根据条件触发，不停的消耗，而导致数据丢失 *
+ 
+====统计状态 ====
+* MessageConsumer会不停的收集一些状态，并将其转换为Metrics, 并放入MessageList
+* 每五分钟发送一次Metrics
+* 列表： 
+  * consumer.message.total_count
+  * consumer.message_queue.current_size
+  * consumer.message_queue.max_size
+  * consumer.lost_chunk.count
+  * consumer.lost_logevent.count
 
 ==MessageSender ==
+* 负责向将chunk发往collector
+* 实现了Runnable接口
+* 拥有一个ChunkQueue的引用，实际上就是MessageConsumer中的ChunkQueue， 这个Queue是由MessageManager创建的
+* run方法：
+  # 如果需要，将收集的状态转换成Metrics打包成chunk,放入ChunkQueue
+  # 从ChunkQueue取出一个chunk(timeout默认为500ms,如果一直取不到，最长会增加到10s),如果取到，到下一步，不存在(增加取chunk时timeout的值，最多到10s），回到1
+  # 将chunk传给sendChunk方法，负责具体的发送，该方法会阻塞，直到到chunk发送出去（在此之前，会将前一步取chunk的timeout恢复到默认值500ms)
+  # 关闭连接
+  # 回到 1
+* sendChunk方法：
+  # 如果需要开启连接
+  # 发送chunk
+  # 成功，返回
+  # 不成功，根据策略线程睡眠
+  # 回到1，进行重试
+* sendChunk 重试时的睡眠策略：
+  # 比较乱
+  # 大体是:0~5s,0~10s,0~15s,0~30s,0~5s,0~10s,0~15s,0~60s,0~5s,0~10s,0~15s,0~60s .....
+   
+==MessageManager ==
+# 这个是单例模式
+# 将MessageConumer和MessageSender关联起来
+# 负责根据配置创建MessageConsumer、MessageSender、ChunkQueue
+# MessageConsumer的数量只有一个
+# MessageSender的数量由2个，可配，默认值是在AgentManager中指定的
+# MessageSender有两类，但实际上只使用了一类（thrift),另外一类（http)没有
+# 这里的逻辑可以简化
 
 ==配置信息 ==
+# 服务器端有针对每个App或IP的配置信息
+# 这些信息控制日志级别，是否开启Trace,是否开启Metrics等
+# 这些信息在Agent端存放在ConfigManager中
+# ConfigManager会每隔5分钟从Collecton端更新一次配置
+# ConfigManager是单例
+# 第一次使用并创建这个单例时，会从Collector拉取一次配置
 
-==Agent自身的Metrics ==
+==Agent的启动 ==
+* 整个Agent上下文的构建，是由第一次记Log Trace或Metrics触发的
+* FreewayLogSender、MetricsImpl或FreewayTraceSender中的ConfigManager.getInstance()
+  # 会触发第一次从Collector拉取配置
+  # *有可能造成线程阻塞，timeout为20s*
+  # 可以将ConfigManager中的pullAgentConfig()去掉解决
+* MetricsImpl或FreewayTraceSender中的AgentManager.getMessageConsumer()
+  # 会触发构建MessageManager MessageConsumer MessageSender
+   
+==Agent的shutdown策略 ==
+* MessageManager构建时会注册shutdownHook 
+* shutdown时会调用MessageManager的shutdown方法
+* MessageManager的shutdown方法
+  # 会调用MessageConsumer的shudown方法
+  # 等待MessageConsumer关闭，最多等待10s
+  # 依次调用MessageSender的shutdown方法
+  # 退出（这里应该也有问题，应该等待MessageSender关闭在退出）
+* MessageConsumer的shutdown方法
+  # 立即触发将MessageList中的数据搬入ChunkQueue
+  # 问题是当MessageList的数据大于600时会搬不干净
+* MessageSender的shutdown方法
+  # 延迟5s关闭
+  # chunkqueue也可能丢数据
