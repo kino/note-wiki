@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Application for Mysql</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../style.css">
+<link rel="Stylesheet" type="text/css" href="../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">申请关系型数据库 - Mysql</a>
+<ul>
+<li><a href="#toc_1.1">Logging2.0 架构</a>
+<li><a href="#toc_1.2">MySql的用途 </a>
+<li><a href="#toc_1.3">MySql存储的信息 </a>
+<ul>
+<li><a href="#toc_1.3.1">loging配置信息</a>
+<li><a href="#toc_1.3.2">loging用到的元数据信息</a>
+<li><a href="#toc_1.3.3">Namespace配置信息</a>
+<li><a href="#toc_1.3.4">Hive元数据配置信息 </a>
+</ul>
+</ul>
+</ul>
+</div>
+
+<h1 id="toc_1">申请关系型数据库 - Mysql</h1>
+
+<h2 id="toc_1.1">Logging2.0 架构</h2>
+<p>
+<img src="central_logging_2.0.png" alt="central_logging_2.0" style="width:900px" />
+</p>
+
+<ul>
+<li>
+如上Central Logging 2.0的架构
+
+<li>
+需要一台关系型数据库存储相应的信息
+
+<li>
+数据库名central-logging
+
+</ul>
+ 
+<h2 id="toc_1.2">MySql的用途 </h2>
+<p>
+<img src="logging-mysql.png" />
+</p>
+
+<p>
+使用该数据库的有两者：
+</p>
+<ol>
+<li>
+Restful Api : 用于存放一些配置信息
+
+<li>
+Hive : 用于存放元数据
+
+</ol>
+
+<h2 id="toc_1.3">MySql存储的信息 </h2>
+
+<h3 id="toc_1.3.1">loging配置信息</h3>
+<ul>
+<li>
+针对appId或Ip的配置信息：日志级别，是否开启trace, 是否开启metrics
+
+</ul>
+
+<h3 id="toc_1.3.2">loging用到的元数据信息</h3>
+<ul>
+<li>
+department: 部门列表信息
+
+<li>
+idc: idc机房信息
+
+<li>
+app: app信息
+
+<li>
+serverHosts: 在线服务器信息
+
+<li>
+services: 所有开启trace的service
+
+<li>
+spans: 所有开启trace的service的方法
+
+</ul>
+
+<h3 id="toc_1.3.3">Namespace配置信息</h3>
+<p>
+目前有针对Metrics的namespace信息：
+</p>
+<ol>
+<li>
+hbase: 可用的hbase实例
+
+<li>
+metric_namespace: 所有的metric namespace信息
+
+<li>
+namespace_read: 对namespace可读的ip白名单
+
+<li>
+namespace_write: 对namespace可写的ip白名单
+
+</ol>
+
+<h3 id="toc_1.3.4">Hive元数据配置信息 </h3>
+<ul>
+<li>
+Hive需要Mysql存放自身的元数据
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>
