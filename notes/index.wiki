@@ -12,6 +12,7 @@
 * [[java/nio|Nio]]
 * [[java/jmx|JMX ]]
 * [[java/frq|杂 ]]
+* [[java/jmm|Java 内存模型 ]]
 ==C ==
 * [[c/cpl|C Programming Language]]
 * [[c/dsaac|Data Structure and Algorithm Analysis in C]]
@@ -40,7 +41,7 @@
 ==复杂事件处理 ==
 * [[cep/esper|Esper ]]
 ==Operating Systems ==
-* [[operating_systems/operating_systems_design_and_implementation|Operating Systems Design and Implementation]]
+* [[operating_systems/osdai|Operating Systems Design and Implementation]]
 ==Online Resource ==
 * [[resource/links|Resource Links]]
  
