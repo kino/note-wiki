@@ -1,0 +1,59 @@
+%title Setting up a Hadoop Cluster 
+
+=Setting up a Hadoop Cluster =
+
+当前日期: 02/25/2013 Mon 
+
+%toc
+
+==集群规范 ==
+* 使用商业硬件
+  # 不代表低端硬件，故障率太高，会带来很大的维护成本
+  # 不使用昂贵的硬件，性价比太低
+* 关于RAID
+  # Namenode使用Raid1
+  # Datanode可以使用Raid0提高磁盘效率，但一般不使用，而使用Hadoop自身的JBOD(Just a bunch of disks)
+    * RAID0 有木桶效应，受限于性能差的磁盘
+    * JBOD循环使用磁盘
+    * 一个测试中JBOD比RADID 0快30%
+* 计算集群增长量
+  # 1 week = (3T/week*replicationNum)*1.3
+  # 30%用于中间文件和日志
+
+===网络拓扑 ===
+{{hadoop_topology.png}}
+# 一般为两层架构
+# 一个机架为30~40台机器，使用一个千兆交换机
+# 各机架的交换机连接一个上层的千兆交换机（或更好）
+# 机架内的node间通信要比机架间的好的多
+
+*机架配置:*
+对于多机架的集群，配置node的网络位置（和机架的映射关系），有助于极大的提升hadoop的效率
+# 接口DNSToSwitchMapping用于解析node和网络位置的对应关系
+  {{{ class="brush:java"
+        public interface DNSToSwitchMapping {
+            public List<String> resolve(List<String> names);
+            //参数是ip列表
+            //返回值是代表网络位置的字符串
+        }
+    }}}
+# 属性 `topology.node.switch.mapping.impl` 指定其要使用的实现类
+  * 默认实现是ScriptBasedMapping,
+  * 它使用一个用户指定的脚本来决定映射关系
+  * 脚本通过属性 `topology.script.file.name` 来指定
+# 使用这部分信息的主要有两块
+  * Namenode用于优化分配Block
+  * Mapreduce尽量避免机架间传输（jobtracker)
+  
+
+==集群的构建与安装 ==
+===安装java环境 ===
+* >=jdk1.6 (推荐使用sun jdk)
+    
+===创建Hadoop专用账号 ===
+# 创建hadoop专用用户，与其他服务隔离
+# 对于小集群，通常会对用户主目录使用NTFS
+  # 实现ssh分布式
+  # 使用autofs, 按需要挂载
+  # autofs还提供挂载失败时的备用方案
+
