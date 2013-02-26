@@ -1,0 +1,21 @@
+%title JVisualVM中线程的四种状态Running, Sleeping, Waiting, Monitor
+=JVisualVM中线程的四种状态Running, Sleeping, Waiting, Monitor=
+
+当前日期: 02/26/2013 Tue 
+
+%toc
+
+==Running==
+* 线程正在运行
+
+==Sleeping==
+* 线程正在睡眠
+ 
+==Waiting==
+* 等待状态，与阻塞不同，可能调用了下列方法中的一种
+  # Object.wait with no timeout
+  # Thread.join with no timeout
+  # LockSupport.park
+
+==Monitor==
+* 阻塞状态，正在等待获取一个锁，比如正在进入同步块

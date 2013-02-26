@@ -1,0 +1,3 @@
+%title Java 线程
+
+# [[thread/thread_status_jvisualvm|JVisualVM中线程的四种状态Running, Sleeping, Waiting, Monitor ]]

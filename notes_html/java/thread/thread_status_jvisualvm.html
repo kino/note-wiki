@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>JVisualVM中线程的四种状态Running, Sleeping, Waiting, Monitor</title>
+<meta http-equiv="Content-Type" content="text/html; charset=cp936">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">鐑傜瑪澶�</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">JVisualVM中线程的四种状态Running, Sleeping, Waiting, Monitor</h1>
+
+<p>
+当前日期: 02/26/2013 Tue 
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">JVisualVM中线程的四种状态Running, Sleeping, Waiting, Monitor</a>
+<ul>
+<li><a href="#toc_1.1">Running</a>
+<li><a href="#toc_1.2">Sleeping</a>
+<li><a href="#toc_1.3">Waiting</a>
+<li><a href="#toc_1.4">Monitor</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">Running</h2>
+<ul>
+<li>
+线程正在运行
+
+</ul>
+
+<h2 id="toc_1.2">Sleeping</h2>
+<ul>
+<li>
+线程正在睡眠
+
+</ul>
+ 
+<h2 id="toc_1.3">Waiting</h2>
+<ul>
+<li>
+等待状态，与阻塞不同，可能调用了下列方法中的一种
+
+<ol>
+<li>
+Object.wait with no timeout
+
+<li>
+Thread.join with no timeout
+
+<li>
+LockSupport.park
+
+</ol>
+</ul>
+
+<h2 id="toc_1.4">Monitor</h2>
+<ul>
+<li>
+阻塞状态，正在等待获取一个锁，比如正在进入同步块
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 鐜嬪叴鏈�
+			</div>
+		</div>
+	<div>
+</body>
+</html>
