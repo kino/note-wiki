@@ -8,3 +8,4 @@
 # [[bash/diff_and_patch|用diff和patch工具维护源码(转)]]
 # [[bash/awk_reference|awk quick reference(转)]]
 # [[bash/hdparm_dd|使用hdparm和dd测试硬盘 ]]
+# [[bash/pwdx|获取一个进程的工作目录 ]]

@@ -13,4 +13,5 @@
 * [[logging/collector_d_i|Collector Design and Implementation]]
 * [[logging/agent_design|Agent Design and Implementation]]
 * [[logging/application_for_mysql|Application for Mysql]]
+* [[logging/log_browser|LogBrowser设计文档 ]]
  

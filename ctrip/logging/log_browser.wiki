@@ -1,0 +1,180 @@
+%title LogBrowser设计文档 
+
+=LogBrowser设计文档 =
+
+%toc
+
+==概述 ==
+Logging 2.0上线，公司内越来越多的应用接入，各应用部门对及时快速准确获得相应日志的需求越来越高，也越来越多样化。 
+目前我们已经提供了日志查询的应用LogView和日志转存功能。但还不能真正满足用户的需求。
+
+为了提供给用户更好的服务与用户体验，现开启了这个新项目LogBrowser，提供给用户以直觉导航浏览式的方式查看日志。
+
+当前Logging2.0自身的应用，数量已超过6个，主要有LogView TraceView，而且全都基于开源项目，架构也不统一，难以扩展与维护,
+浪费了大量的人力资源，而且不能带来令人满意的回报。
+接下来的目标就是将这些应用慢慢整合，最终合并成两个应用，一个用于提供数据的RestfulApi, 一个用于提供Web界面操作的LogBrowser.
+接下来以这个项目为契机，开启这种进化。
+
+Logging2.0当前后端的HBase设计也存在一定的问题，在查询速度与并发访问下表现并不能使人满意，存在大量浪费带宽的行为。
+在此次项目开发中，也会使用新方案，改善这种情况。
+
+==设计目标 ==
+* *提供一个可扩展的应用基础架构*
+  # 当前的应用会慢慢合并到LogBrowser中
+  # 以后新开发的应用在LogBrowser中扩展
+* *数据服务分离*
+  # 开发Restful Api提供专门的数据服务
+  # LogBrowser只提供界面服务，通过Ajax与Restful Api通信，获取相应数据
+
+==总体架构 ==
+
+{{log-browser.png}}
+
+总体架构如上，分为三种角色: *数据源 * 、 *Restful Api接口* 、 *web应用*
+
+===数据源 ===
+数据源分为两种，HBase和MySql.
+
+*HBase:*
+* 用于存储海量的日志数据，主要包含四种结构化数据：log, span, metric, event
+* HBase里的数据主要是通过HBaseWriter写进来的
+
+*MySql:*
+* MySql里主要用于存储Central Logging 2.0的辅助数据，比如元数据等。
+  # 关于App的元数据（appId, department, server etc.)
+  # 配置数据（日志的配置信息，metric namespace的配置信息）
+* MySql中的数据来源有两种：第三方系统和通过 api 录入的
+  # 第三方来源：app相关的元数据
+  # api录入:配置信息
+
+===Restful Api===
+* 以上面两种数据源为基础，包装并暴露合理的api接口，提供数据服务
+* 设计restful api分为三类
+  # Meta Api.  `logging/apps` 获取所有的app列表
+  # Config Api. `logging/config/agent-configs` 获取agent的日志配置
+  # Data Api. `logging/data/logs?app=110101&startDate=2013-01-01 18:00:00` 获取某个app指定时间段的日志数据 
+* restful api可以返回两种数据：xml json
+
+===web应用 ===
+* Log-Browser应用
+* 以导航式方式查看日志数据
+* 根据用户的点击导航，从restful api获取数据，以友好美观的方式呈现给用户
+
+==程序结构 ==
+当前Central-Logging 2.0的组成：
+
+{{central-logging-project.png}}
+
+Central-Logging 2.0中Log-Browser相关的将划分为三个子项目，挂在Central-Logging 2.0下面。
+* *central-logging-domain:* 
+  # 用于定义领域模型对应的java bean和相关信息，作为jar包被其他子项目依赖。
+  # 基包: `com.ctrip.freeway.domain`
+* *central-logging-restful:*
+  # 用于开发Restful Api接口，将作为一个web 项目发布
+  # 基包: `com.ctrip.framework.freeway.rest`
+* *central-logging-web:*
+  # 用户直接使用的产品，提供界面，作为web 项目发布。
+  # 基包: `com.ctrip.framework.freeway.web`
+
+==领域模型 ==
+Central Logging 2.0中的数据模型分为三类:meta data(*元数据 *), configration data(*配置数据*), log data(*日志数据*: log metric span event).
+这些领域模型对应的Java Bean在项目central-loggging-domain里定义
+
+===元数据 ===
+====成员及关系 ====
+{{domain-meta.png}}
+
+元数据的领域模型主要是以App为核心展开的：
+* *Department:* 代表携程的一个部门， 一层结构。一个部门下可以有多个应用
+* *App:* 代表一个具体的应用。和Department的关系是多对一。
+* *AppServer:* 代表运营环境中一台具体的服务器。服务器上可以运行一个具体的应用。
+  * 上图中和App的关系是多个一，实际上可能是多对多，因为一台服务器上可以运行多个App.
+* *AppService:* 代表一个被trace的服务，比如一个具体的WebService接口。和App的关系是多对一。
+* *ServiceSpan:* 代表服务中的一个方法。比如某个WebService接口中的一个方法。
+
+*总结:* 一个部门下可以有多个应用;一个应用可以有多台服务器;一个应用可以多个服务;一个服务可以有多个方法
+
+
+====实体组成 ====
+{{domain-meta-entity.png}}
+
+*Department:*
+| 属性        | 类型   | 说明     |
+|-------------|--------|----------|
+| name        | String | 部门名称 |
+| description | String | 部门描述 |
+
+*App:*
+| 属性        | 类型             | 说明                                          |
+|-------------|------------------|-----------------------------------------------|
+| appId       | String           | 公司分配给这个应用的一个应用号，通常为6位数字 |
+| name        | String           | 应用名称                                      |
+| description | String           | 应用描述                                      |
+| appServers  | List<AppServer>  | 应用拥有的服务器列表                          |
+| appServices | List<AppService> | 应用中被trace的服务列表                       |
+
+*AppServer:*
+| 属性        | 类型             | 说明                    |
+|-------------|------------------|-------------------------|
+| hostName    | String           | 服务器的hostName        |
+| ip          | String           | 服务器的ip              |
+
+*AppService:*
+| 属性         | 类型              | 说明                 |
+|--------------|-------------------|----------------------|
+| name         | String            | service名称          |
+| serviceSpans | List<ServiceSpan> | 服务所拥有的方法列表 |
+
+*ServiceSpan:*
+| 属性 | 类型   | 说明     |
+|------|--------|----------|
+| name | String | 方法名称 |
+
+
+====数据来源 ====
+无数数据的来源分为两种：
+* Department App AppServer来自系统部的api, 我们定期更新
+* AppService ServiceSpan是由我们的HBaseWriter收集的，通过Restful Api更新
+
+===配置数据 ===
+配置数据分为两类，一类是对Agent的配置信息，一类是对Metric Namespace的配置信息。
+
+====Agent配置 ====
+由类AgentConfig表示
+
+{{domain-agent-config.png}}
+
+*AgentConfig:*
+| 属性             | 类型     | 说明                                                                                           |
+|------------------|----------|------------------------------------------------------------------------------------------------|
+| key              | String   | 指定的一个Key,将确定对谁生效。通常为一个appId或server ip, 特殊key:"global",代表agent的默认配置 |
+| appLogEnabled    | boolean  | 表明是否开启日志                                                                               |
+| traceEnabled     | boolean  | 表明是否开启trace                                                                              |
+| metricEnabled    | boolean  | 表明是否开启metrics                                                                            |
+| appLogLevel      | LogLevel | 日志级别，前提需要开启appLogEnabled                                                            |
+| traceLogLevel    | LogLevel | trace中的日志级别，前提需要开启traceLogEnabled                                                 |
+| flushPeriod      | int      | 毫秒，agent中打包chunk的频率                                                                   |
+| maxMessageSize   | int      | KB，一条 log中message的最大size                                                                |
+| urlLogSampleRate | double   | url trace的采样率                                                                              |
+
+===日志数据 ===
+
+==Restful Api 接口 ==
+
+==Log-Browser日志应用 ==
+
+==其他模块关联更改 ==
+
+===HBase Scheme更新 ===
+====HBase Log Scheme优化====
+====HBase Log 统计 Scheme====
+
+===HBase Writer 日志统计模块===
+
+==部署架构 ==
+
+
+
+
+
+
