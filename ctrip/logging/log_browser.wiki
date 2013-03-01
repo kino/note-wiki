@@ -77,12 +77,13 @@ Central-Logging 2.0中Log-Browser相关的将划分为三个子项目，挂在Ce
   # 基包: `com.ctrip.framework.freeway.web`
 
 ==领域模型 ==
-Central Logging 2.0中的数据模型分为三类:meta data(*元数据 *), configration data(*配置数据*), log data(*日志数据*: log metric span event).
+Central Logging 2.0中的数据模型分为三类:meta data(*元数据 *), configration data(*配置数据*), 
+log data(*日志数据*: log metric span event), statistics data(*统计数据*).
 这些领域模型对应的Java Bean在项目central-loggging-domain里定义
 
 ===元数据 ===
 ====成员及关系 ====
-{{domain-meta.png}}
+{{domain-meta-entity.png}}
 
 元数据的领域模型主要是以App为核心展开的：
 * *Department:* 代表携程的一个部门， 一层结构。一个部门下可以有多个应用
@@ -95,8 +96,7 @@ Central Logging 2.0中的数据模型分为三类:meta data(*元数据 *), confi
 *总结:* 一个部门下可以有多个应用;一个应用可以有多台服务器;一个应用可以多个服务;一个服务可以有多个方法
 
 
-====实体组成 ====
-{{domain-meta-entity.png}}
+====实体定义 ====
 
 *Department:*
 | 属性        | 类型   | 说明     |
@@ -157,7 +157,123 @@ Central Logging 2.0中的数据模型分为三类:meta data(*元数据 *), confi
 | maxMessageSize   | int      | KB，一条 log中message的最大size                                                                |
 | urlLogSampleRate | double   | url trace的采样率                                                                              |
 
+====Namespace配置 ====
+目前只有metrics使用namespace, namespace决定了读写权限，和使用的hbase实例和table名称。
+
+{{domain-namespace.png}}
+
+* HBase代表一个HBase实例
+* MetricNamespace代表一个metric namespace的定义
+ 
+*HBase:*
+| 属性     | 类型    | 说明                       |
+|----------|---------|----------------------------|
+| zkquorum | String  | Zookeeper 结点列表         |
+| basePath | String  | HBase实例在HDFS中的路径    |
+| isMeta   | boolean | HBase实例是否存储元数据    |
+| isUnique | boolean | HBase实例是否存储unique id |
+
+*MetricNamespace:*
+| 属性     | 类型    | 说明                       |
+|----------|---------|----------------------------|
+| zkquorum | String  | Zookeeper 结点列表         |
+| basePath | String  | HBase实例在HDFS中的路径    |
+| isMeta   | boolean | HBase实例是否存储元数据    |
+| isUnique | boolean | HBase实例是否存储unique id |
+
 ===日志数据 ===
+主要是我们Logging系统收集的四种结构化数据：log span metric event:
+
+====成员及关系 ====
+{{domain-log.png}}
+
+* *BaseEventDomain:* 四种结构化数据的基类，基本上代表了数据来源。
+* *Log:* 代表一条日志
+* *Span:* 代表一个trace实例中的一个方法追踪，其中可以内嵌Log
+* *Metric:* 代表一个度量的点
+* *Event:* 代表一个事件
+
+*总结:* Log可以单独记，也可以和Span关联起来，它们之间是多对0关系。
+Span本身也可以组成树形结构，一个span可以有一个父span, 一个span可能有多个子span.
+所以span与span之间是多对一的关系。
+
+====实体定义 ====
+
+*BaseEventDomain:* 
+| 属性      | 类型   | 说明                        |
+|-----------|--------|-----------------------------|
+| type      | String | 数据分类，保留使用          |
+| hostName  | String | 数据来源的服务器的host name |
+| hostIP    | String | 数据来源的服务器的ip        |
+| processId | String | 产生该数据的进程号          |
+
+*Log:* 
+| 属性        | 类型     | 说明                                                        |
+|-------------|----------|-------------------------------------------------------------|
+| rowKey      | String   | Log在Hbase中的row key                                       |
+| logId       | long     | Log的id号，一般由agent产生，并不是全局唯一                  |
+| logType     | LogType  | Log的类型                                                   |
+| logLevel    | LogLevel | Log的level                                                  |
+| threadId    | long     | 产生log的线程号                                             |
+| traceId     | long     | Log产生时，如果存在trace,trace的Id号                        |
+| spanRowKey  | String   | 如果Log是在某个Span生命周期记的，对应Span在HBase中的row key |
+| source      | String   | Log的来源，比如某个类名                                     |
+| title       | String   | 日志title                                                   |
+| message     | String   | 日志内容                                                    |
+| attributs   | String   | 日志附加属性，键值对                                        |
+| createdTime | String   | 数据来源的服务器的host name                                 |
+
+*Span:* 
+| 属性         | 类型     | 说明                                        |
+|--------------|----------|---------------------------------------------|
+| rowKey       | String   | Span在Hbase中的row key                      |
+| serviceName  | String   | 对应的service name                          |
+| spanName     | String   | 对应的service的method name                  |
+| spanType     | SpanType | Log的level                                  |
+| threadId     | long     | 产生span的线程号                            |
+| traceId      | long     | span所属trace的Id号                         |
+| spanId       | long     | span的id号，一般由agent产生，并不是全局唯一 |
+| parentId     | long     | 此span父span的id号                          |
+| startTime    | String   | span的开始时间                              |
+| stopTime     | String   | span的结束时间                              |
+| isUnfinished | String   | 此span是否是正常结束的，通过stop方法        |
+
+*Metric:* 
+| 属性            | 类型            | 说明                                    |
+|-----------------|-----------------|-----------------------------------------|
+| name            | String          | metric的名称                            |
+| namespace       | String          | metric所属的namespace, 用于目的地和安全 |
+| value           | String          | metric这个点的值                        |
+| metricValueType | MetricValueType | 值的类型                                |
+| tags            | List<Attribute> | 这个metric的tag value对                 |
+| createdTime     | long            | 此metric的创建时间                      |
+
+*Event:* 
+| 属性        | 类型            | 说明                |
+|-------------|-----------------|---------------------|
+| name        | String          | 事件的名称          |
+| namespace   | String          | 事件所属的namespace |
+| attributes  | List<Attribute> | 事件的属性对        |
+| createdTime | long            | 事件的创建时间      |
+
+===统计数据 ===
+Central Logging 2.0中为app统计一日志数据。
+
+{{domain-statistics.png}}
+
+用于表示一个app的一台server在一定时间范围内的各种日志level的数量。
+
+*LogStatistics:* 
+| 属性       | 类型   | 说明                      |
+|------------|--------|---------------------------|
+| appId      | String | 要统计的应用号            |
+| hostName   | String | 要统计的server host name  |
+| hostIP     | String | 要统计的server ip         |
+| startTime  | long   | 统计开始的时间            |
+| dateRange  | long   | 要统计的时间长度          |
+| infoCount  | long   | 统计范围内info log的数量  |
+| warnCount  | long   | 统计范围内warn log的数量  |
+| errorCount | long   | 统计范围内error log的数量 |
 
 ==Restful Api 接口 ==
 
