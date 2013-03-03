@@ -56,4 +56,72 @@
   # 实现ssh分布式
   # 使用autofs, 按需要挂载
   # autofs还提供挂载失败时的备用方案
+   
+===安装Hadoop ===
+# 将Hadoop安装在一个合理的地方
+# 通常为/usr/local或/opt下
+ 
+===测试已安装的Hadoop ===
 
+==SSH配置 ==
+# Hadoop跨集群的控制脚本信赖于ssh
+# 需要将集群中的机器配成无密码登录
+ 
+==Hadoop的配置 ==
+# 配置文件放在conf目录中
+# 也可以放在Hadoop安装目录之外的目录中，但启动守护进程时，需要使用-config选项指定配置的位置
+
+
+| Filename                   | Format                   | Description                                                                                                |
+|----------------------------|--------------------------|------------------------------------------------------------------------------------------------------------|
+| hadoop-env.sh              | Bash script              | Environment variables that are used in the scripts to run Hadoop                                           |
+| core-site.xml              | Hadoop configuration XML | Configuration settings for Hadoop Core, such as I/O settings that are common to HDFS and MapReduce         |
+| hdfs-site.xml              | Hadoop configuration XML | Configuration settings for HDFS daemons: the namenode, the secondary namenode, and the datanodes           |
+| mapred-site.xml            | Hadoop configuration XML | Configuration settings for MapReduce daemons: the jobtracker, and the tasktrackers                         |
+| masters                    | Plain text               | A list of machines (one per line) that each run a secondary namenode                                       |
+| slaves                     | Plain text               | A list of machines (one per line) that each run a datanode and a task-tracker                              |
+| hadoop-metrics .properties | Java Properties          | Properties for controlling how metrics are published in Hadoop                                             |
+| log4j.properties           | Java Properties          | Properties for system logfiles, the namenode audit log, and the task log for the tasktracker child process |
+
+
+===配置管理 ===
+# Hadoop集群没有统一的配置信息
+# 而是集群中的每个结点拥有自己的一组配置信息
+# 需要系统管理员来保证配置文件之间的同步
+# 当然Hadoop也被设计成整个集群使用一套配置文件,但也有不适用的地方：
+  # 集群中机器结点配置不一样时
+  # 可以分机器类
+  
+*控制脚本:* 
+# Hadoop提供了控制脚本用于启动或关闭整个集群中的守护进程
+# 需要告诉Hadoop集群中包含哪些机器
+# 两个配置文件存储了这部分信息，每一行存储一个hostname和一个ip address
+# masters
+  * 用于记录运行第二namenode的所有机器
+# slaves
+  * 用于记录所有运行datanode和tasktracker的机器
+# 这两个文件放在配置目录中
+# 但slaves的位置可在在hadoop.env通过HADOOP_SLAVES另行指定
+# 这些配置文件无需分发到各工作结点上
+# 它们只会被运行控制脚本的namenode使用
+# start-dfs.sh, 用于启动集群中所有 HDFS的守护进程，并在运行脚本的机器上启动一个namenode
+  # Starts a namenode on the local machine (the machine that the script is run on)
+  # Starts a datanode on each machine listed in the slaves file
+  # Starts a secondary namenode on each machine listed in the masters file
+# start-mapred.sh, 用于启动集群中所有 MapReduce的守护进程
+  # Starts a jobtracker on the local machine
+  # Starts a tasktracker on each machine listed in the slaves file
+# MapReduce的控制脚本并不会使用masters配置文件
+# 最终是通过hadoop-daemon.sh这个脚本完成工作的
+
+*主要结点:* 
+# 主要结点的守护进程：namenode, secondary namenode, jobtracker
+# 这些守护进程可以运行于一台机器上，集群较小时
+# 但随着机器的增大，应该运行于不同的机器上
+# 不管是否在一台机器上，它的运行遵循下列规则
+  * Run the HDFS control scripts from the namenode machine. The masters file should contain the address of the secondary namenode.
+  * Run the MapReduce control scripts from the jobtracker machine
+
+# 当namenode与jobtracker运行于不同的机器上时，它们的slaves配置文件应该保持同步
+
+===环境变量设置 ===

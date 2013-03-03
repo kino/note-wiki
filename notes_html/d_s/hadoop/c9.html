@@ -49,6 +49,19 @@
 <ul>
 <li><a href="#toc_1.1.1">网络拓扑</a>
 </ul>
+<li><a href="#toc_1.2">集群的构建与安装</a>
+<ul>
+<li><a href="#toc_1.2.1">安装java环境</a>
+<li><a href="#toc_1.2.2">创建Hadoop专用账号</a>
+<li><a href="#toc_1.2.3">安装Hadoop</a>
+<li><a href="#toc_1.2.4">测试已安装的Hadoop</a>
+</ul>
+<li><a href="#toc_1.3">SSH配置</a>
+<li><a href="#toc_1.4">Hadoop的配置</a>
+<ul>
+<li><a href="#toc_1.4.1">配置管理</a>
+<li><a href="#toc_1.4.2">环境变量设置</a>
+</ul>
 </ul>
 </ul>
 </div>
@@ -115,7 +128,350 @@ JBOD循环使用磁盘
 <li>
 各机架的交换机连接一个上层的千兆交换机（或更好）
 
+<li>
+机架内的node间通信要比机架间的好的多
+
 </ol>
+
+<p>
+<strong>机架配置:</strong>
+对于多机架的集群，配置node的网络位置（和机架的映射关系），有助于极大的提升hadoop的效率
+</p>
+<ol>
+<li>
+接口DNSToSwitchMapping用于解析node和网络位置的对应关系
+<pre  class="brush:java">
+        public interface DNSToSwitchMapping {
+            public List&lt;String&gt; resolve(List&lt;String&gt; names);
+            //参数是ip列表
+            //返回值是代表网络位置的字符串
+        }
+</pre>
+
+<li>
+属性 <code>topology.node.switch.mapping.impl</code> 指定其要使用的实现类
+
+<ul>
+<li>
+默认实现是ScriptBasedMapping,
+
+<li>
+它使用一个用户指定的脚本来决定映射关系
+
+<li>
+脚本通过属性 <code>topology.script.file.name</code> 来指定
+
+</ul>
+<li>
+使用这部分信息的主要有两块
+
+<ul>
+<li>
+Namenode用于优化分配Block
+
+<li>
+Mapreduce尽量避免机架间传输（jobtracker)
+
+</ul>
+</ol>
+  
+
+<h2 id="toc_1.2">集群的构建与安装</h2>
+<h3 id="toc_1.2.1">安装java环境</h3>
+<ul>
+<li>
+&gt;=jdk1.6 (推荐使用sun jdk)
+
+</ul>
+    
+<h3 id="toc_1.2.2">创建Hadoop专用账号</h3>
+<ol>
+<li>
+创建hadoop专用用户，与其他服务隔离
+
+<li>
+对于小集群，通常会对用户主目录使用NTFS
+
+<ol>
+<li>
+实现ssh分布式
+
+<li>
+使用autofs, 按需要挂载
+
+<li>
+autofs还提供挂载失败时的备用方案
+
+</ol>
+</ol>
+   
+<h3 id="toc_1.2.3">安装Hadoop</h3>
+<ol>
+<li>
+将Hadoop安装在一个合理的地方
+
+<li>
+通常为/usr/local或/opt下
+
+</ol>
+ 
+<h3 id="toc_1.2.4">测试已安装的Hadoop</h3>
+
+<h2 id="toc_1.3">SSH配置</h2>
+<ol>
+<li>
+Hadoop跨集群的控制脚本信赖于ssh
+
+<li>
+需要将集群中的机器配成无密码登录
+
+</ol>
+ 
+<h2 id="toc_1.4">Hadoop的配置</h2>
+<ol>
+<li>
+配置文件放在conf目录中
+
+<li>
+也可以放在Hadoop安装目录之外的目录中，但启动守护进程时，需要使用-config选项指定配置的位置
+
+</ol>
+
+
+<table>
+<tr>
+<th>
+Filename
+</th>
+<th>
+Format
+</th>
+<th>
+Description
+</th>
+</tr>
+<tr>
+<td>
+hadoop-env.sh
+</td>
+<td>
+Bash script
+</td>
+<td>
+Environment variables that are used in the scripts to run Hadoop
+</td>
+</tr>
+<tr>
+<td>
+core-site.xml
+</td>
+<td>
+Hadoop configuration XML
+</td>
+<td>
+Configuration settings for Hadoop Core, such as I/O settings that are common to HDFS and MapReduce
+</td>
+</tr>
+<tr>
+<td>
+hdfs-site.xml
+</td>
+<td>
+Hadoop configuration XML
+</td>
+<td>
+Configuration settings for HDFS daemons: the namenode, the secondary namenode, and the datanodes
+</td>
+</tr>
+<tr>
+<td>
+mapred-site.xml
+</td>
+<td>
+Hadoop configuration XML
+</td>
+<td>
+Configuration settings for MapReduce daemons: the jobtracker, and the tasktrackers
+</td>
+</tr>
+<tr>
+<td>
+masters
+</td>
+<td>
+Plain text
+</td>
+<td>
+A list of machines (one per line) that each run a secondary namenode
+</td>
+</tr>
+<tr>
+<td>
+slaves
+</td>
+<td>
+Plain text
+</td>
+<td>
+A list of machines (one per line) that each run a datanode and a task-tracker
+</td>
+</tr>
+<tr>
+<td>
+hadoop-metrics .properties
+</td>
+<td>
+Java Properties
+</td>
+<td>
+Properties for controlling how metrics are published in Hadoop
+</td>
+</tr>
+<tr>
+<td>
+log4j.properties
+</td>
+<td>
+Java Properties
+</td>
+<td>
+Properties for system logfiles, the namenode audit log, and the task log for the tasktracker child process
+</td>
+</tr>
+</table>
+
+
+<h3 id="toc_1.4.1">配置管理</h3>
+<ol>
+<li>
+Hadoop集群没有统一的配置信息
+
+<li>
+而是集群中的每个结点拥有自己的一组配置信息
+
+<li>
+需要系统管理员来保证配置文件之间的同步
+
+<li>
+当然Hadoop也被设计成整个集群使用一套配置文件,但也有不适用的地方：
+
+<ol>
+<li>
+集群中机器结点配置不一样时
+
+<li>
+可以分机器类
+
+</ol>
+</ol>
+  
+<p>
+<strong>控制脚本:</strong> 
+</p>
+<ol>
+<li>
+Hadoop提供了控制脚本用于启动或关闭整个集群中的守护进程
+
+<li>
+需要告诉Hadoop集群中包含哪些机器
+
+<li>
+两个配置文件存储了这部分信息，每一行存储一个hostname和一个ip address
+
+<li>
+masters
+
+<ul>
+<li>
+用于记录运行第二namenode的所有机器
+
+</ul>
+<li>
+slaves
+
+<ul>
+<li>
+用于记录所有运行datanode和tasktracker的机器
+
+</ul>
+<li>
+这两个文件放在配置目录中
+
+<li>
+但slaves的位置可在在hadoop.env通过HADOOP_SLAVES另行指定
+
+<li>
+这些配置文件无需分发到各工作结点上
+
+<li>
+它们只会被运行控制脚本的namenode使用
+
+<li>
+start-dfs.sh, 用于启动集群中所有 HDFS的守护进程，并在运行脚本的机器上启动一个namenode
+
+<ol>
+<li>
+Starts a namenode on the local machine (the machine that the script is run on)
+
+<li>
+Starts a datanode on each machine listed in the slaves file
+
+<li>
+Starts a secondary namenode on each machine listed in the masters file
+
+</ol>
+<li>
+start-mapred.sh, 用于启动集群中所有 MapReduce的守护进程
+
+<ol>
+<li>
+Starts a jobtracker on the local machine
+
+<li>
+Starts a tasktracker on each machine listed in the slaves file
+
+</ol>
+<li>
+MapReduce的控制脚本并不会使用masters配置文件
+
+<li>
+最终是通过hadoop-daemon.sh这个脚本完成工作的
+
+</ol>
+
+<p>
+<strong>主要结点:</strong> 
+</p>
+<ol>
+<li>
+主要结点的守护进程：namenode, secondary namenode, jobtracker
+
+<li>
+这些守护进程可以运行于一台机器上，集群较小时
+
+<li>
+但随着机器的增大，应该运行于不同的机器上
+
+<li>
+不管是否在一台机器上，它的运行遵循下列规则
+
+<ul>
+<li>
+Run the HDFS control scripts from the namenode machine. The masters file should contain the address of the secondary namenode.
+
+<li>
+Run the MapReduce control scripts from the jobtracker machine
+
+</ul>
+</ol>
+
+<ol>
+<li>
+当namenode与jobtracker运行于不同的机器上时，它们的slaves配置文件应该保持同步
+
+</ol>
+
+<h3 id="toc_1.4.2">环境变量设置</h3>
 
 			</div>
 
