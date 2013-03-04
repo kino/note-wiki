@@ -525,6 +525,10 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 * Error level的日志数量
 
 ====表logstatistics设计====
+| rowkey | >  | >    | >       | >        | >  | >        | column family:log | >         | >          |
+|--------|----|------|---------|----------|----|----------|-------------------|-----------|------------|
+| AppId  | DC | Days | Minutes | HostName | IP | ThreadId | infoCount         | warnCount | errorCount |
+| 3B     | 1B | 1B   | 3B      | 4B       | 1B | 1B       | \/                | \/        | \/         |
 
 ====HBaseWriter 日志统计模块====
 * _*ToDo:详细设计*_
