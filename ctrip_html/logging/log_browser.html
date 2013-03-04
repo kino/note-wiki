@@ -1,129 +1,106 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-
+<link rel="Stylesheet" type="text/css" href="../style.css">
 <title>LogBrowser设计文档 </title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-
-<script type="text/javascript" src="../js/jquery-1.6.4.min.js"></script>
-
-<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shCore.css">
-<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shThemeRDark.css">
-<script type="text/javascript" src="../js/sh/scripts/shCore.js"></script>
-<script type="text/javascript" src="../js/sh/scripts/shAutoloader.js"></script>
-
-<script type="text/javascript" src="../js/main.js"></script>
-
-<link rel="Stylesheet" type="text/css" href="../style.css">
-<link rel="Stylesheet" type="text/css" href="../css/main.css">
-
 </head>
 <body>
-	<div class="hidden">
-		<input id="root_path" type="text" value="../">
-	</div>
-	<div id="body-wrapper">
-		<div id="container">
-			<div id="top">
-				<div id="page-title">
-					<a href="../index.html">CTRIP</a>
-				</div>
-				<ul id="top-nav">
-				</ul>
-			</div>
-			<div id="middle">
-				
 
-<h1 id="toc_1"> LogBrowser设计文档</h1>
+
+<h1 id="toc_1">LogBrowser设计文档</h1>
 
 <div class="toc">
 <ul>
-<li><a href="#toc_1"> LogBrowser设计文档</a>
+<li><a href="#toc_1">LogBrowser设计文档</a>
 <ul>
-<li><a href="#toc_1.1">1 概述</a>
-<li><a href="#toc_1.2">2 设计目标</a>
-<li><a href="#toc_1.3">3 总体架构</a>
+<li><a href="#toc_1.1">概述</a>
+<li><a href="#toc_1.2">设计目标</a>
+<li><a href="#toc_1.3">总体架构</a>
 <ul>
-<li><a href="#toc_1.3.1">3.1 数据源 </a>
-<li><a href="#toc_1.3.2">3.2 Restful Api</a>
-<li><a href="#toc_1.3.3">3.3 web应用</a>
+<li><a href="#toc_1.3.1">数据源</a>
+<li><a href="#toc_1.3.2">Restful Api</a>
+<li><a href="#toc_1.3.3">web应用</a>
 </ul>
-<li><a href="#toc_1.4">4 程序结构</a>
-<li><a href="#toc_1.5">5 领域模型</a>
+<li><a href="#toc_1.4">程序结构</a>
+<li><a href="#toc_1.5">领域模型</a>
 <ul>
-<li><a href="#toc_1.5.1">5.1 元数据 </a>
+<li><a href="#toc_1.5.1">元数据</a>
 <ul>
-<li><a href="#toc_1.5.1.1">5.1.1 成员及关系 </a>
-<li><a href="#toc_1.5.1.2">5.1.2 实体定义</a>
-<li><a href="#toc_1.5.1.3">5.1.3 数据来源</a>
+<li><a href="#toc_1.5.1.1">成员及关系</a>
+<li><a href="#toc_1.5.1.2">实体定义</a>
+<li><a href="#toc_1.5.1.3">数据来源</a>
 </ul>
-<li><a href="#toc_1.5.2">5.2 配置数据</a>
+<li><a href="#toc_1.5.2">配置数据</a>
 <ul>
-<li><a href="#toc_1.5.2.1">5.2.1 Agent配置</a>
-<li><a href="#toc_1.5.2.2">5.2.2 Namespace配置</a>
+<li><a href="#toc_1.5.2.1">Agent配置</a>
+<li><a href="#toc_1.5.2.2">Namespace配置</a>
 </ul>
-<li><a href="#toc_1.5.3">5.3 日志数据</a>
+<li><a href="#toc_1.5.3">日志数据</a>
 <ul>
-<li><a href="#toc_1.5.3.1">5.3.1 成员及关系 </a>
-<li><a href="#toc_1.5.3.2">5.3.2 实体定义</a>
+<li><a href="#toc_1.5.3.1">成员及关系</a>
+<li><a href="#toc_1.5.3.2">实体定义</a>
 </ul>
-<li><a href="#toc_1.5.4">5.4 统计报表数据</a>
+<li><a href="#toc_1.5.4">统计报表数据</a>
 </ul>
-<li><a href="#toc_1.6">6 Restful Api 接口</a>
+<li><a href="#toc_1.6">Restful Api 接口</a>
 <ul>
-<li><a href="#toc_1.6.1">6.1 设计理念</a>
-<li><a href="#toc_1.6.2">6.2 接口定义</a>
+<li><a href="#toc_1.6.1">设计理念</a>
+<li><a href="#toc_1.6.2">接口定义</a>
 <ul>
-<li><a href="#toc_1.6.2.1">6.2.1 Meta Api</a>
-<li><a href="#toc_1.6.2.2">6.2.2 Configration Api</a>
-<li><a href="#toc_1.6.2.3">6.2.3 Data Api</a>
-<li><a href="#toc_1.6.2.4">6.2.4 Report Api</a>
+<li><a href="#toc_1.6.2.1">Meta Api</a>
+<li><a href="#toc_1.6.2.2">Configration Api</a>
+<li><a href="#toc_1.6.2.3">Data Api</a>
+<li><a href="#toc_1.6.2.4">Report Api</a>
 </ul>
-<li><a href="#toc_1.6.3">6.3 核心设计</a>
+<li><a href="#toc_1.6.3">核心设计</a>
 <ul>
-<li><a href="#toc_1.6.3.1">6.3.1 元数据获取 </a>
-<li><a href="#toc_1.6.3.2">6.3.2 查询日志数据</a>
-<li><a href="#toc_1.6.3.3">6.3.3 查询日志报表</a>
-</ul>
-</ul>
-<li><a href="#toc_1.7">7 Log-Browser日志应用</a>
-<ul>
-<li><a href="#toc_1.7.1">7.1 页面流设计 </a>
-<ul>
-<li><a href="#toc_1.7.1.1">7.1.1 Page 1: 主页</a>
-<li><a href="#toc_1.7.1.2">7.1.2 Page 2: 部门列表</a>
-<li><a href="#toc_1.7.1.3">7.1.3 Page 3: 应用列表</a>
-<li><a href="#toc_1.7.1.4">7.1.4 Page 4: 服务器列表 </a>
-<li><a href="#toc_1.7.1.5">7.1.5 Page 5: 服务器日志报表 </a>
-<li><a href="#toc_1.7.1.6">7.1.6 Page 6: 日志列表</a>
-</ul>
-<li><a href="#toc_1.7.2">7.2 页面流方案二</a>
-<li><a href="#toc_1.7.3">7.3 页面逻辑设计</a>
-<li><a href="#toc_1.7.4">7.4 基础架构</a>
-</ul>
-<li><a href="#toc_1.8">8 其他模块关联更改</a>
-<ul>
-<li><a href="#toc_1.8.1">8.1 HBase 日志存储优化</a>
-<ul>
-<li><a href="#toc_1.8.1.1">8.1.1 HBase Log Scheme优化</a>
-<li><a href="#toc_1.8.1.2">8.1.2 HBaseWriter功能</a>
-</ul>
-<li><a href="#toc_1.8.2">8.2 HBase 日志统计</a>
-<ul>
-<li><a href="#toc_1.8.2.1">8.2.1 HBase Scheme设计</a>
-<li><a href="#toc_1.8.2.2">8.2.2 HBase Writer 日志统计模块</a>
+<li><a href="#toc_1.6.3.1">元数据获取</a>
+<li><a href="#toc_1.6.3.2">查询日志数据</a>
+<li><a href="#toc_1.6.3.3">查询日志报表</a>
 </ul>
 </ul>
-<li><a href="#toc_1.9">9 部署架构</a>
+<li><a href="#toc_1.7">Log-Browser日志应用</a>
 <ul>
-<li><a href="#toc_1.9.1">9.1 域名</a>
-<li><a href="#toc_1.9.2">9.2 部署图 </a>
+<li><a href="#toc_1.7.1">页面流设计</a>
+<ul>
+<li><a href="#toc_1.7.1.1">Page 1: 主页</a>
+<li><a href="#toc_1.7.1.2">Page 2: 部门列表</a>
+<li><a href="#toc_1.7.1.3">Page 3: 应用列表</a>
+<li><a href="#toc_1.7.1.4">Page 4: 服务器列表</a>
+<li><a href="#toc_1.7.1.5">Page 5: 服务器日志报表</a>
+<li><a href="#toc_1.7.1.6">Page 6: 日志列表</a>
+</ul>
+<li><a href="#toc_1.7.2">页面流方案二</a>
+<li><a href="#toc_1.7.3">页面逻辑设计</a>
+<li><a href="#toc_1.7.4">基础架构</a>
+</ul>
+<li><a href="#toc_1.8">其他模块关联更改</a>
+<ul>
+<li><a href="#toc_1.8.1">HBase 日志查询优化</a>
+<ul>
+<li><a href="#toc_1.8.1.1">现有方案及问题</a>
+<li><a href="#toc_1.8.1.2">优化方案</a>
+<li><a href="#toc_1.8.1.3">rawlogindex表设计</a>
+<li><a href="#toc_1.8.1.4">写实现</a>
+<li><a href="#toc_1.8.1.5">查询实现</a>
+</ul>
+<li><a href="#toc_1.8.2">HBase 日志统计</a>
+<ul>
+<li><a href="#toc_1.8.2.1">表logstatistics设计</a>
+<li><a href="#toc_1.8.2.2">HBaseWriter 日志统计模块</a>
+</ul>
+</ul>
+<li><a href="#toc_1.9">部署架构</a>
+<ul>
+<li><a href="#toc_1.9.1">域名</a>
+<li><a href="#toc_1.9.2">部署图</a>
 </ul>
 </ul>
 </ul>
 </div>
 
-<h2 id="toc_1.1">1 概述</h2>
+<h2 id="toc_1.1">概述</h2>
 <p>
 Logging 2.0上线，公司内越来越多的应用接入，各应用部门对及时快速准确获得相应日志的需求越来越高，也越来越多样化。 
 目前我们已经提供了日志查询的应用LogView和日志转存功能。但还不能真正满足用户的需求。
@@ -145,7 +122,7 @@ Logging2.0当前后端的HBase设计也存在一定的问题，在查询速度�
 在此次项目开发中，也会使用新方案，改善这种情况。
 </p>
 
-<h2 id="toc_1.2">2 设计目标</h2>
+<h2 id="toc_1.2">设计目标</h2>
 <ul>
 <li>
 <strong>提供一个可扩展的应用基础架构</strong>
@@ -171,17 +148,17 @@ LogBrowser只提供界面服务，通过Ajax与Restful Api通信，获取相应�
 </ol>
 </ul>
 
-<h2 id="toc_1.3">3 总体架构</h2>
+<h2 id="toc_1.3">总体架构</h2>
 
 <p>
 <img src="log-browser.png" />
 </p>
 
 <p>
-总体架构如上，分为三种角色: <strong>数据源 </strong> 、 <strong>Restful Api接口</strong> 、 <strong>web应用</strong>
+总体架构如上，分为三种角色: *数据源 * 、 <strong>Restful Api接口</strong> 、 <strong>web应用</strong>
 </p>
 
-<h3 id="toc_1.3.1">3.1 数据源 </h3>
+<h3 id="toc_1.3.1">数据源</h3>
 <p>
 数据源分为两种，HBase和MySql.
 </p>
@@ -226,7 +203,7 @@ api录入:配置信息
 </ol>
 </ul>
 
-<h3 id="toc_1.3.2">3.2 Restful Api</h3>
+<h3 id="toc_1.3.2">Restful Api</h3>
 <ul>
 <li>
 以上面两种数据源为基础，包装并暴露合理的api接口，提供数据服务
@@ -250,7 +227,7 @@ restful api可以返回两种数据：xml json
 
 </ul>
 
-<h3 id="toc_1.3.3">3.3 web应用</h3>
+<h3 id="toc_1.3.3">web应用</h3>
 <ul>
 <li>
 Log-Browser应用
@@ -263,7 +240,7 @@ Log-Browser应用
 
 </ul>
 
-<h2 id="toc_1.4">4 程序结构</h2>
+<h2 id="toc_1.4">程序结构</h2>
 <p>
 当前Central-Logging 2.0的组成：
 </p>
@@ -311,15 +288,15 @@ Central-Logging 2.0中Log-Browser相关的将划分为三个子项目，挂在Ce
 </ol>
 </ul>
 
-<h2 id="toc_1.5">5 领域模型</h2>
+<h2 id="toc_1.5">领域模型</h2>
 <p>
-Central Logging 2.0中的数据模型分为四类:meta data(<strong>元数据 </strong>), configration data(<strong>配置数据</strong>), 
+Central Logging 2.0中的数据模型分为四类:meta data(*元数据 *), configration data(<strong>配置数据</strong>), 
 log data(<strong>日志数据</strong>: log metric span event), report data(<strong>统计报表数据</strong>).
 这些领域模型对应的Java Bean在项目central-loggging-domain里定义
 </p>
 
-<h3 id="toc_1.5.1">5.1 元数据 </h3>
-<h4 id="toc_1.5.1.1">5.1.1 成员及关系 </h4>
+<h3 id="toc_1.5.1">元数据</h3>
+<h4 id="toc_1.5.1.1">成员及关系</h4>
 <p>
 <img src="domain-meta-entity.png" />
 </p>
@@ -355,14 +332,14 @@ log data(<strong>日志数据</strong>: log metric span event), report data(<str
 </p>
 
 
-<h4 id="toc_1.5.1.2">5.1.2 实体定义</h4>
+<h4 id="toc_1.5.1.2">实体定义</h4>
 
 <p>
 <strong>Department:</strong>
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -401,7 +378,7 @@ String
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -418,7 +395,7 @@ appId
 String
 </td>
 <td>
-公司分配给这个应用的一个应用号，通常为6位数字 
+公司分配给这个应用的一个应用号，通常为6位数字
 </td>
 </tr>
 <tr>
@@ -462,7 +439,7 @@ appServices
 List&lt;AppService&gt;
 </td>
 <td>
-应用中被trace的服务列表 
+应用中被trace的服务列表
 </td>
 </tr>
 </table>
@@ -473,7 +450,7 @@ List&lt;AppService&gt;
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -512,7 +489,7 @@ String
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -540,7 +517,7 @@ serviceSpans
 List&lt;ServiceSpan&gt;
 </td>
 <td>
-服务所拥有的方法列表 
+服务所拥有的方法列表
 </td>
 </tr>
 </table>
@@ -551,7 +528,7 @@ List&lt;ServiceSpan&gt;
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -575,7 +552,7 @@ String
 </p>
 
 
-<h4 id="toc_1.5.1.3">5.1.3 数据来源</h4>
+<h4 id="toc_1.5.1.3">数据来源</h4>
 <p>
 无数数据的来源分为两种：
 </p>
@@ -588,12 +565,12 @@ AppService ServiceSpan是由我们的HBaseWriter收集的，通过Restful Api更
 
 </ul>
 
-<h3 id="toc_1.5.2">5.2 配置数据</h3>
+<h3 id="toc_1.5.2">配置数据</h3>
 <p>
 配置数据分为两类，一类是对Agent的配置信息，一类是对Metric Namespace的配置信息。
 </p>
 
-<h4 id="toc_1.5.2.1">5.2.1 Agent配置</h4>
+<h4 id="toc_1.5.2.1">Agent配置</h4>
 <p>
 由类AgentConfig表示
 </p>
@@ -607,7 +584,7 @@ AppService ServiceSpan是由我们的HBaseWriter收集的，通过Restful Api更
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -624,7 +601,7 @@ key
 String
 </td>
 <td>
-指定的一个Key,将确定对谁生效。通常为一个appId或server ip, 特殊key:"global",代表agent的默认配置 
+指定的一个Key,将确定对谁生效。通常为一个appId或server ip, 特殊key:"global",代表agent的默认配置
 </td>
 </tr>
 <tr>
@@ -635,7 +612,7 @@ appLogEnabled
 boolean
 </td>
 <td>
-表明是否开启日志 
+表明是否开启日志
 </td>
 </tr>
 <tr>
@@ -690,7 +667,7 @@ flushPeriod
 int
 </td>
 <td>
-毫秒，agent中打包chunk的频率 
+毫秒，agent中打包chunk的频率
 </td>
 </tr>
 <tr>
@@ -718,7 +695,7 @@ url trace的采样率
 </table>
 </p>
 
-<h4 id="toc_1.5.2.2">5.2.2 Namespace配置</h4>
+<h4 id="toc_1.5.2.2">Namespace配置</h4>
 <p>
 目前只有metrics使用namespace, namespace决定了读写权限，和使用的hbase实例和table名称。
 </p>
@@ -741,7 +718,7 @@ MetricNamespace代表一个metric namespace的定义
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -780,7 +757,7 @@ isMeta
 boolean
 </td>
 <td>
-HBase实例是否存储元数据 
+HBase实例是否存储元数据
 </td>
 </tr>
 <tr>
@@ -802,7 +779,7 @@ HBase实例是否存储unique id
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -841,7 +818,7 @@ isMeta
 boolean
 </td>
 <td>
-HBase实例是否存储元数据 
+HBase实例是否存储元数据
 </td>
 </tr>
 <tr>
@@ -858,12 +835,12 @@ HBase实例是否存储unique id
 </table>
 </p>
 
-<h3 id="toc_1.5.3">5.3 日志数据</h3>
+<h3 id="toc_1.5.3">日志数据</h3>
 <p>
 主要是我们Logging系统收集的四种结构化数据：log span metric event:
 </p>
 
-<h4 id="toc_1.5.3.1">5.3.1 成员及关系 </h4>
+<h4 id="toc_1.5.3.1">成员及关系</h4>
 <p>
 <img src="domain-log.png" />
 </p>
@@ -892,14 +869,14 @@ Span本身也可以组成树形结构，一个span可以有一个父span, 一个
 所以span与span之间是多对一的关系。
 </p>
 
-<h4 id="toc_1.5.3.2">5.3.2 实体定义</h4>
+<h4 id="toc_1.5.3.2">实体定义</h4>
 
 <p>
 <strong>BaseEventDomain:</strong> 
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -916,7 +893,7 @@ type
 String
 </td>
 <td>
-数据分类，保留使用 
+数据分类，保留使用
 </td>
 </tr>
 <tr>
@@ -949,7 +926,7 @@ processId
 String
 </td>
 <td>
-产生该数据的进程号 
+产生该数据的进程号
 </td>
 </tr>
 </table>
@@ -960,7 +937,7 @@ String
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -999,7 +976,7 @@ logType
 LogType
 </td>
 <td>
-Log的类型 
+Log的类型
 </td>
 </tr>
 <tr>
@@ -1032,7 +1009,7 @@ traceId
 long
 </td>
 <td>
-Log产生时，如果存在trace,trace的Id号 
+Log产生时，如果存在trace,trace的Id号
 </td>
 </tr>
 <tr>
@@ -1109,7 +1086,7 @@ String
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -1181,7 +1158,7 @@ traceId
 long
 </td>
 <td>
-span所属trace的Id号 
+span所属trace的Id号
 </td>
 </tr>
 <tr>
@@ -1203,7 +1180,7 @@ parentId
 long
 </td>
 <td>
-此span父span的id号 
+此span父span的id号
 </td>
 </tr>
 <tr>
@@ -1214,7 +1191,7 @@ startTime
 String
 </td>
 <td>
-span的开始时间 
+span的开始时间
 </td>
 </tr>
 <tr>
@@ -1225,7 +1202,7 @@ stopTime
 String
 </td>
 <td>
-span的结束时间 
+span的结束时间
 </td>
 </tr>
 <tr>
@@ -1247,7 +1224,7 @@ String
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -1264,7 +1241,7 @@ name
 String
 </td>
 <td>
-metric的名称 
+metric的名称
 </td>
 </tr>
 <tr>
@@ -1286,7 +1263,7 @@ value
 String
 </td>
 <td>
-metric这个点的值 
+metric这个点的值
 </td>
 </tr>
 <tr>
@@ -1308,7 +1285,7 @@ tags
 List&lt;Attribute&gt;
 </td>
 <td>
-这个metric的tag value对 
+这个metric的tag value对
 </td>
 </tr>
 <tr>
@@ -1319,7 +1296,7 @@ createdTime
 long
 </td>
 <td>
-此metric的创建时间 
+此metric的创建时间
 </td>
 </tr>
 </table>
@@ -1330,7 +1307,7 @@ long
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -1347,7 +1324,7 @@ name
 String
 </td>
 <td>
-事件的名称 
+事件的名称
 </td>
 </tr>
 <tr>
@@ -1380,13 +1357,13 @@ createdTime
 long
 </td>
 <td>
-事件的创建时间 
+事件的创建时间
 </td>
 </tr>
 </table>
 </p>
 
-<h3 id="toc_1.5.4">5.4 统计报表数据</h3>
+<h3 id="toc_1.5.4">统计报表数据</h3>
 <p>
 Central Logging 2.0中为app统计一日志数据。
 </p>
@@ -1404,7 +1381,7 @@ Central Logging 2.0中为app统计一日志数据。
 <table>
 <tr>
 <th>
-属性 
+属性
 </th>
 <th>
 类型
@@ -1421,7 +1398,7 @@ appId
 String
 </td>
 <td>
-要统计的应用号 
+要统计的应用号
 </td>
 </tr>
 <tr>
@@ -1476,7 +1453,7 @@ infoCount
 long
 </td>
 <td>
-统计范围内info log的数量 
+统计范围内info log的数量
 </td>
 </tr>
 <tr>
@@ -1487,7 +1464,7 @@ warnCount
 long
 </td>
 <td>
-统计范围内warn log的数量 
+统计范围内warn log的数量
 </td>
 </tr>
 <tr>
@@ -1498,13 +1475,13 @@ errorCount
 long
 </td>
 <td>
-统计范围内error log的数量 
+统计范围内error log的数量
 </td>
 </tr>
 </table>
 </p>
 
-<h2 id="toc_1.6">6 Restful Api 接口</h2>
+<h2 id="toc_1.6">Restful Api 接口</h2>
 <p>
 为了实现数据分离，接口化。需要把CentralLogging 2中所有的内部通信和外部接口包装成Restful 的接口。
 </p>
@@ -1513,7 +1490,7 @@ long
 <img src="logging-rest.png" alt="logging-rest.png" style="width:900px" />
 </p>
 
-<h3 id="toc_1.6.1">6.1 设计理念</h3>
+<h3 id="toc_1.6.1">设计理念</h3>
 
 <p>
 <strong>在Restful Api中，主要将前面定义的领域模型转换成Restful中的资源，对这些资源进行查询，创建，更新等操作，而支持的资源表现形式为XML和JSON.</strong>
@@ -1537,9 +1514,9 @@ long
 
 </ul>
  
-<h3 id="toc_1.6.2">6.2 接口定义</h3>
+<h3 id="toc_1.6.2">接口定义</h3>
 
-<h4 id="toc_1.6.2.1">6.2.1 Meta Api</h4>
+<h4 id="toc_1.6.2.1">Meta Api</h4>
 
 <p>
  <strong>部门相关:</strong>
@@ -1551,7 +1528,7 @@ long
 Api 地址
 </th>
 <th>
-支持的方法 
+支持的方法
 </th>
 <th>
 请求
@@ -1604,7 +1581,7 @@ NA
 JSON/XML
 </td>
 <td>
-获取指定部门的信息 
+获取指定部门的信息
 </td>
 </tr>
 </table>
@@ -1619,7 +1596,7 @@ JSON/XML
 Api 地址
 </th>
 <th>
-支持的方法 
+支持的方法
 </th>
 <th>
 请求
@@ -1672,7 +1649,7 @@ NA
 JSON/XML
 </td>
 <td>
-获取指定数据中心的信息 
+获取指定数据中心的信息
 </td>
 </tr>
 </table>
@@ -1687,7 +1664,7 @@ JSON/XML
 Api 地址
 </th>
 <th>
-支持的方法 
+支持的方法
 </th>
 <th>
 请求
@@ -1718,7 +1695,7 @@ Query String
 JSON/XML
 </td>
 <td>
-获取应用列表，可以根据条件过虑，比如通过Query String指定返回某个部门的所有应用 
+获取应用列表，可以根据条件过虑，比如通过Query String指定返回某个部门的所有应用
 </td>
 </tr>
 <tr>
@@ -1740,7 +1717,7 @@ NA
 JSON/XML
 </td>
 <td>
-获取指定应用的信息 
+获取指定应用的信息
 </td>
 </tr>
 <tr>
@@ -1806,7 +1783,7 @@ NA
 JSON/XML
 </td>
 <td>
-获取某个应用的某个具体的Service的所有追踪过的方法 
+获取某个应用的某个具体的Service的所有追踪过的方法
 </td>
 </tr>
 <tr>
@@ -1823,12 +1800,12 @@ String
 NA
 </td>
 <td>
-为某个应用的某个具体的Service添加一个追踪过的方法 
+为某个应用的某个具体的Service添加一个追踪过的方法
 </td>
 </tr>
 </table>
 
-<h4 id="toc_1.6.2.2">6.2.2 Configration Api</h4>
+<h4 id="toc_1.6.2.2">Configration Api</h4>
 
 <p>
 <strong>Agent配置相关:</strong>
@@ -1840,7 +1817,7 @@ NA
 Api 地址
 </th>
 <th>
-支持的方法 
+支持的方法
 </th>
 <th>
 请求
@@ -1888,7 +1865,7 @@ JSON/XML
 NA
 </td>
 <td>
-增加一个具体Agent的配置 
+增加一个具体Agent的配置
 </td>
 </tr>
 <tr>
@@ -1910,7 +1887,7 @@ NA
 JSON/XML
 </td>
 <td>
-获取一个具体agent的配置信息 
+获取一个具体agent的配置信息
 </td>
 </tr>
 <tr>
@@ -1927,7 +1904,7 @@ JSON/XML
 NA
 </td>
 <td>
-更新一个具体agent的配置信息 
+更新一个具体agent的配置信息
 </td>
 </tr>
 </table>
@@ -1942,7 +1919,7 @@ NA
 Api 地址
 </th>
 <th>
-支持的方法 
+支持的方法
 </th>
 <th>
 请求
@@ -1973,7 +1950,7 @@ NA
 JSON/XML
 </td>
 <td>
-获取所有的metric namespace的配置列表 
+获取所有的metric namespace的配置列表
 </td>
 </tr>
 <tr>
@@ -1995,19 +1972,19 @@ NA
 JSON/XML
 </td>
 <td>
-获取一个具体的metric namespace的配置信息 
+获取一个具体的metric namespace的配置信息
 </td>
 </tr>
 </table>
 
-<h4 id="toc_1.6.2.3">6.2.3 Data Api</h4>
+<h4 id="toc_1.6.2.3">Data Api</h4>
 <table>
 <tr>
 <th>
 Api 地址
 </th>
 <th>
-支持的方法 
+支持的方法
 </th>
 <th>
 请求
@@ -2153,7 +2130,7 @@ JSON/XML
 </tr>
 </table>
 
-<h4 id="toc_1.6.2.4">6.2.4 Report Api</h4>
+<h4 id="toc_1.6.2.4">Report Api</h4>
 
 <table>
 <tr>
@@ -2161,7 +2138,7 @@ JSON/XML
 Api 地址
 </th>
 <th>
-支持的方法 
+支持的方法
 </th>
 <th>
 请求
@@ -2197,9 +2174,9 @@ JSON/XML
 </tr>
 </table>
 
-<h3 id="toc_1.6.3">6.3 核心设计</h3>
+<h3 id="toc_1.6.3">核心设计</h3>
 
-<h4 id="toc_1.6.3.1">6.3.1 元数据获取 </h4>
+<h4 id="toc_1.6.3.1">元数据获取</h4>
 <ul>
 <li>
 department app server等元数据从第三方系统的获取
@@ -2209,7 +2186,7 @@ department app server等元数据从第三方系统的获取
 
 </ul>
 
-<h4 id="toc_1.6.3.2">6.3.2 查询日志数据</h4>
+<h4 id="toc_1.6.3.2">查询日志数据</h4>
 <ul>
 <li>
 查询参数的设计
@@ -2219,7 +2196,7 @@ department app server等元数据从第三方系统的获取
 
 </ul>
 
-<h4 id="toc_1.6.3.3">6.3.3 查询日志报表</h4>
+<h4 id="toc_1.6.3.3">查询日志报表</h4>
 <ul>
 <li>
 查询参数的设计
@@ -2232,12 +2209,12 @@ department app server等元数据从第三方系统的获取
 
 </ul>
 
-<h2 id="toc_1.7">7 Log-Browser日志应用</h2>
+<h2 id="toc_1.7">Log-Browser日志应用</h2>
 <p>
 Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志数据。
 </p>
 
-<h3 id="toc_1.7.1">7.1 页面流设计 </h3>
+<h3 id="toc_1.7.1">页面流设计</h3>
 
 <p>
 <img src="log-browser-page-flow.png" />
@@ -2247,7 +2224,7 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 如上图页面流分为6张页面，也对应用户浏览日志的6个骤，从page 1到page 6.
 </p>
 
-<h4 id="toc_1.7.1.1">7.1.1 Page 1: 主页</h4>
+<h4 id="toc_1.7.1.1">Page 1: 主页</h4>
 <ol>
 <li>
 将作为Central Logging 2.0 web app的landing配置，各模块的入口。
@@ -2257,7 +2234,7 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 
 </ol>
 
-<h4 id="toc_1.7.1.2">7.1.2 Page 2: 部门列表</h4>
+<h4 id="toc_1.7.1.2">Page 2: 部门列表</h4>
 <ol>
 <li>
 在page 1点击浏览日志进入
@@ -2270,7 +2247,7 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 
 </ol>
 
-<h4 id="toc_1.7.1.3">7.1.3 Page 3: 应用列表</h4>
+<h4 id="toc_1.7.1.3">Page 3: 应用列表</h4>
 <ol>
 <li>
 在page 2点击某个部门进入
@@ -2283,7 +2260,7 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 
 </ol>
 
-<h4 id="toc_1.7.1.4">7.1.4 Page 4: 服务器列表 </h4>
+<h4 id="toc_1.7.1.4">Page 4: 服务器列表</h4>
 <ol>
 <li>
 在page 3点击某个应用进入
@@ -2296,7 +2273,7 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 
 </ol>
 
-<h4 id="toc_1.7.1.5">7.1.5 Page 5: 服务器日志报表 </h4>
+<h4 id="toc_1.7.1.5">Page 5: 服务器日志报表</h4>
 <ol>
 <li>
 在page 4点击某台服务器进入
@@ -2317,7 +2294,7 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 
 </ol>
 
-<h4 id="toc_1.7.1.6">7.1.6 Page 6: 日志列表</h4>
+<h4 id="toc_1.7.1.6">Page 6: 日志列表</h4>
 <ol>
 <li>
 在page 5做相点击进入进入
@@ -2330,7 +2307,7 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 
 </ol>
 
-<h3 id="toc_1.7.2">7.2 页面流方案二</h3>
+<h3 id="toc_1.7.2">页面流方案二</h3>
 <p>
 还有一种页面流方案，就是省略上一节的page 5, 直接从page 4到page 6.
 而在page 4显示整个应用的日志统计信息。见下图。
@@ -2344,7 +2321,7 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 <img src="log-browser-page-flow2.png" />
 </p>
 
-<h3 id="toc_1.7.3">7.3 页面逻辑设计</h3>
+<h3 id="toc_1.7.3">页面逻辑设计</h3>
 <p>
 上面的页面，每个页面的逻辑结构是相似的，也应该持一致，这样可以保持项目维护。
 </p>
@@ -2374,33 +2351,271 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 
 </ol>
   
-<h3 id="toc_1.7.4">7.4 基础架构</h3>
+<h3 id="toc_1.7.4">基础架构</h3>
 <ul>
 <li>
 <em><strong>ToDo:</strong></em> 软件具体实现
 
 </ul>
 
-<h2 id="toc_1.8">8 其他模块关联更改</h2>
+<h2 id="toc_1.8">其他模块关联更改</h2>
 
-<h3 id="toc_1.8.1">8.1 HBase 日志存储优化</h3>
-<h4 id="toc_1.8.1.1">8.1.1 HBase Log Scheme优化</h4>
-<h4 id="toc_1.8.1.2">8.1.2 HBaseWriter功能</h4>
+<h3 id="toc_1.8.1">HBase 日志查询优化</h3>
+<p>
+在Central Logging 2.0中存储在HBase中的日志，目前的方案是有所缺陷和性能瓶颈的。
+</p>
 
-<h3 id="toc_1.8.2">8.2 HBase 日志统计</h3>
-<h4 id="toc_1.8.2.1">8.2.1 HBase Scheme设计</h4>
-<h4 id="toc_1.8.2.2">8.2.2 HBase Writer 日志统计模块</h4>
+<h4 id="toc_1.8.1.1">现有方案及问题</h4>
+<p>
+目前Log是通过HBaseWriter写表freeway.rawlog中的，而查询方案如下：
+</p>
 
-<h2 id="toc_1.9">9 部署架构</h2>
-<h3 id="toc_1.9.1">9.1 域名</h3>
-<h3 id="toc_1.9.2">9.2 部署图 </h3>
+<p>
+<img src="rawlog-old.png" />
+</p>
 
-			</div>
+<p>
+日志查询实现总体分为两大步Scan和Filter,详细步骤如下：
+</p>
+<ol>
+<li>
+scan出100条记录，返回反序化成原始数据
 
-			<div id="bottom">
-				&copy; 2012 王兴朝
-			</div>
-		</div>
-	<div>
+<li>
+逐条Filter,看是否满足查询条件，若满足就放入result待返回
+
+<li>
+查看result是否满足条数，满足返回
+
+<li>
+查看是否超时，超时返回，不超时执行1
+
+</ol>
+
+<p>
+<strong>问题:</strong>
+</p>
+<ol>
+<li>
+使用逐条过滤，效率不高，容易超时
+
+<li>
+产生大量无效网络流量，使用客户端过滤, 每次都要取回原始log数据
+
+</ol>
+
+<h4 id="toc_1.8.1.2">优化方案</h4>
+<p>
+解决方案就是为rowlog表建立一张index表，查询时，先查index表，再查rawlog表
+</p>
+
+<p>
+<img src="rawlog-new.png" />
+</p>
+
+<p>
+新方案查询如下：
+</p>
+<ol>
+<li>
+根据条件去sacan rawlogindex表
+
+<li>
+最终生成一个包含rawlog rowkey的列表
+
+<li>
+根据rowkey列表，从rawlog表中get出所需的数据
+
+<li>
+放入result返回
+
+</ol>
+
+<h4 id="toc_1.8.1.3">rawlogindex表设计</h4>
+<p>
+新方案的好坏很大一部分取决于步骤一，步骤一的目标：
+</p>
+<ol>
+<li>
+更快
+
+<li>
+传输的数据更少
+
+<li>
+尽量在HBase端做过滤
+
+</ol>
+
+<p>
+所以，根据常用查询条件，设计rawlogindex表如下：
+<table>
+<tr>
+<th colspan="9">
+rowkey
+</th>
+<th>
+column family:rawlog
+</th>
+</tr>
+<tr>
+<td>
+AppId
+</td>
+<td>
+DC
+</td>
+<td>
+Days
+</td>
+<td>
+Seconds
+</td>
+<td>
+HostName
+</td>
+<td>
+IP
+</td>
+<td>
+ThreadId
+</td>
+<td>
+LogLevel
+</td>
+<td>
+AddtionalInfo
+</td>
+<td rowspan="2">
+RowLog RowKey
+</td>
+</tr>
+<tr>
+<td>
+3B
+</td>
+<td>
+1B
+</td>
+<td>
+1B
+</td>
+<td>
+3B
+</td>
+<td>
+4B
+</td>
+<td>
+1B
+</td>
+<td>
+1B
+</td>
+<td>
+1B
+</td>
+<td>
+9B x 8 +7
+</td>
+</tr>
+</table>
+</p>
+
+<p>
+<strong>rowkey组成:</strong>
+</p>
+
+<ol>
+<li>
+<strong>AppId:</strong> 一数字,为了优化存储，足够散列，由原始appId计算获得: ???
+
+<li>
+<strong>DC:</strong> 数据中心，保留使用
+
+<li>
+<strong>Days:</strong> 距离1970/01/01 00:00的天数对30取模
+
+<li>
+<strong>Seconds:</strong> 距离0点的秒数，即Hour x 3600 + Seconds
+
+<li>
+<strong>HostName:</strong> 对HostName取4字节的Hash 
+
+<li>
+<strong>IP:</strong> 转换成数字
+
+<li>
+<strong>ThreadId:</strong> 数字
+
+<li>
+<strong>LogLevel:</strong> 数字 
+
+<li>
+<strong>AddtionalInfo:</strong>
+
+<ol>
+<li>
+共8对，每对间使用|分隔
+
+<li>
+每对的key value使用:分隔
+
+<li>
+key和value都是长度4B, 是分别对原始key和vaue取Hash获得
+
+</ol>
+</ol>
+
+<h4 id="toc_1.8.1.4">写实现</h4>
+<ul>
+<li>
+HBaseWriter写log时需要同时写两张表
+
+<li>
+<em><strong>ToDo:详细设计</strong></em>
+
+</ul>
+
+<h4 id="toc_1.8.1.5">查询实现</h4>
+<ul>
+<li>
+查询分两步，先查index,现取rawlog
+
+<li>
+<em><strong>ToDo:详细设计</strong></em>
+
+</ul>
+
+<h3 id="toc_1.8.2">HBase 日志统计</h3>
+<p>
+为了更好的记录应用的情况，我们以分钟为单位统计每个应用的日志情况，在一分钟内的:
+</p>
+
+<ul>
+<li>
+&lt;=Info level的日志数量
+
+<li>
+Warn level的日志数量
+
+<li>
+Error level的日志数量
+
+</ul>
+
+<h4 id="toc_1.8.2.1">表logstatistics设计</h4>
+
+<h4 id="toc_1.8.2.2">HBaseWriter 日志统计模块</h4>
+<ul>
+<li>
+<em><strong>ToDo:详细设计</strong></em>
+
+</ul>
+
+<h2 id="toc_1.9">部署架构</h2>
+<h3 id="toc_1.9.1">域名</h3>
+<h3 id="toc_1.9.2">部署图</h3>
+
 </body>
 </html>

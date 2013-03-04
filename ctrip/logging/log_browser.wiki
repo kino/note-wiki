@@ -453,13 +453,81 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 
 ==其他模块关联更改 ==
 
-===HBase 日志存储优化 ===
-====HBase Log Scheme优化====
-====HBaseWriter功能====
+===HBase 日志查询优化 ===
+在Central Logging 2.0中存储在HBase中的日志，目前的方案是有所缺陷和性能瓶颈的。
+
+====现有方案及问题====
+目前Log是通过HBaseWriter写表freeway.rawlog中的，而查询方案如下：
+
+{{rawlog-old.png}}
+
+日志查询实现总体分为两大步Scan和Filter,详细步骤如下：
+# scan出100条记录，返回反序化成原始数据
+# 逐条Filter,看是否满足查询条件，若满足就放入result待返回
+# 查看result是否满足条数，满足返回
+# 查看是否超时，超时返回，不超时执行1
+
+*问题:*
+# 使用逐条过滤，效率不高，容易超时
+# 产生大量无效网络流量，使用客户端过滤, 每次都要取回原始log数据
+
+====优化方案 ====
+解决方案就是为rowlog表建立一张index表，查询时，先查index表，再查rawlog表
+
+{{rawlog-new.png}}
+
+新方案查询如下：
+# 根据条件去sacan rawlogindex表
+# 最终生成一个包含rawlog rowkey的列表
+# 根据rowkey列表，从rawlog表中get出所需的数据
+# 放入result返回
+
+====rawlogindex表设计 ====
+新方案的好坏很大一部分取决于步骤一，步骤一的目标：
+# 更快
+# 传输的数据更少
+# 尽量在HBase端做过滤
+
+所以，根据常用查询条件，设计rawlogindex表如下：
+| rowkey | >  | >    | >       | >        | >  | >        | >        | >             | column family:rawlog |
+|--------|----|------|---------|----------|----|----------|----------|---------------|----------------------|
+| AppId  | DC | Days | Seconds | HostName | IP | ThreadId | LogLevel | AddtionalInfo | RowLog RowKey        |
+| 3B     | 1B | 1B   | 3B      | 4B       | 1B | 1B       | 1B       | 9B x 8 +7     | \/                   |
+
+*rowkey组成:*
+
+# *AppId:* 一数字,为了优化存储，足够散列，由原始appId计算获得: ???
+# *DC:* 数据中心，保留使用
+# *Days:* 距离1970/01/01 00:00的天数对30取模
+# *Seconds:* 距离0点的秒数，即Hour x 3600 + Seconds
+# *HostName:* 对HostName取4字节的Hash 
+# *IP:* 转换成数字
+# *ThreadId:* 数字
+# *LogLevel:* 数字 
+# *AddtionalInfo:*
+  # 共8对，每对间使用|分隔
+  # 每对的key value使用:分隔
+  # key和value都是长度4B, 是分别对原始key和vaue取Hash获得
+
+====写实现====
+* HBaseWriter写log时需要同时写两张表
+* _*ToDo:详细设计*_
+
+====查询实现====
+* 查询分两步，先查index,现取rawlog
+* _*ToDo:详细设计*_
 
 ===HBase 日志统计 ===
-====HBase Scheme设计====
-====HBase Writer 日志统计模块====
+为了更好的记录应用的情况，我们以分钟为单位统计每个应用的日志情况，在一分钟内的:
+
+* <=Info level的日志数量
+* Warn level的日志数量
+* Error level的日志数量
+
+====表logstatistics设计====
+
+====HBaseWriter 日志统计模块====
+* _*ToDo:详细设计*_
 
 ==部署架构 ==
 ===域名 ===
