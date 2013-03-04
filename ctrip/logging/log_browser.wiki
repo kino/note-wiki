@@ -77,8 +77,8 @@ Central-Logging 2.0中Log-Browser相关的将划分为三个子项目，挂在Ce
   # 基包: `com.ctrip.framework.freeway.web`
 
 ==领域模型 ==
-Central Logging 2.0中的数据模型分为三类:meta data(*元数据 *), configration data(*配置数据*), 
-log data(*日志数据*: log metric span event), statistics data(*统计数据*).
+Central Logging 2.0中的数据模型分为四类:meta data(*元数据 *), configration data(*配置数据*), 
+log data(*日志数据*: log metric span event), report data(*统计报表数据*).
 这些领域模型对应的Java Bean在项目central-loggging-domain里定义
 
 ===元数据 ===
@@ -256,7 +256,7 @@ Span本身也可以组成树形结构，一个span可以有一个父span, 一个
 | attributes  | List<Attribute> | 事件的属性对        |
 | createdTime | long            | 事件的创建时间      |
 
-===统计数据 ===
+===统计报表数据 ===
 Central Logging 2.0中为app统计一日志数据。
 
 {{domain-statistics.png}}
@@ -276,18 +276,194 @@ Central Logging 2.0中为app统计一日志数据。
 | errorCount | long   | 统计范围内error log的数量 |
 
 ==Restful Api 接口 ==
+为了实现数据分离，接口化。需要把CentralLogging 2中所有的内部通信和外部接口包装成Restful 的接口。
+
+{{logging-rest.png|logging-rest.png|style="width:900px"}}
+
+===设计理念 ===
+
+*在Restful Api中，主要将前面定义的领域模型转换成Restful中的资源，对这些资源进行查询，创建，更新等操作，而支持的资源表现形式为XML和JSON.*
+
+如上图，把Restful Api分为四类：meta, config, data, report
+* *meta:* 元数据接口，比如公司的部门信息，数据中心信息，服务器信息，应用信息等。
+* *config:* 配置接口，所有和配置相关的api放在这个类别下面。比如agent的配置，metrics的namespace配置。
+* *data:* 数据接口，主要用于暴露logging收集到的结构化数据。比如根据数据查询日志数据
+* *report:* 统计报表数据，用于暴露logging自身统计的一些数据。比如每个app记录日志的情况
+ 
+===接口定义 ===
+
+====Meta Api====
+
+ *部门相关:*
+ 
+| Api 地址                                      | 支持的方法 | 请求 | 返回     | 描述               |
+|-----------------------------------------------|------------|------|----------|--------------------|
+| _*/logging/meta/department*_                  | >          | >    | >        | >                  |
+|                                               | GET        | NA   | JSON/XML | 获取所有的部门列表 |
+| _*/logging/meta/department/{departmentCode}*_ | >          | >    | >        | >                  |
+|                                               | GET        | NA   | JSON/XML | 获取指定部门的信息 |
+
+*数据中心相关:* 
+ 
+| Api 地址                         | 支持的方法 | 请求 | 返回     | 描述                   |
+|----------------------------------|------------|------|----------|------------------------|
+| _*/logging/meta/idcs*_           | >          | >    | >        | >                      |
+|                                  | GET        | NA   | JSON/XML | 获取所有的数据中心列表 |
+| _*/logging/meta/idcs/{idcCode}*_ | >          | >    | >        | >                      |
+|                                  | GET        | NA   | JSON/XML | 获取指定数据中心的信息 |
+
+*应用相关:*
+ 
+| Api 地址                                                              | 支持的方法 | 请求         | 返回     | 描述                                                                           |
+|-----------------------------------------------------------------------|------------|--------------|----------|--------------------------------------------------------------------------------|
+| _*/logging/meta/apps*_                                                | >          | >            | >        | >                                                                              |
+|                                                                       | GET        | Query String | JSON/XML | 获取应用列表，可以根据条件过虑，比如通过Query String指定返回某个部门的所有应用 |
+| _*/logging/meta/apps/{appId}*_                                        | >          | >            | >        | >                                                                              |
+|                                                                       | GET        | NA           | JSON/XML | 获取指定应用的信息                                                             |
+| _*/logging/meta/apps/{appId}/appServices*_                            | >          | >            | >        | >                                                                              |
+|                                                                       | GET        | NA           | JSON/XML | 获取某个应用的开启过trace的service列表                                         |
+| _*/logging/meta/apps/{appId}/appServices/{serviceName}*_              | >          | >            | >        | >                                                                              |
+|                                                                       | GET        | NA           | JSON/XML | 获取某个应用的某个具体的Service                                                |
+| _*/logging/meta/apps/{appId}/appServices/{serviceName}/serviceSpans*_ | >          | >            | >        | >                                                                              |
+|                                                                       | GET        | NA           | JSON/XML | 获取某个应用的某个具体的Service的所有追踪过的方法                              |
+|                                                                       | POST       | String       | NA       | 为某个应用的某个具体的Service添加一个追踪过的方法                              |
+
+====Configration Api====
+
+*Agent配置相关:*
+
+| Api 地址                                                              | 支持的方法 | 请求     | 返回     | 描述                                              |
+|-----------------------------------------------------------------------|------------|----------|----------|---------------------------------------------------|
+| _*/logging/config/agent-configs*_                                     | >          | >        | >        | >                                                 |
+|                                                                       | GET        | NA       | JSON/XML | 获取所有的Agent配置列表                           |
+|                                                                       | POST       | JSON/XML | NA       | 增加一个具体Agent的配置                           |
+| _*/logging/config/agent-configs/{key:appId or ip}*_                   | >          | >        | >        | >                                                 |
+|                                                                       | GET        | NA       | JSON/XML | 获取一个具体agent的配置信息                       |
+|                                                                       | PUT        | JSON/XML | NA       | 更新一个具体agent的配置信息                       |
+
+*Metric Namespace配置相关:*
+
+| Api 地址                                              | 支持的方法 | 请求 | 返回     | 描述                                     |
+|-------------------------------------------------------|------------|------|----------|------------------------------------------|
+| _*/logging/config/metric-namespaces*_                 | >          | >    | >        | >                                        |
+|                                                       | GET        | NA   | JSON/XML | 获取所有的metric namespace的配置列表     |
+| _*/logging/config/metric-namespaces/{namespaceName}*_ | >          | >    | >        | >                                        |
+|                                                       | GET        | NA   | JSON/XML | 获取一个具体的metric namespace的配置信息 |
+
+====Data Api====
+| Api 地址                          | 支持的方法 | 请求         | 返回     | 描述                                                               |
+|-----------------------------------|------------|--------------|----------|--------------------------------------------------------------------|
+| _*/logging/data/logs*_            | >          | >            | >        | >                                                                  |
+|                                   | GET        | Query String | JSON/XML | 根据查询条件获取日志列表，比如某个app某个时间段内所有的Error日志   |
+| _*/logging/data/logs/{rowKey}*_   | >          | >            | >        | >                                                                  |
+|                                   | GET        | NA           | JSON/XML | 获取一条具体的日志                                                 |
+| _*/logging/data/spans*_           | >          | >            | >        | >                                                                  |
+|                                   | GET        | Query String | JSON/XML | 根据查询条件获取追踪信息，比如某个traceId,获取一次追踪中所有的span |
+| _*/logging/data/spans/{rowKey}*_  | >          | >            | >        | >                                                                  |
+|                                   | GET        | NA           | JSON/XML | 获取一条具体的span                                                 |
+| _*/logging/data/events*_          | >          | >            | >        | >                                                                  |
+|                                   | GET        | Query String | JSON/XML | 根据查询条件获取事件列表，比如某个app某个时间段内所有的事件        |
+| _*/logging/data/events/{rowKey}*_ | >          | >            | >        | >                                                                  |
+|                                   | GET        | NA           | JSON/XML | 获取一条具体的事件                                                 |
+
+====Report Api====
+
+| Api 地址                | 支持的方法 | 请求         | 返回     | 描述                                                                      |
+|-------------------------|------------|--------------|----------|---------------------------------------------------------------------------|
+| _*/logging/report/log*_ | >          | >            | >        | >                                                                         |
+|                         | GET        | Query String | JSON/XML | 根据查询条件获取日志统计信息，比如某个app某个时间段内日志每小时的分布情况 |
+
+===核心设计 ===
+
+====元数据获取 ====
+* department app server等元数据从第三方系统的获取
+* _*ToDo:*_  详细设计
+
+====查询日志数据====
+* 查询参数的设计
+* _*ToDo:*_  详细设计
+
+====查询日志报表====
+* 查询参数的设计
+* 返回值的设计
+* _*ToDo:*_  详细设计
 
 ==Log-Browser日志应用 ==
+Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志数据。
+
+===页面流设计 ===                                                       
+
+{{log-browser-page-flow.png}}
+
+如上图页面流分为6张页面，也对应用户浏览日志的6个骤，从page 1到page 6.
+
+====Page 1: 主页 ====
+# 将作为Central Logging 2.0 web app的landing配置，各模块的入口。
+# 比如浏览日志、搜索日志等
+
+====Page 2: 部门列表 ====
+# 在page 1点击浏览日志进入
+# 此页面将列出公司的所有部门
+# 从Restful Api `/logging/meta/departments` 获取数据
+
+====Page 3: 应用列表 ====
+# 在page 2点击某个部门进入
+# 此页面将列出该部门的所有应用
+# 从Restful Api `/logging/meta/apps` 获取数据
+
+====Page 4: 服务器列表 ====
+# 在page 3点击某个应用进入
+# 此页面将列出该应用的所有服务器
+# 从Restful Api `/logging/meta/servers` 获取数据
+
+====Page 5: 服务器日志报表 ====
+# 在page 4点击某台服务器进入
+# 此页面将列出该服务器日志报表，提供两种方式：
+  # 按天查看每小时的日志统计
+  # 按小时查看每五分钟的日志统计
+# 从Restful Api `/logging/report/log` 获取数据
+
+====Page 6: 日志列表 ====
+# 在page 5做相点击进入进入
+# 该页面可以查看一个小时内或五分钟内的日志详情
+# 从Restful Api `/loggging/data/logs` 获取数据
+
+===页面流方案二 ===                                                       
+还有一种页面流方案，就是省略上一节的page 5, 直接从page 4到page 6.
+而在page 4显示整个应用的日志统计信息。见下图。
+
+其实两种方案并不冲突，可以并存！
+
+{{log-browser-page-flow2.png}}
+
+===页面逻辑设计 ===                                      
+上面的页面，每个页面的逻辑结构是相似的，也应该持一致，这样可以保持项目维护。
+
+{{log-browser-page-action.png}}
+
+页面加载分为四个步骤：
+# 从Log-Browser的Server上load页面               
+# 通过ajax从Restful Api加载相应的数据
+# 根据数据渲染页面
+# 为页面组件注册相关js事件
+# 用户解发js事件，有可能跳转页面，也有可能从 2 重新执行
+  
+===基础架构 ===
+* _*ToDo:*_ 软件具体实现
 
 ==其他模块关联更改 ==
 
-===HBase Scheme更新 ===
+===HBase 日志存储优化 ===
 ====HBase Log Scheme优化====
-====HBase Log 统计 Scheme====
+====HBaseWriter功能====
 
-===HBase Writer 日志统计模块===
+===HBase 日志统计 ===
+====HBase Scheme设计====
+====HBase Writer 日志统计模块====
 
 ==部署架构 ==
+===域名 ===
+===部署图 ===
 
 
 
