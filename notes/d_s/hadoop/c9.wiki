@@ -125,3 +125,45 @@
 # 当namenode与jobtracker运行于不同的机器上时，它们的slaves配置文件应该保持同步
 
 ===环境变量设置 ===
+
+====内存 ====
+
+# 默认为每个守护进程分配1G内存, 通过 `hadoop-env.sh` 中的变量 `HADOOP_HEAPSIZE` 控制
+# 工作结点内存大小的结点需要考虑到map task和reduce task的，因为这些task是在独立jvm里运行的
+  * 一个结点，最多的map task:    mapred.tasktracker.map.tasks.maximum,    默认为2
+  * 一个结点，最多的reduce task: mapred.tasktracker.reduce.tasks.maximum, 默认为2
+  * 一个task的内存：mapred.child.java.opts, 默认为200m
+  * 工作结点内存 = datanode + tasktracker + maptasks + reducetasks = 1G + 1G + 200m*2 + 200m*2 = 2.8G
+  * 经验之谈：task总数与cpu数目之比的1与2之间
+  *  计算内存，最后不要忘记机器上其他不属于hadoop进程的内存
+# 主结点内存，若运行namenode, secondary namenode, jobtracker, 默认需要3G内存
+# 计算namenode 进程的内存
+  * namenode内存的大小依赖于集群中文件的总数和块数
+  * 默认1G内存，一般足够几百万文件使用了
+  * 保守使用，通常认为1G内存可用于一百万个文件块分配
+  * namenode 进程内存 = ( diskSize*datanodeNumber/blockSize/replicationNumber/100000 ) G
+  * 在 `hadoop-env.sh` 中的可以专门设置namenode内存的大小： `HADOOP_NAMENODE_OPTS` 
+  * 在 `hadoop-env.sh` 中的可以专门设置sceondary namenode内存的大小： `HADOOP_SECONDARYNAMENODE_OPTS`, 应该和namenode保持一致 
+# 在 `hadoop-env.sh` 中也可以为其他守护进程设置内存大小
+ 
+====Java ====
+# hadoop使用 `hadoop-env.sh` 的变量 `JAVA_HOME` 或系统环境变量 `JAVA_HOME` 来决定使用的jdk
+# 推荐在 `hadoop-env.sh` 设置，可以使整个集群保持一致
+ 
+====系统日志 ====
+# 日志文件默认存放在 `$HADOOP_INSTALL/logs` 下
+# 可以通过 `hadoop-env.sh` 的变量 `HADOOP_LOG_DIR` 修改
+# 日志文件夹不存在，会自动创建， _*但要注意创建权限*_ 
+# 两类日志文件
+  * .log结尾，由log4j记录，每天rotate, 包含大部分的日志信息
+  * .out结尾，stdout和stderr的组成，每次重启rotate，最多五个，只有很少的日志内容
+  * 日志文件名 = 用户名-进程名-主机名.(log/out)
+  * 上面的用户名由 `hadoop-env.sh` 中的 `HADOOP_IDENT_STRING` 指定
+   
+====ssh配置 ====
+# 主结点的控制脚本可以通过ssh在所有工作结点上运行命令
+# *ConnetionTimeout:* 调整合适的超时大小
+# *StrictHostKeyChecking:* 不询问，自动添加远程主机known hosts
+# 在 `hadoop-env.sh` 中配置 `HADOOP_MASTER`
+  * 在工作结点守护进程启动时，会把以  `HADOOP_MASTER` 为根的目录树与本地的 `HADOOP_INSTALL` 进行同步
+  * 大型集群为了防止启动时主结点rsync压力过大，可以设置 `HADOOP_SLAVE_SLEEP` 单位为秒，会在调用工作结点两个指令间隙休眠一段时间

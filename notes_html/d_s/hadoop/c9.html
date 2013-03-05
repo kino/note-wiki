@@ -35,7 +35,7 @@
 			<div id="middle">
 				
 
-<h1 id="toc_1">Setting up a Hadoop Cluster</h1>
+<h1 id="toc_1"> Setting up a Hadoop Cluster</h1>
 
 <p>
 当前日期: 02/25/2013 Mon 
@@ -43,30 +43,36 @@
 
 <div class="toc">
 <ul>
-<li><a href="#toc_1">Setting up a Hadoop Cluster</a>
+<li><a href="#toc_1"> Setting up a Hadoop Cluster</a>
 <ul>
-<li><a href="#toc_1.1">集群规范</a>
+<li><a href="#toc_1.1">1 集群规范</a>
 <ul>
-<li><a href="#toc_1.1.1">网络拓扑</a>
+<li><a href="#toc_1.1.1">1.1 网络拓扑</a>
 </ul>
-<li><a href="#toc_1.2">集群的构建与安装</a>
+<li><a href="#toc_1.2">2 集群的构建与安装</a>
 <ul>
-<li><a href="#toc_1.2.1">安装java环境</a>
-<li><a href="#toc_1.2.2">创建Hadoop专用账号</a>
-<li><a href="#toc_1.2.3">安装Hadoop</a>
-<li><a href="#toc_1.2.4">测试已安装的Hadoop</a>
+<li><a href="#toc_1.2.1">2.1 安装java环境</a>
+<li><a href="#toc_1.2.2">2.2 创建Hadoop专用账号</a>
+<li><a href="#toc_1.2.3">2.3 安装Hadoop</a>
+<li><a href="#toc_1.2.4">2.4 测试已安装的Hadoop</a>
 </ul>
-<li><a href="#toc_1.3">SSH配置</a>
-<li><a href="#toc_1.4">Hadoop的配置</a>
+<li><a href="#toc_1.3">3 SSH配置</a>
+<li><a href="#toc_1.4">4 Hadoop的配置 </a>
 <ul>
-<li><a href="#toc_1.4.1">配置管理</a>
-<li><a href="#toc_1.4.2">环境变量设置</a>
+<li><a href="#toc_1.4.1">4.1 配置管理</a>
+<li><a href="#toc_1.4.2">4.2 环境变量设置</a>
+<ul>
+<li><a href="#toc_1.4.2.1">4.2.1 内存</a>
+<li><a href="#toc_1.4.2.2">4.2.2 Java</a>
+<li><a href="#toc_1.4.2.3">4.2.3 系统日志</a>
+<li><a href="#toc_1.4.2.4">4.2.4 ssh配置</a>
+</ul>
 </ul>
 </ul>
 </ul>
 </div>
 
-<h2 id="toc_1.1">集群规范</h2>
+<h2 id="toc_1.1">1 集群规范</h2>
 <ul>
 <li>
 使用商业硬件
@@ -114,7 +120,7 @@ JBOD循环使用磁盘
 </ol>
 </ul>
 
-<h3 id="toc_1.1.1">网络拓扑</h3>
+<h3 id="toc_1.1.1">1.1 网络拓扑</h3>
 <p>
 <img src="hadoop_topology.png" />
 </p>
@@ -176,15 +182,15 @@ Mapreduce尽量避免机架间传输（jobtracker)
 </ol>
   
 
-<h2 id="toc_1.2">集群的构建与安装</h2>
-<h3 id="toc_1.2.1">安装java环境</h3>
+<h2 id="toc_1.2">2 集群的构建与安装</h2>
+<h3 id="toc_1.2.1">2.1 安装java环境</h3>
 <ul>
 <li>
 &gt;=jdk1.6 (推荐使用sun jdk)
 
 </ul>
     
-<h3 id="toc_1.2.2">创建Hadoop专用账号</h3>
+<h3 id="toc_1.2.2">2.2 创建Hadoop专用账号</h3>
 <ol>
 <li>
 创建hadoop专用用户，与其他服务隔离
@@ -205,7 +211,7 @@ autofs还提供挂载失败时的备用方案
 </ol>
 </ol>
    
-<h3 id="toc_1.2.3">安装Hadoop</h3>
+<h3 id="toc_1.2.3">2.3 安装Hadoop</h3>
 <ol>
 <li>
 将Hadoop安装在一个合理的地方
@@ -215,9 +221,9 @@ autofs还提供挂载失败时的备用方案
 
 </ol>
  
-<h3 id="toc_1.2.4">测试已安装的Hadoop</h3>
+<h3 id="toc_1.2.4">2.4 测试已安装的Hadoop</h3>
 
-<h2 id="toc_1.3">SSH配置</h2>
+<h2 id="toc_1.3">3 SSH配置</h2>
 <ol>
 <li>
 Hadoop跨集群的控制脚本信赖于ssh
@@ -227,7 +233,7 @@ Hadoop跨集群的控制脚本信赖于ssh
 
 </ol>
  
-<h2 id="toc_1.4">Hadoop的配置</h2>
+<h2 id="toc_1.4">4 Hadoop的配置 </h2>
 <ol>
 <li>
 配置文件放在conf目录中
@@ -341,7 +347,7 @@ Properties for system logfiles, the namenode audit log, and the task log for the
 </table>
 
 
-<h3 id="toc_1.4.1">配置管理</h3>
+<h3 id="toc_1.4.1">4.1 配置管理</h3>
 <ol>
 <li>
 Hadoop集群没有统一的配置信息
@@ -471,7 +477,131 @@ Run the MapReduce control scripts from the jobtracker machine
 
 </ol>
 
-<h3 id="toc_1.4.2">环境变量设置</h3>
+<h3 id="toc_1.4.2">4.2 环境变量设置</h3>
+
+<h4 id="toc_1.4.2.1">4.2.1 内存</h4>
+
+<ol>
+<li>
+默认为每个守护进程分配1G内存, 通过 <code>hadoop-env.sh</code> 中的变量 <code>HADOOP_HEAPSIZE</code> 控制
+
+<li>
+工作结点内存大小的结点需要考虑到map task和reduce task的，因为这些task是在独立jvm里运行的
+
+<ul>
+<li>
+一个结点，最多的map task:    mapred.tasktracker.map.tasks.maximum,    默认为2
+
+<li>
+一个结点，最多的reduce task: mapred.tasktracker.reduce.tasks.maximum, 默认为2
+
+<li>
+一个task的内存：mapred.child.java.opts, 默认为200m
+
+<li>
+工作结点内存 = datanode + tasktracker + maptasks + reducetasks = 1G + 1G + 200m*2 + 200m*2 = 2.8G
+
+<li>
+经验之谈：task总数与cpu数目之比的1与2之间
+
+<li>
+ 计算内存，最后不要忘记机器上其他不属于hadoop进程的内存
+
+</ul>
+<li>
+主结点内存，若运行namenode, secondary namenode, jobtracker, 默认需要3G内存
+
+<li>
+计算namenode 进程的内存
+
+<ul>
+<li>
+namenode内存的大小依赖于集群中文件的总数和块数
+
+<li>
+默认1G内存，一般足够几百万文件使用了
+
+<li>
+保守使用，通常认为1G内存可用于一百万个文件块分配
+
+<li>
+namenode 进程内存 = ( diskSize*datanodeNumber/blockSize/replicationNumber/100000 ) G
+
+<li>
+在 <code>hadoop-env.sh</code> 中的可以专门设置namenode内存的大小： <code>HADOOP_NAMENODE_OPTS</code> 
+
+<li>
+在 <code>hadoop-env.sh</code> 中的可以专门设置sceondary namenode内存的大小： <code>HADOOP_SECONDARYNAMENODE_OPTS</code>, 应该和namenode保持一致 
+
+</ul>
+<li>
+在 <code>hadoop-env.sh</code> 中也可以为其他守护进程设置内存大小
+
+</ol>
+ 
+<h4 id="toc_1.4.2.2">4.2.2 Java</h4>
+<ol>
+<li>
+hadoop使用 <code>hadoop-env.sh</code> 的变量 <code>JAVA_HOME</code> 或系统环境变量 <code>JAVA_HOME</code> 来决定使用的jdk
+
+<li>
+推荐在 <code>hadoop-env.sh</code> 设置，可以使整个集群保持一致
+
+</ol>
+ 
+<h4 id="toc_1.4.2.3">4.2.3 系统日志</h4>
+<ol>
+<li>
+日志文件默认存放在 <code>$HADOOP_INSTALL/logs</code> 下
+
+<li>
+可以通过 <code>hadoop-env.sh</code> 的变量 <code>HADOOP_LOG_DIR</code> 修改
+
+<li>
+日志文件夹不存在，会自动创建， <em><strong>但要注意创建权限</strong></em> 
+
+<li>
+两类日志文件
+
+<ul>
+<li>
+.log结尾，由log4j记录，每天rotate, 包含大部分的日志信息
+
+<li>
+.out结尾，stdout和stderr的组成，每次重启rotate，最多五个，只有很少的日志内容
+
+<li>
+日志文件名 = 用户名-进程名-主机名.(log/out)
+
+<li>
+上面的用户名由 <code>hadoop-env.sh</code> 中的 <code>HADOOP_IDENT_STRING</code> 指定
+
+</ul>
+</ol>
+   
+<h4 id="toc_1.4.2.4">4.2.4 ssh配置</h4>
+<ol>
+<li>
+主结点的控制脚本可以通过ssh在所有工作结点上运行命令
+
+<li>
+<strong>ConnetionTimeout:</strong> 调整合适的超时大小
+
+<li>
+<strong>StrictHostKeyChecking:</strong> 不询问，自动添加远程主机known hosts
+
+<li>
+在 <code>hadoop-env.sh</code> 中配置 <code>HADOOP_MASTER</code>
+
+<ul>
+<li>
+在工作结点守护进程启动时，会把以  <code>HADOOP_MASTER</code> 为根的目录树与本地的 <code>HADOOP_INSTALL</code> 进行同步
+
+<li>
+大型集群为了防止启动时主结点rsync压力过大，可以设置 <code>HADOOP_SLAVE_SLEEP</code> 单位为秒，会在调用工作结点两个指令间隙休眠一段时间
+
+</ul>
+</ol>
 
 			</div>
 

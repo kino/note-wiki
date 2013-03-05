@@ -456,7 +456,7 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 ===HBase 日志查询优化 ===
 在Central Logging 2.0中存储在HBase中的日志，目前的方案是有所缺陷和性能瓶颈的。
 
-====现有方案及问题====
+====现有方案及问题 ====
 目前Log是通过HBaseWriter写表freeway.rawlog中的，而查询方案如下：
 
 {{rawlog-old.png}}
@@ -509,7 +509,7 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
   # 每对的key value使用:分隔
   # key和value都是长度4B, 是分别对原始key和vaue取Hash获得
 
-====写实现====
+====写实现 ====
 * HBaseWriter写log时需要同时写两张表
 * _*ToDo:详细设计*_
 
