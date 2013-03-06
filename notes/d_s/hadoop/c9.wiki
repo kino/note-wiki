@@ -167,3 +167,31 @@
 # 在 `hadoop-env.sh` 中配置 `HADOOP_MASTER`
   * 在工作结点守护进程启动时，会把以  `HADOOP_MASTER` 为根的目录树与本地的 `HADOOP_INSTALL` 进行同步
   * 大型集群为了防止启动时主结点rsync压力过大，可以设置 `HADOOP_SLAVE_SLEEP` 单位为秒，会在调用工作结点两个指令间隙休眠一段时间
+   
+===守护进程的主要配置 ===
+
+主要的配置文件： core-site.xml hdfs-site.xml mapred-site.xml
+
+====HDFS====
+
+${hadoop.tmp.dir} 默认值： 
+/tmp/hadoop-${user.name}
+ 
+Table: Important HDFS daemon properties
+| Property name     | Type                            | Default value                       | Description                                                                                                                                                            |
+| fs.default.name   | URI                             | file:///                            | The default filesystem. The URI defines the hostname and port that the namenode’s RPC server runs on. The default port is 8020. This property is set in coresite.xml. |
+| dfs.name.dir      | Comma-separated directory names | ${hadoop.tmp.dir}/dfs/name          | The list of directories where the namenode stores its persistent metadata.  The namenode stores a copy of the metadata in each directory in the list.                  |
+| dfs.data.dir      | Comma-separated directory names | ${hadoop.tmp.dir}/dfs/data          | A list of directories where the datanode stores blocks. Each block is stored in only one of these directories.                                                         |
+| fs.checkpoint.dir | Comma-separated directory names | ${hadoop.tmp.dir}/dfs/namesecondary | A list of directories where the secondary namenode stores checkpoints.  It stores a copy of the checkpoint in each directory in the list.                              |
+
+====MapReduce====
+| Property name                             | Type                            | Default value                   | Description                                                                                                                                                                                                                                                                                                   |
+|-------------------------------------------|---------------------------------|---------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| mapred.job.tracker                        | Hostname and port               | local                           | The hostname and port that the jobtracker’s RPC server runs on. If set to the default value of local, the jobtracker is run in-process on demand when you run a MapReduce job (you don’t need to start the jobtracker in this case, and in fact you will get an error if you try to start it in this mode). |
+| mapred.local.dir                          | Comma-separated directory names | ${hadoop.tmp.dir}/mapred/local  | A list of directories where MapReduce stores intermediate data for jobs. The data is cleared out when the job ends.                                                                                                                                                                                           |
+| mapred.system.dir                         | URI                             | ${hadoop.tmp.dir}/mapred/system | The directory relative to fs.default.name where shared files are stored during a job run.                                                                                                                                                                                                                     |
+| mapred.tasktracker.map.tasks.maximum      | int                             | 2                               | The number of map tasks that may be run on a tasktracker at any one time.                                                                                                                                                                                                                                     |
+| mapred.tasktracker.  reduce.tasks.maximum | int                             | 2                               | The number of reduce tasks that may be run on a tasktracker at any one time.                                                                                                                                                                                                                                  |
+| mapred.child.java.opts                    | String                          | -Xmx200m                        | The JVM options used to launch the tasktracker child process that runs map and reduce tasks. This property can be set on a per-job basis, which can be useful for setting JVM properties for debugging, for example.                                                                                          |
+| mapreduce.map.java.opts                   | String                          | -Xmx200m                        | The JVM options used for the child process that runs map tasks. (Not available in 1.x.)                                                                                                                                                                                                                       |
+| mapreduce.reduce.java.opts                | String                          | -Xmx200m                        | The JVM options used for the child process that runs reduce tasks. (Not available in 1.x.)                                                                                                                                                                                                                    |

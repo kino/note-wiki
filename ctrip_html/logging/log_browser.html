@@ -91,7 +91,7 @@
 <li><a href="#toc_1.7.1">7.1 页面流设计 </a>
 <ul>
 <li><a href="#toc_1.7.1.1">7.1.1 Page 1: 主页</a>
-<li><a href="#toc_1.7.1.2">7.1.2 Page 2: 部门列表</a>
+<li><a href="#toc_1.7.1.2">7.1.2 Page 2: 产品列表</a>
 <li><a href="#toc_1.7.1.3">7.1.3 Page 3: 应用列表</a>
 <li><a href="#toc_1.7.1.4">7.1.4 Page 4: 服务器列表 </a>
 <li><a href="#toc_1.7.1.5">7.1.5 Page 5: 服务器日志报表 </a>
@@ -210,7 +210,7 @@ MySql里主要用于存储Central Logging 2.0的辅助数据，比如元数据�
 
 <ol>
 <li>
-关于App的元数据（appId, department, server etc.)
+关于App的元数据（appId, product, server etc.)
 
 <li>
 配置数据（日志的配置信息，metric namespace的配置信息）
@@ -332,10 +332,10 @@ log data(<strong>日志数据</strong>: log metric span event), report data(<str
 </p>
 <ul>
 <li>
-<strong>Department:</strong> 代表携程的一个部门， 一层结构。一个部门下可以有多个应用
+<strong>Product:</strong> 代表一个产品。一个产品下可以有多个子应用
 
 <li>
-<strong>App:</strong> 代表一个具体的应用。和Department的关系是多对一。
+<strong>App:</strong> 代表一个具体的应用。和Product的关系是多对一。
 
 <li>
 <strong>AppServer:</strong> 代表运营环境中一台具体的服务器。服务器上可以运行一个具体的应用。
@@ -349,19 +349,19 @@ log data(<strong>日志数据</strong>: log metric span event), report data(<str
 <strong>AppService:</strong> 代表一个被trace的服务，比如一个具体的WebService接口。和App的关系是多对一。
 
 <li>
-<strong>ServiceSpan:</strong> 代表服务中的一个方法。比如某个WebService接口中的一个方法。
+<strong>ServiceMethod:</strong> 代表服务中的一个方法。比如某个WebService接口中的一个方法。
 
 </ul>
 
 <p>
-<strong>总结:</strong> 一个部门下可以有多个应用;一个应用可以有多台服务器;一个应用可以多个服务;一个服务可以有多个方法
+<strong>总结:</strong> 一个部品下可以有多个应用;一个应用可以有多台服务器;一个应用可以多个服务;一个服务可以有多个方法
 </p>
 
 
 <h4 id="toc_1.5.1.2">5.1.2 实体定义</h4>
 
 <p>
-<strong>Department:</strong>
+<strong>Product:</strong>
 <table>
 <tr>
 <th>
@@ -382,7 +382,7 @@ name
 String
 </td>
 <td>
-部门名称
+产品名称
 </td>
 </tr>
 <tr>
@@ -393,7 +393,7 @@ description
 String
 </td>
 <td>
-部门描述
+产品描述
 </td>
 </tr>
 </table>
@@ -537,10 +537,10 @@ service名称
 </tr>
 <tr>
 <td>
-serviceSpans
+serviceMethods
 </td>
 <td>
-List&lt;ServiceSpan&gt;
+List&lt;ServiceMethod&gt;
 </td>
 <td>
 服务所拥有的方法列表 
@@ -550,7 +550,7 @@ List&lt;ServiceSpan&gt;
 </p>
 
 <p>
-<strong>ServiceSpan:</strong>
+<strong>ServiceMethod:</strong>
 <table>
 <tr>
 <th>
@@ -584,10 +584,10 @@ String
 </p>
 <ul>
 <li>
-Department App AppServer来自系统部的api, 我们定期更新
+Product App AppServer来自系统部的api, 我们定期更新
 
 <li>
-AppService ServiceSpan是由我们的HBaseWriter收集的，通过Restful Api更新
+AppService ServiceMethod是由我们的HBaseWriter收集的，通过Restful Api更新
 
 </ul>
 
@@ -816,46 +816,57 @@ HBase实例是否存储unique id
 </tr>
 <tr>
 <td>
-zkquorum
+namespace
 </td>
 <td>
 String
 </td>
 <td>
-Zookeeper 结点列表
+namespace名称
 </td>
 </tr>
 <tr>
 <td>
-basePath
+hbase
+</td>
+<td>
+HBase
+</td>
+<td>
+使用的hbase实例
+</td>
+</tr>
+<tr>
+<td>
+tableName
 </td>
 <td>
 String
 </td>
 <td>
-HBase实例在HDFS中的路径
+使用的表名称
 </td>
 </tr>
 <tr>
 <td>
-isMeta
+readIps
 </td>
 <td>
-boolean
+List&lt;String&gt;
 </td>
 <td>
-HBase实例是否存储元数据 
+该namespace可读的白名单
 </td>
 </tr>
 <tr>
 <td>
-isUnique
+writeIps
 </td>
 <td>
-boolean
+List&lt;String&gt;
 </td>
 <td>
-HBase实例是否存储unique id
+该namespace可写的白名单
 </td>
 </tr>
 </table>
@@ -955,6 +966,17 @@ String
 产生该数据的进程号 
 </td>
 </tr>
+<tr>
+<td>
+threadId
+</td>
+<td>
+long
+</td>
+<td>
+产生该数据的线程号 
+</td>
+</tr>
 </table>
 </p>
 
@@ -1014,17 +1036,6 @@ LogLevel
 </td>
 <td>
 Log的level
-</td>
-</tr>
-<tr>
-<td>
-threadId
-</td>
-<td>
-long
-</td>
-<td>
-产生log的线程号
 </td>
 </tr>
 <tr>
@@ -1163,17 +1174,6 @@ SpanType
 </td>
 <td>
 Log的level
-</td>
-</tr>
-<tr>
-<td>
-threadId
-</td>
-<td>
-long
-</td>
-<td>
-产生span的线程号
 </td>
 </tr>
 <tr>
@@ -1451,6 +1451,17 @@ String
 </tr>
 <tr>
 <td>
+threadId
+</td>
+<td>
+long
+</td>
+<td>
+要统计的线程号 
+</td>
+</tr>
+<tr>
+<td>
 startTime
 </td>
 <td>
@@ -1469,6 +1480,17 @@ long
 </td>
 <td>
 要统计的时间长度
+</td>
+</tr>
+<tr>
+<td>
+debugCount
+</td>
+<td>
+long
+</td>
+<td>
+统计范围内debug log的数量 
 </td>
 </tr>
 <tr>
@@ -1527,7 +1549,7 @@ long
 </p>
 <ul>
 <li>
-<strong>meta:</strong> 元数据接口，比如公司的部门信息，数据中心信息，服务器信息，应用信息等。
+<strong>meta:</strong> 元数据接口，比如公司的产品信息，数据中心信息，服务器信息，应用信息等。
 
 <li>
 <strong>config:</strong> 配置接口，所有和配置相关的api放在这个类别下面。比如agent的配置，metrics的namespace配置。
@@ -1545,7 +1567,7 @@ long
 <h4 id="toc_1.6.2.1">6.2.1 Meta Api</h4>
 
 <p>
- <strong>部门相关:</strong>
+ <strong>产品相关:</strong>
 </p>
  
 <table>
@@ -1568,7 +1590,7 @@ Api 地址
 </tr>
 <tr>
 <td colspan="5">
-<em><strong>/logging/meta/department</strong></em>
+<em><strong>/logging/meta/products</strong></em>
 </td>
 </tr>
 <tr>
@@ -1585,12 +1607,12 @@ NA
 JSON/XML
 </td>
 <td>
-获取所有的部门列表
+获取所有的产品列表
 </td>
 </tr>
 <tr>
 <td colspan="5">
-<em><strong>/logging/meta/department/{departmentCode}</strong></em>
+<em><strong>/logging/meta/products/{productCode}</strong></em>
 </td>
 </tr>
 <tr>
@@ -1607,7 +1629,7 @@ NA
 JSON/XML
 </td>
 <td>
-获取指定部门的信息 
+获取指定产品的信息 
 </td>
 </tr>
 </table>
@@ -1721,7 +1743,7 @@ Query String
 JSON/XML
 </td>
 <td>
-获取应用列表，可以根据条件过虑，比如通过Query String指定返回某个部门的所有应用 
+获取应用列表，可以根据条件过虑，比如通过Query String指定返回某个产品的所有应用 
 </td>
 </tr>
 <tr>
@@ -1792,7 +1814,7 @@ JSON/XML
 </tr>
 <tr>
 <td colspan="5">
-<em><strong>/logging/meta/apps/{appId}/appServices/{serviceName}/serviceSpans</strong></em>
+<em><strong>/logging/meta/apps/{appId}/appServices/{serviceName}/service-methods</strong></em>
 </td>
 </tr>
 <tr>
@@ -2205,7 +2227,7 @@ JSON/XML
 <h4 id="toc_1.6.3.1">6.3.1 元数据获取 </h4>
 <ul>
 <li>
-department app server等元数据从第三方系统的获取
+product app server等元数据从第三方系统的获取
 
 <li>
 <em><strong>ToDo:</strong></em>  详细设计
@@ -2260,26 +2282,26 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 
 </ol>
 
-<h4 id="toc_1.7.1.2">7.1.2 Page 2: 部门列表</h4>
+<h4 id="toc_1.7.1.2">7.1.2 Page 2: 产品列表</h4>
 <ol>
 <li>
 在page 1点击浏览日志进入
 
 <li>
-此页面将列出公司的所有部门
+此页面将列出公司的所有产品
 
 <li>
-从Restful Api <code>/logging/meta/departments</code> 获取数据
+从Restful Api <code>/logging/meta/products</code> 获取数据
 
 </ol>
 
 <h4 id="toc_1.7.1.3">7.1.3 Page 3: 应用列表</h4>
 <ol>
 <li>
-在page 2点击某个部门进入
+在page 2点击某个产品进入
 
 <li>
-此页面将列出该部门的所有应用
+此页面将列出该产品的所有应用
 
 <li>
 从Restful Api <code>/logging/meta/apps</code> 获取数据
@@ -2477,7 +2499,7 @@ scan出100条记录，返回反序化成原始数据
 所以，根据常用查询条件，设计rawlogindex表如下：
 <table>
 <tr>
-<th colspan="9">
+<th colspan="10">
 rowkey
 </th>
 <th>
@@ -2489,13 +2511,13 @@ column family:rawlog
 AppId
 </td>
 <td>
-DC
-</td>
-<td>
 Days
 </td>
 <td>
 Seconds
+</td>
+<td>
+DC
 </td>
 <td>
 HostName
@@ -2508,6 +2530,9 @@ ThreadId
 </td>
 <td>
 LogLevel
+</td>
+<td>
+LogId
 </td>
 <td>
 AddtionalInfo
@@ -2524,13 +2549,16 @@ RowLog RowKey
 1B
 </td>
 <td>
-1B
-</td>
-<td>
 3B
 </td>
 <td>
+1B
+</td>
+<td>
 4B
+</td>
+<td>
+1B
 </td>
 <td>
 1B
@@ -2557,13 +2585,13 @@ RowLog RowKey
 <strong>AppId:</strong> 一数字,为了优化存储，足够散列，由原始appId计算获得: ???
 
 <li>
-<strong>DC:</strong> 数据中心，保留使用
-
-<li>
 <strong>Days:</strong> 距离1970/01/01 00:00的天数对30取模
 
 <li>
-<strong>Seconds:</strong> 距离0点的秒数，即Hour x 3600 + Seconds
+<strong>Seconds:</strong> 倒序 距离一天结束的秒数，即 3600*24 - (Hour x 3600 + Seconds) , 
+
+<li>
+<strong>DC:</strong> 数据中心，保留使用
 
 <li>
 <strong>HostName:</strong> 对HostName取4字节的Hash 
@@ -2578,6 +2606,9 @@ RowLog RowKey
 <strong>LogLevel:</strong> 数字 
 
 <li>
+<strong>LogId:</strong> 数字 
+
+<li>
 <strong>AddtionalInfo:</strong>
 
 <ol>
@@ -2589,6 +2620,9 @@ RowLog RowKey
 
 <li>
 key和value都是长度4B, 是分别对原始key和vaue取Hash获得
+
+<li>
+排好序
 
 </ol>
 </ol>
@@ -2620,7 +2654,10 @@ HBaseWriter写log时需要同时写两张表
 
 <ul>
 <li>
-&lt;=Info level的日志数量
+Debug level的日志数量
+
+<li>
+Info level的日志数量
 
 <li>
 Warn level的日志数量
@@ -2633,10 +2670,10 @@ Error level的日志数量
 <h4 id="toc_1.8.2.1">8.2.1 表logstatistics设计</h4>
 <table>
 <tr>
-<th colspan="7">
+<th colspan="8">
 rowkey
 </th>
-<th colspan="3">
+<th colspan="6">
 column family:log
 </th>
 </tr>
@@ -2645,13 +2682,13 @@ column family:log
 AppId
 </td>
 <td>
-DC
-</td>
-<td>
 Days
 </td>
 <td>
-Minutes
+Hours
+</td>
+<td>
+DC
 </td>
 <td>
 HostName
@@ -2662,14 +2699,26 @@ IP
 <td>
 ThreadId
 </td>
-<td rowspan="2">
-infoCount
+<td>
+LogLevel
 </td>
 <td rowspan="2">
-warnCount
+totalCount
 </td>
 <td rowspan="2">
-errorCount
+count1
+</td>
+<td rowspan="2">
+count2
+</td>
+<td rowspan="2">
+...
+</td>
+<td rowspan="2">
+count59
+</td>
+<td rowspan="2">
+count60
 </td>
 </tr>
 <tr>
@@ -2680,13 +2729,16 @@ errorCount
 1B
 </td>
 <td>
-1B
-</td>
-<td>
 3B
 </td>
 <td>
+1B
+</td>
+<td>
 4B
+</td>
+<td>
+1B
 </td>
 <td>
 1B

@@ -41,7 +41,7 @@ Logging2.0当前后端的HBase设计也存在一定的问题，在查询速度�
 
 *MySql:*
 * MySql里主要用于存储Central Logging 2.0的辅助数据，比如元数据等。
-  # 关于App的元数据（appId, department, server etc.)
+  # 关于App的元数据（appId, product, server etc.)
   # 配置数据（日志的配置信息，metric namespace的配置信息）
 * MySql中的数据来源有两种：第三方系统和通过 api 录入的
   # 第三方来源：app相关的元数据
@@ -86,23 +86,23 @@ log data(*日志数据*: log metric span event), report data(*统计报表数据
 {{domain-meta-entity.png}}
 
 元数据的领域模型主要是以App为核心展开的：
-* *Department:* 代表携程的一个部门， 一层结构。一个部门下可以有多个应用
-* *App:* 代表一个具体的应用。和Department的关系是多对一。
+* *Product:* 代表一个产品。一个产品下可以有多个子应用
+* *App:* 代表一个具体的应用。和Product的关系是多对一。
 * *AppServer:* 代表运营环境中一台具体的服务器。服务器上可以运行一个具体的应用。
   * 上图中和App的关系是多个一，实际上可能是多对多，因为一台服务器上可以运行多个App.
 * *AppService:* 代表一个被trace的服务，比如一个具体的WebService接口。和App的关系是多对一。
-* *ServiceSpan:* 代表服务中的一个方法。比如某个WebService接口中的一个方法。
+* *ServiceMethod:* 代表服务中的一个方法。比如某个WebService接口中的一个方法。
 
-*总结:* 一个部门下可以有多个应用;一个应用可以有多台服务器;一个应用可以多个服务;一个服务可以有多个方法
+*总结:* 一个部品下可以有多个应用;一个应用可以有多台服务器;一个应用可以多个服务;一个服务可以有多个方法
 
 
 ====实体定义 ====
 
-*Department:*
+*Product:*
 | 属性        | 类型   | 说明     |
 |-------------|--------|----------|
-| name        | String | 部门名称 |
-| description | String | 部门描述 |
+| name        | String | 产品名称 |
+| description | String | 产品描述 |
 
 *App:*
 | 属性        | 类型             | 说明                                          |
@@ -120,12 +120,12 @@ log data(*日志数据*: log metric span event), report data(*统计报表数据
 | ip          | String           | 服务器的ip              |
 
 *AppService:*
-| 属性         | 类型              | 说明                 |
-|--------------|-------------------|----------------------|
-| name         | String            | service名称          |
-| serviceSpans | List<ServiceSpan> | 服务所拥有的方法列表 |
+| 属性           | 类型                | 说明                 |
+|----------------|---------------------|----------------------|
+| name           | String              | service名称          |
+| serviceMethods | List<ServiceMethod> | 服务所拥有的方法列表 |
 
-*ServiceSpan:*
+*ServiceMethod:*
 | 属性 | 类型   | 说明     |
 |------|--------|----------|
 | name | String | 方法名称 |
@@ -133,8 +133,8 @@ log data(*日志数据*: log metric span event), report data(*统计报表数据
 
 ====数据来源 ====
 无数数据的来源分为两种：
-* Department App AppServer来自系统部的api, 我们定期更新
-* AppService ServiceSpan是由我们的HBaseWriter收集的，通过Restful Api更新
+* Product App AppServer来自系统部的api, 我们定期更新
+* AppService ServiceMethod是由我们的HBaseWriter收集的，通过Restful Api更新
 
 ===配置数据 ===
 配置数据分为两类，一类是对Agent的配置信息，一类是对Metric Namespace的配置信息。
@@ -174,12 +174,13 @@ log data(*日志数据*: log metric span event), report data(*统计报表数据
 | isUnique | boolean | HBase实例是否存储unique id |
 
 *MetricNamespace:*
-| 属性     | 类型    | 说明                       |
-|----------|---------|----------------------------|
-| zkquorum | String  | Zookeeper 结点列表         |
-| basePath | String  | HBase实例在HDFS中的路径    |
-| isMeta   | boolean | HBase实例是否存储元数据    |
-| isUnique | boolean | HBase实例是否存储unique id |
+| 属性      | 类型         | 说明                    |
+|-----------|--------------|-------------------------|
+| namespace | String       | namespace名称           |
+| hbase     | HBase        | 使用的hbase实例         |
+| tableName | String       | 使用的表名称            |
+| readIps   | List<String> | 该namespace可读的白名单 |
+| writeIps  | List<String> | 该namespace可写的白名单 |
 
 ===日志数据 ===
 主要是我们Logging系统收集的四种结构化数据：log span metric event:
@@ -206,6 +207,7 @@ Span本身也可以组成树形结构，一个span可以有一个父span, 一个
 | hostName  | String | 数据来源的服务器的host name |
 | hostIP    | String | 数据来源的服务器的ip        |
 | processId | String | 产生该数据的进程号          |
+| threadId  | long   | 产生该数据的线程号          |
 
 *Log:* 
 | 属性        | 类型     | 说明                                                        |
@@ -214,7 +216,6 @@ Span本身也可以组成树形结构，一个span可以有一个父span, 一个
 | logId       | long     | Log的id号，一般由agent产生，并不是全局唯一                  |
 | logType     | LogType  | Log的类型                                                   |
 | logLevel    | LogLevel | Log的level                                                  |
-| threadId    | long     | 产生log的线程号                                             |
 | traceId     | long     | Log产生时，如果存在trace,trace的Id号                        |
 | spanRowKey  | String   | 如果Log是在某个Span生命周期记的，对应Span在HBase中的row key |
 | source      | String   | Log的来源，比如某个类名                                     |
@@ -230,7 +231,6 @@ Span本身也可以组成树形结构，一个span可以有一个父span, 一个
 | serviceName  | String   | 对应的service name                          |
 | spanName     | String   | 对应的service的method name                  |
 | spanType     | SpanType | Log的level                                  |
-| threadId     | long     | 产生span的线程号                            |
 | traceId      | long     | span所属trace的Id号                         |
 | spanId       | long     | span的id号，一般由agent产生，并不是全局唯一 |
 | parentId     | long     | 此span父span的id号                          |
@@ -269,8 +269,10 @@ Central Logging 2.0中为app统计一日志数据。
 | appId      | String | 要统计的应用号            |
 | hostName   | String | 要统计的server host name  |
 | hostIP     | String | 要统计的server ip         |
+| threadId   | long   | 要统计的线程号            |
 | startTime  | long   | 统计开始的时间            |
 | dateRange  | long   | 要统计的时间长度          |
+| debugCount | long   | 统计范围内debug log的数量 |
 | infoCount  | long   | 统计范围内info log的数量  |
 | warnCount  | long   | 统计范围内warn log的数量  |
 | errorCount | long   | 统计范围内error log的数量 |
@@ -285,7 +287,7 @@ Central Logging 2.0中为app统计一日志数据。
 *在Restful Api中，主要将前面定义的领域模型转换成Restful中的资源，对这些资源进行查询，创建，更新等操作，而支持的资源表现形式为XML和JSON.*
 
 如上图，把Restful Api分为四类：meta, config, data, report
-* *meta:* 元数据接口，比如公司的部门信息，数据中心信息，服务器信息，应用信息等。
+* *meta:* 元数据接口，比如公司的产品信息，数据中心信息，服务器信息，应用信息等。
 * *config:* 配置接口，所有和配置相关的api放在这个类别下面。比如agent的配置，metrics的namespace配置。
 * *data:* 数据接口，主要用于暴露logging收集到的结构化数据。比如根据数据查询日志数据
 * *report:* 统计报表数据，用于暴露logging自身统计的一些数据。比如每个app记录日志的情况
@@ -294,14 +296,14 @@ Central Logging 2.0中为app统计一日志数据。
 
 ====Meta Api====
 
- *部门相关:*
+ *产品相关:*
  
-| Api 地址                                      | 支持的方法 | 请求 | 返回     | 描述               |
-|-----------------------------------------------|------------|------|----------|--------------------|
-| _*/logging/meta/department*_                  | >          | >    | >        | >                  |
-|                                               | GET        | NA   | JSON/XML | 获取所有的部门列表 |
-| _*/logging/meta/department/{departmentCode}*_ | >          | >    | >        | >                  |
-|                                               | GET        | NA   | JSON/XML | 获取指定部门的信息 |
+| Api 地址                                 | 支持的方法 | 请求 | 返回     | 描述               |
+|------------------------------------------|------------|------|----------|--------------------|
+| _*/logging/meta/products*_               | >          | >    | >        | >                  |
+|                                          | GET        | NA   | JSON/XML | 获取所有的产品列表 |
+| _*/logging/meta/products/{productCode}*_ | >          | >    | >        | >                  |
+|                                          | GET        | NA   | JSON/XML | 获取指定产品的信息 |
 
 *数据中心相关:* 
  
@@ -314,19 +316,19 @@ Central Logging 2.0中为app统计一日志数据。
 
 *应用相关:*
  
-| Api 地址                                                              | 支持的方法 | 请求         | 返回     | 描述                                                                           |
-|-----------------------------------------------------------------------|------------|--------------|----------|--------------------------------------------------------------------------------|
-| _*/logging/meta/apps*_                                                | >          | >            | >        | >                                                                              |
-|                                                                       | GET        | Query String | JSON/XML | 获取应用列表，可以根据条件过虑，比如通过Query String指定返回某个部门的所有应用 |
-| _*/logging/meta/apps/{appId}*_                                        | >          | >            | >        | >                                                                              |
-|                                                                       | GET        | NA           | JSON/XML | 获取指定应用的信息                                                             |
-| _*/logging/meta/apps/{appId}/appServices*_                            | >          | >            | >        | >                                                                              |
-|                                                                       | GET        | NA           | JSON/XML | 获取某个应用的开启过trace的service列表                                         |
-| _*/logging/meta/apps/{appId}/appServices/{serviceName}*_              | >          | >            | >        | >                                                                              |
-|                                                                       | GET        | NA           | JSON/XML | 获取某个应用的某个具体的Service                                                |
-| _*/logging/meta/apps/{appId}/appServices/{serviceName}/serviceSpans*_ | >          | >            | >        | >                                                                              |
-|                                                                       | GET        | NA           | JSON/XML | 获取某个应用的某个具体的Service的所有追踪过的方法                              |
-|                                                                       | POST       | String       | NA       | 为某个应用的某个具体的Service添加一个追踪过的方法                              |
+| Api 地址                                                                  | 支持的方法 | 请求         | 返回     | 描述                                                                           |
+|---------------------------------------------------------------------------|------------|--------------|----------|--------------------------------------------------------------------------------|
+| _*/logging/meta/apps*_                                                    | >          | >            | >        | >                                                                              |
+|                                                                           | GET        | Query String | JSON/XML | 获取应用列表，可以根据条件过虑，比如通过Query String指定返回某个产品的所有应用 |
+| _*/logging/meta/apps/{appId}*_                                            | >          | >            | >        | >                                                                              |
+|                                                                           | GET        | NA           | JSON/XML | 获取指定应用的信息                                                             |
+| _*/logging/meta/apps/{appId}/appServices*_                                | >          | >            | >        | >                                                                              |
+|                                                                           | GET        | NA           | JSON/XML | 获取某个应用的开启过trace的service列表                                         |
+| _*/logging/meta/apps/{appId}/appServices/{serviceName}*_                  | >          | >            | >        | >                                                                              |
+|                                                                           | GET        | NA           | JSON/XML | 获取某个应用的某个具体的Service                                                |
+| _*/logging/meta/apps/{appId}/appServices/{serviceName}/service-methods*_ | >          | >            | >        | >                                                                              |
+|                                                                           | GET        | NA           | JSON/XML | 获取某个应用的某个具体的Service的所有追踪过的方法                              |
+|                                                                           | POST       | String       | NA       | 为某个应用的某个具体的Service添加一个追踪过的方法                              |
 
 ====Configration Api====
 
@@ -376,7 +378,7 @@ Central Logging 2.0中为app统计一日志数据。
 ===核心设计 ===
 
 ====元数据获取 ====
-* department app server等元数据从第三方系统的获取
+* product app server等元数据从第三方系统的获取
 * _*ToDo:*_  详细设计
 
 ====查询日志数据====
@@ -401,14 +403,14 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 # 将作为Central Logging 2.0 web app的landing配置，各模块的入口。
 # 比如浏览日志、搜索日志等
 
-====Page 2: 部门列表 ====
+====Page 2: 产品列表 ====
 # 在page 1点击浏览日志进入
-# 此页面将列出公司的所有部门
-# 从Restful Api `/logging/meta/departments` 获取数据
+# 此页面将列出公司的所有产品
+# 从Restful Api `/logging/meta/products` 获取数据
 
 ====Page 3: 应用列表 ====
-# 在page 2点击某个部门进入
-# 此页面将列出该部门的所有应用
+# 在page 2点击某个产品进入
+# 此页面将列出该产品的所有应用
 # 从Restful Api `/logging/meta/apps` 获取数据
 
 ====Page 4: 服务器列表 ====
@@ -489,25 +491,27 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 # 尽量在HBase端做过滤
 
 所以，根据常用查询条件，设计rawlogindex表如下：
-| rowkey | >  | >    | >       | >        | >  | >        | >        | >             | column family:rawlog |
-|--------|----|------|---------|----------|----|----------|----------|---------------|----------------------|
-| AppId  | DC | Days | Seconds | HostName | IP | ThreadId | LogLevel | AddtionalInfo | RowLog RowKey        |
-| 3B     | 1B | 1B   | 3B      | 4B       | 1B | 1B       | 1B       | 9B x 8 +7     | \/                   |
+| rowkey | >    | >       | >  | >        | >  | >        | >        | >     | >             | column family:rawlog |
+|--------|------|---------|----|----------|----|----------|----------|-------|---------------|----------------------|
+| AppId  | Days | Seconds | DC | HostName | IP | ThreadId | LogLevel | LogId | AddtionalInfo | RowLog RowKey        |
+| 3B     | 1B   | 3B      | 1B | 4B       | 1B | 1B       | 1B       | 1B    | 9B x 8 +7     | \/                   |
 
 *rowkey组成:*
 
 # *AppId:* 一数字,为了优化存储，足够散列，由原始appId计算获得: ???
-# *DC:* 数据中心，保留使用
 # *Days:* 距离1970/01/01 00:00的天数对30取模
-# *Seconds:* 距离0点的秒数，即Hour x 3600 + Seconds
+# *Seconds:* 倒序 距离一天结束的秒数，即 3600*24 - (Hour x 3600 + Seconds) , 
+# *DC:* 数据中心，保留使用
 # *HostName:* 对HostName取4字节的Hash 
 # *IP:* 转换成数字
 # *ThreadId:* 数字
 # *LogLevel:* 数字 
+# *LogId:* 数字 
 # *AddtionalInfo:*
   # 共8对，每对间使用|分隔
   # 每对的key value使用:分隔
   # key和value都是长度4B, 是分别对原始key和vaue取Hash获得
+  # 排好序
 
 ====写实现 ====
 * HBaseWriter写log时需要同时写两张表
@@ -520,15 +524,16 @@ Log-Browser主要是前端应用，以直觉导航的方式供用户查看日志
 ===HBase 日志统计 ===
 为了更好的记录应用的情况，我们以分钟为单位统计每个应用的日志情况，在一分钟内的:
 
-* <=Info level的日志数量
+* Debug level的日志数量
+* Info level的日志数量
 * Warn level的日志数量
 * Error level的日志数量
 
 ====表logstatistics设计====
-| rowkey | >  | >    | >       | >        | >  | >        | column family:log | >         | >          |
-|--------|----|------|---------|----------|----|----------|-------------------|-----------|------------|
-| AppId  | DC | Days | Minutes | HostName | IP | ThreadId | infoCount         | warnCount | errorCount |
-| 3B     | 1B | 1B   | 3B      | 4B       | 1B | 1B       | \/                | \/        | \/         |
+| rowkey | >    | >     | >  | >        | >  | >        | >        | column family:log | >      | >      | >   | >       | >       |
+|--------|------|-------|----|----------|----|----------|----------|-------------------|--------|--------|-----|---------|---------|
+| AppId  | Days | Hours | DC | HostName | IP | ThreadId | LogLevel | totalCount        | count1 | count2 | ... | count59 | count60 |
+| 3B     | 1B   | 3B    | 1B | 4B       | 1B | 1B       | 1B       | \/                | \/     | \/     | \/  | \/      | \/      |
 
 ====HBaseWriter 日志统计模块====
 * _*ToDo:详细设计*_
