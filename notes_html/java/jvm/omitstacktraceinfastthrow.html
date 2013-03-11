@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>JVM优化参数导致异常无堆栈  </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1"> JVM优化参数导致异常无堆栈 </h1>
+
+<p>
+当前日期: 03/11/2013 Mon 
+</p>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1"> JVM优化参数导致异常无堆栈 </a>
+<ul>
+<li><a href="#toc_1.1">1 诱因</a>
+<li><a href="#toc_1.2">2 OmitStackTraceInFastThrow</a>
+<li><a href="#toc_1.3">3 HotSpot VMs Release Notes</a>
+</ul>
+</ul>
+</div>
+
+
+<h2 id="toc_1.1">1 诱因</h2>
+<ul>
+<li>
+程序中抓到一个NullPointerException, 但并没有堆栈信息
+
+</ul>
+
+<h2 id="toc_1.2">2 OmitStackTraceInFastThrow</h2>
+<ul>
+<li>
+发现是因为jvm JIT优化导致的，该优化可以通过一个jvm参数关掉
+<pre class="brush:bash">
+    -XX:-OmitStackTraceInFastThrow
+    # The default setting is -XX:+OmitStackTraceInFastThrow 
+    # (note: default "+", but switch to "-" to always get the stacks).
+</pre>
+
+</ul>
+    
+<h2 id="toc_1.3">3 HotSpot VMs Release Notes</h2>
+<p>
+摘抄自: <a href="http://www.oracle.com/technetwork/java/javase/relnotes-139183.html">http://www.oracle.com/technetwork/java/javase/relnotes-139183.html</a>
+</p>
+<blockquote>
+The compiler in the server VM now provides correct stack backtraces for all "cold" built-in exceptions. For performance purposes, when such an exception is thrown a few times, the method may be recompiled. After recompilation, the compiler may choose a faster tactic using preallocated exceptions that do not provide a stack trace. To disable completely the use of preallocated exceptions, use this new flag: -XX:-OmitStackTraceInFastThrow.
+</blockquote>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

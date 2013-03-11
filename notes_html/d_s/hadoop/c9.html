@@ -72,6 +72,16 @@
 <li><a href="#toc_1.4.3.1">4.3.1 HDFS</a>
 <li><a href="#toc_1.4.3.2">4.3.2 MapReduce</a>
 </ul>
+<li><a href="#toc_1.4.4">4.4 Hadoop守护进程与端口 </a>
+<li><a href="#toc_1.4.5">4.5 其他Hadoop的配置 </a>
+<ul>
+<li><a href="#toc_1.4.5.1">4.5.1 集群成员</a>
+<li><a href="#toc_1.4.5.2">4.5.2 缓冲区大小 </a>
+<li><a href="#toc_1.4.5.3">4.5.3 HDFS block大小</a>
+<li><a href="#toc_1.4.5.4">4.5.4 保留空间</a>
+<li><a href="#toc_1.4.5.5">4.5.5 回收站 </a>
+<li><a href="#toc_1.4.5.6">4.5.6 Reduce慢启动 </a>
+</ul>
 </ul>
 </ul>
 </ul>
@@ -826,6 +836,233 @@ The JVM options used for the child process that runs reduce tasks. (Not availabl
 </td>
 </tr>
 </table>
+
+<h3 id="toc_1.4.4">4.4 Hadoop守护进程与端口 </h3>
+<ul>
+<li>
+守护进程运行一个RPC Server, 供守护进程间通信
+
+<li>
+守护进程运行一个HTTP Server, 提供界面供人为查看
+
+<li>
+Server的端口号设为 0， 意谓着例使用一个空闲端口。
+
+<li>
+datanode除RPC Server外，还会运行一个TCP/IP Server
+
+<ol>
+<li>
+用于block传输
+
+<li>
+通过属性fs.datanode.addrss设置
+
+<li>
+默认值：0.0.0.0:50010
+
+</ol>
+<li>
+通过下列属性可以设置datanode和tasktracker使用的网口，同时会影响RPC Server和Http Server
+
+<ol>
+<li>
+dfs.datanode.dns.interface
+
+<li>
+mapred.tasktracker.dns.interface
+
+</ol>
+</ul>
+
+
+<p>
+<strong>Table 9-5. RPC server properties:</strong>
+<table>
+<tr>
+<th>
+Property name
+</th>
+<th>
+Default value
+</th>
+<th>
+Description
+</th>
+</tr>
+<tr>
+<td>
+fs.default.name
+</td>
+<td>
+<a href="file:///">file:///</a>
+</td>
+<td>
+When set to an HDFS URI, this property determines the namenode’s RPC server address and port. The default port is 8020 if not specified.
+</td>
+</tr>
+<tr>
+<td>
+dfs.datanode.ipc.address
+</td>
+<td>
+0.0.0.0:50020
+</td>
+<td>
+The datanode’s RPC server address and port.  mapred.job.tracker local When set to a hostname and port, this property specifies the jobtracker’s RPC server address and port. A commonly used port is 8021.
+</td>
+</tr>
+<tr>
+<td>
+mapred.task.tracker.report.address
+</td>
+<td>
+127.0.0.1:0
+</td>
+<td>
+The tasktracker’s RPC server address and port. This is used by the tasktracker’s child JVM to communicate with the tasktracker. Using any free port is acceptable in this case, as the server only binds to the loopback address. You should change this setting only if the machine has no loopback address.
+</td>
+</tr>
+</table>
+</p>
+
+
+<p>
+<strong>Table 9-6. HTTP server properties:</strong>
+<table>
+<tr>
+<th>
+Property name
+</th>
+<th>
+Default value
+</th>
+<th>
+Description
+</th>
+</tr>
+<tr>
+<td>
+mapred.job.tracker.http.address
+</td>
+<td>
+0.0.0.0:50030
+</td>
+<td>
+The jobtracker’s HTTP server address and port
+</td>
+</tr>
+<tr>
+<td>
+mapred.task.tracker.http.address
+</td>
+<td>
+0.0.0.0:50060
+</td>
+<td>
+The tasktracker’s HTTP server address and port
+</td>
+</tr>
+<tr>
+<td>
+dfs.http.address
+</td>
+<td>
+0.0.0.0:50070
+</td>
+<td>
+The namenode’s HTTP server address and port
+</td>
+</tr>
+<tr>
+<td>
+dfs.datanode.http.address
+</td>
+<td>
+0.0.0.0:50075
+</td>
+<td>
+The datanode’s HTTP server address and port
+</td>
+</tr>
+<tr>
+<td>
+dfs.secondary.http.address
+</td>
+<td>
+0.0.0.0:50090
+</td>
+<td>
+The secondary namenode’s HTTP server address and port
+</td>
+</tr>
+</table>
+</p>
+
+<h3 id="toc_1.4.5">4.5 其他Hadoop的配置 </h3>
+
+<h4 id="toc_1.4.5.1">4.5.1 集群成员</h4>
+<ul>
+<li>
+<strong>dfs.hosts:</strong> 加入集群中将作为datanode的机器列表
+
+<li>
+<strong>mapred.hosts:</strong> 加入集群中将作为tasktracker的机器列表
+
+<li>
+<strong>dfs.hosts.exclude:</strong> 要从datanode中移除的机器
+
+<li>
+<strong>mapred.hosts.exclude:</strong> 要从tasktracker中移除的机器 
+
+</ul>
+
+<h4 id="toc_1.4.5.2">4.5.2 缓冲区大小 </h4>
+<ul>
+<li>
+<strong>io.file.buffer.size:</strong> i/o缓冲区大小，默认值 4KB, 可更改，比如128KB
+
+</ul>
+
+<h4 id="toc_1.4.5.3">4.5.3 HDFS block大小</h4>
+<ul>
+<li>
+<strong>dfs.block.size:</strong> HDFS块大小，默认值 64KB, 可更改，比如128MB 256MB
+
+</ul>
+ 
+<h4 id="toc_1.4.5.4">4.5.4 保留空间</h4>
+<ul>
+<li>
+<strong>dfs.datanode.du.reserved:</strong> HDFS块大小，默认值 0, 不保留 , 单位为bytes
+
+</ul>
+
+<h4 id="toc_1.4.5.5">4.5.5 回收站 </h4>
+<ul>
+<li>
+通过fa.trash.interval设置保留时间,单位为钟，默认为0， 不保留，立刻删除
+
+<li>
+shell中直接使用
+
+<li>
+编程需要特殊 api
+
+</ul>
+ 
+<h4 id="toc_1.4.5.6">4.5.6 Reduce慢启动 </h4>
+<ul>
+<li>
+默认情况下，高度器会等待一个job至少%5map task完成，才会启动reduce task
+
+<li>
+但即使taskreduce不启动，仍就占着一个reduce slot
+
+<li>
+<strong>:</strong> 设置等待时间，比如0.8，代表80%
+
+</ul>
 
 			</div>
 

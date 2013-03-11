@@ -1,0 +1,24 @@
+%title JVM优化参数导致异常无堆栈  
+
+=JVM优化参数导致异常无堆栈 =
+
+当前日期: 03/11/2013 Mon 
+
+%toc
+
+
+==诱因 ==
+* 程序中抓到一个NullPointerException, 但并没有堆栈信息
+
+==OmitStackTraceInFastThrow ==
+* 发现是因为jvm JIT优化导致的，该优化可以通过一个jvm参数关掉
+  {{{class="brush:bash"
+    -XX:-OmitStackTraceInFastThrow
+    # The default setting is -XX:+OmitStackTraceInFastThrow 
+    # (note: default "+", but switch to "-" to always get the stacks).
+    }}}
+    
+==HotSpot VMs Release Notes==
+摘抄自: http://www.oracle.com/technetwork/java/javase/relnotes-139183.html
+
+     The compiler in the server VM now provides correct stack backtraces for all "cold" built-in exceptions. For performance purposes, when such an exception is thrown a few times, the method may be recompiled. After recompilation, the compiler may choose a faster tactic using preallocated exceptions that do not provide a stack trace. To disable completely the use of preallocated exceptions, use this new flag: -XX:-OmitStackTraceInFastThrow.

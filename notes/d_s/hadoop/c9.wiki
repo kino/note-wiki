@@ -195,3 +195,62 @@ Table: Important HDFS daemon properties
 | mapred.child.java.opts                    | String                          | -Xmx200m                        | The JVM options used to launch the tasktracker child process that runs map and reduce tasks. This property can be set on a per-job basis, which can be useful for setting JVM properties for debugging, for example.                                                                                          |
 | mapreduce.map.java.opts                   | String                          | -Xmx200m                        | The JVM options used for the child process that runs map tasks. (Not available in 1.x.)                                                                                                                                                                                                                       |
 | mapreduce.reduce.java.opts                | String                          | -Xmx200m                        | The JVM options used for the child process that runs reduce tasks. (Not available in 1.x.)                                                                                                                                                                                                                    |
+
+===Hadoop守护进程与端口 ===
+* 守护进程运行一个RPC Server, 供守护进程间通信
+* 守护进程运行一个HTTP Server, 提供界面供人为查看
+* Server的端口号设为 0， 意谓着例使用一个空闲端口。
+* datanode除RPC Server外，还会运行一个TCP/IP Server
+  # 用于block传输
+  # 通过属性fs.datanode.addrss设置
+  # 默认值：0.0.0.0:50010
+* 通过下列属性可以设置datanode和tasktracker使用的网口，同时会影响RPC Server和Http Server
+  # dfs.datanode.dns.interface
+  # mapred.tasktracker.dns.interface
+
+
+*Table 9-5. RPC server properties:*
+| Property name                      | Default value | Description                                                                                                                                                                                                                                                                                                     |
+|------------------------------------|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| fs.default.name                    | file:///      | When set to an HDFS URI, this property determines the namenode’s RPC server address and port. The default port is 8020 if not specified.                                                                                                                                                                       |
+| dfs.datanode.ipc.address           | 0.0.0.0:50020 | The datanode’s RPC server address and port.  mapred.job.tracker local When set to a hostname and port, this property specifies the jobtracker’s RPC server address and port. A commonly used port is 8021.                                                                                                    |
+| mapred.task.tracker.report.address | 127.0.0.1:0   | The tasktracker’s RPC server address and port. This is used by the tasktracker’s child JVM to communicate with the tasktracker. Using any free port is acceptable in this case, as the server only binds to the loopback address. You should change this setting only if the machine has no loopback address. |
+
+
+*Table 9-6. HTTP server properties:*
+| Property name                    | Default value | Description                                            |
+|----------------------------------|---------------|--------------------------------------------------------|
+| mapred.job.tracker.http.address  | 0.0.0.0:50030 | The jobtracker’s HTTP server address and port         |
+| mapred.task.tracker.http.address | 0.0.0.0:50060 | The tasktracker’s HTTP server address and port        |
+| dfs.http.address                 | 0.0.0.0:50070 | The namenode’s HTTP server address and port           |
+| dfs.datanode.http.address        | 0.0.0.0:50075 | The datanode’s HTTP server address and port           |
+| dfs.secondary.http.address       | 0.0.0.0:50090 | The secondary namenode’s HTTP server address and port |
+
+===其他Hadoop的配置 ===
+
+====集群成员 ====
+* *dfs.hosts:* 加入集群中将作为datanode的机器列表
+* *mapred.hosts:* 加入集群中将作为tasktracker的机器列表
+* *dfs.hosts.exclude:* 要从datanode中移除的机器
+* *mapred.hosts.exclude:* 要从tasktracker中移除的机器 
+
+====缓冲区大小 ====
+* *io.file.buffer.size:* i/o缓冲区大小，默认值 4KB, 可更改，比如128KB
+
+====HDFS block大小 ====
+* *dfs.block.size:* HDFS块大小，默认值 64KB, 可更改，比如128MB 256MB
+ 
+====保留空间 ====
+* *dfs.datanode.du.reserved:* HDFS块大小，默认值 0, 不保留 , 单位为bytes
+
+====回收站 ====
+* 通过fa.trash.interval设置保留时间,单位为钟，默认为0， 不保留，立刻删除
+* shell中直接使用
+* 编程需要特殊 api
+ 
+====Reduce慢启动 ====
+* 默认情况下，高度器会等待一个job至少%5map task完成，才会启动reduce task
+* 但即使taskreduce不启动，仍就占着一个reduce slot
+* *mapred.reduce.slowstart.completed.maps:* 设置等待时间，比如0.8，代表80%
+
+
