@@ -35,7 +35,7 @@
 			<div id="middle">
 				
 
-<h1 id="toc_1"> Setting up a Hadoop Cluster</h1>
+<h1 id="toc_1">Setting up a Hadoop Cluster</h1>
 
 <p>
 当前日期: 02/25/2013 Mon 
@@ -43,61 +43,65 @@
 
 <div class="toc">
 <ul>
-<li><a href="#toc_1"> Setting up a Hadoop Cluster</a>
+<li><a href="#toc_1">Setting up a Hadoop Cluster</a>
 <ul>
-<li><a href="#toc_1.1">1 集群规范</a>
+<li><a href="#toc_1.1">集群规范</a>
 <ul>
-<li><a href="#toc_1.1.1">1.1 网络拓扑</a>
+<li><a href="#toc_1.1.1">网络拓扑</a>
 </ul>
-<li><a href="#toc_1.2">2 集群的构建与安装</a>
+<li><a href="#toc_1.2">集群的构建与安装</a>
 <ul>
-<li><a href="#toc_1.2.1">2.1 安装java环境</a>
-<li><a href="#toc_1.2.2">2.2 创建Hadoop专用账号</a>
-<li><a href="#toc_1.2.3">2.3 安装Hadoop</a>
-<li><a href="#toc_1.2.4">2.4 测试已安装的Hadoop</a>
+<li><a href="#toc_1.2.1">安装java环境</a>
+<li><a href="#toc_1.2.2">创建Hadoop专用账号</a>
+<li><a href="#toc_1.2.3">安装Hadoop</a>
+<li><a href="#toc_1.2.4">测试已安装的Hadoop</a>
 </ul>
-<li><a href="#toc_1.3">3 SSH配置</a>
-<li><a href="#toc_1.4">4 Hadoop的配置 </a>
+<li><a href="#toc_1.3">SSH配置</a>
+<li><a href="#toc_1.4">Hadoop的配置</a>
 <ul>
-<li><a href="#toc_1.4.1">4.1 配置管理</a>
-<li><a href="#toc_1.4.2">4.2 环境变量设置</a>
+<li><a href="#toc_1.4.1">配置管理</a>
+<li><a href="#toc_1.4.2">环境变量设置</a>
 <ul>
-<li><a href="#toc_1.4.2.1">4.2.1 内存</a>
-<li><a href="#toc_1.4.2.2">4.2.2 Java</a>
-<li><a href="#toc_1.4.2.3">4.2.3 系统日志</a>
-<li><a href="#toc_1.4.2.4">4.2.4 ssh配置</a>
+<li><a href="#toc_1.4.2.1">内存</a>
+<li><a href="#toc_1.4.2.2">Java</a>
+<li><a href="#toc_1.4.2.3">系统日志</a>
+<li><a href="#toc_1.4.2.4">ssh配置</a>
 </ul>
-<li><a href="#toc_1.4.3">4.3 守护进程的主要配置 </a>
+<li><a href="#toc_1.4.3">守护进程的主要配置</a>
 <ul>
-<li><a href="#toc_1.4.3.1">4.3.1 HDFS</a>
-<li><a href="#toc_1.4.3.2">4.3.2 MapReduce</a>
+<li><a href="#toc_1.4.3.1">HDFS</a>
+<li><a href="#toc_1.4.3.2">MapReduce</a>
 </ul>
-<li><a href="#toc_1.4.4">4.4 Hadoop守护进程与端口 </a>
-<li><a href="#toc_1.4.5">4.5 其他Hadoop的配置 </a>
+<li><a href="#toc_1.4.4">Hadoop守护进程与端口</a>
+<li><a href="#toc_1.4.5">其他Hadoop的配置</a>
 <ul>
-<li><a href="#toc_1.4.5.1">4.5.1 集群成员</a>
-<li><a href="#toc_1.4.5.2">4.5.2 缓冲区大小 </a>
-<li><a href="#toc_1.4.5.3">4.5.3 HDFS block大小</a>
-<li><a href="#toc_1.4.5.4">4.5.4 保留空间</a>
-<li><a href="#toc_1.4.5.5">4.5.5 回收站 </a>
-<li><a href="#toc_1.4.5.6">4.5.6 Reduce慢启动 </a>
-<li><a href="#toc_1.4.5.7">4.5.7 Task内存限制</a>
+<li><a href="#toc_1.4.5.1">集群成员</a>
+<li><a href="#toc_1.4.5.2">缓冲区大小</a>
+<li><a href="#toc_1.4.5.3">HDFS block大小</a>
+<li><a href="#toc_1.4.5.4">保留空间</a>
+<li><a href="#toc_1.4.5.5">回收站</a>
+<li><a href="#toc_1.4.5.6">Reduce慢启动</a>
+<li><a href="#toc_1.4.5.7">Task内存限制</a>
 </ul>
-<li><a href="#toc_1.4.6">4.6 创建用户</a>
+<li><a href="#toc_1.4.6">创建用户</a>
 </ul>
-<li><a href="#toc_1.5">5 YARN配置</a>
+<li><a href="#toc_1.5">YARN配置</a>
 <ul>
-<li><a href="#toc_1.5.1">5.1 YARN守护进程的重要配置 </a>
+<li><a href="#toc_1.5.1">YARN守护进程的重要配置</a>
 <ul>
-<li><a href="#toc_1.5.1.1">5.1.1 内存</a>
+<li><a href="#toc_1.5.1.1">内存</a>
 </ul>
-<li><a href="#toc_1.5.2">5.2 YARN的守护进程与端口</a>
+<li><a href="#toc_1.5.2">YARN的守护进程与端口</a>
+</ul>
+<li><a href="#toc_1.6">安全</a>
+<ul>
+<li><a href="#toc_1.6.1">kerberos与hadoop</a>
 </ul>
 </ul>
 </ul>
 </div>
 
-<h2 id="toc_1.1">1 集群规范</h2>
+<h2 id="toc_1.1">集群规范</h2>
 <ul>
 <li>
 使用商业硬件
@@ -145,7 +149,7 @@ JBOD循环使用磁盘
 </ol>
 </ul>
 
-<h3 id="toc_1.1.1">1.1 网络拓扑</h3>
+<h3 id="toc_1.1.1">网络拓扑</h3>
 <p>
 <img src="hadoop_topology.png" />
 </p>
@@ -207,15 +211,15 @@ Mapreduce尽量避免机架间传输（jobtracker)
 </ol>
   
 
-<h2 id="toc_1.2">2 集群的构建与安装</h2>
-<h3 id="toc_1.2.1">2.1 安装java环境</h3>
+<h2 id="toc_1.2">集群的构建与安装</h2>
+<h3 id="toc_1.2.1">安装java环境</h3>
 <ul>
 <li>
 &gt;=jdk1.6 (推荐使用sun jdk)
 
 </ul>
     
-<h3 id="toc_1.2.2">2.2 创建Hadoop专用账号</h3>
+<h3 id="toc_1.2.2">创建Hadoop专用账号</h3>
 <ol>
 <li>
 创建hadoop专用用户，与其他服务隔离
@@ -236,7 +240,7 @@ autofs还提供挂载失败时的备用方案
 </ol>
 </ol>
    
-<h3 id="toc_1.2.3">2.3 安装Hadoop</h3>
+<h3 id="toc_1.2.3">安装Hadoop</h3>
 <ol>
 <li>
 将Hadoop安装在一个合理的地方
@@ -246,9 +250,9 @@ autofs还提供挂载失败时的备用方案
 
 </ol>
  
-<h3 id="toc_1.2.4">2.4 测试已安装的Hadoop</h3>
+<h3 id="toc_1.2.4">测试已安装的Hadoop</h3>
 
-<h2 id="toc_1.3">3 SSH配置</h2>
+<h2 id="toc_1.3">SSH配置</h2>
 <ol>
 <li>
 Hadoop跨集群的控制脚本信赖于ssh
@@ -258,7 +262,7 @@ Hadoop跨集群的控制脚本信赖于ssh
 
 </ol>
  
-<h2 id="toc_1.4">4 Hadoop的配置 </h2>
+<h2 id="toc_1.4">Hadoop的配置</h2>
 <ol>
 <li>
 配置文件放在conf目录中
@@ -372,7 +376,7 @@ Properties for system logfiles, the namenode audit log, and the task log for the
 </table>
 
 
-<h3 id="toc_1.4.1">4.1 配置管理</h3>
+<h3 id="toc_1.4.1">配置管理</h3>
 <ol>
 <li>
 Hadoop集群没有统一的配置信息
@@ -502,9 +506,9 @@ Run the MapReduce control scripts from the jobtracker machine
 
 </ol>
 
-<h3 id="toc_1.4.2">4.2 环境变量设置</h3>
+<h3 id="toc_1.4.2">环境变量设置</h3>
 
-<h4 id="toc_1.4.2.1">4.2.1 内存</h4>
+<h4 id="toc_1.4.2.1">内存</h4>
 
 <ol>
 <li>
@@ -564,7 +568,7 @@ namenode 进程内存 = ( diskSize*datanodeNumber/blockSize/replicationNumber/10
 
 </ol>
  
-<h4 id="toc_1.4.2.2">4.2.2 Java</h4>
+<h4 id="toc_1.4.2.2">Java</h4>
 <ol>
 <li>
 hadoop使用 <code>hadoop-env.sh</code> 的变量 <code>JAVA_HOME</code> 或系统环境变量 <code>JAVA_HOME</code> 来决定使用的jdk
@@ -574,7 +578,7 @@ hadoop使用 <code>hadoop-env.sh</code> 的变量 <code>JAVA_HOME</code> 或系�
 
 </ol>
  
-<h4 id="toc_1.4.2.3">4.2.3 系统日志</h4>
+<h4 id="toc_1.4.2.3">系统日志</h4>
 <ol>
 <li>
 日志文件默认存放在 <code>$HADOOP_INSTALL/logs</code> 下
@@ -604,7 +608,7 @@ hadoop使用 <code>hadoop-env.sh</code> 的变量 <code>JAVA_HOME</code> 或系�
 </ul>
 </ol>
    
-<h4 id="toc_1.4.2.4">4.2.4 ssh配置</h4>
+<h4 id="toc_1.4.2.4">ssh配置</h4>
 <ol>
 <li>
 主结点的控制脚本可以通过ssh在所有工作结点上运行命令
@@ -628,13 +632,13 @@ hadoop使用 <code>hadoop-env.sh</code> 的变量 <code>JAVA_HOME</code> 或系�
 </ul>
 </ol>
    
-<h3 id="toc_1.4.3">4.3 守护进程的主要配置 </h3>
+<h3 id="toc_1.4.3">守护进程的主要配置</h3>
 
 <p>
 主要的配置文件： core-site.xml hdfs-site.xml mapred-site.xml
 </p>
 
-<h4 id="toc_1.4.3.1">4.3.1 HDFS</h4>
+<h4 id="toc_1.4.3.1">HDFS</h4>
 
 <p>
 ${hadoop.tmp.dir} 默认值： 
@@ -717,7 +721,7 @@ A list of directories where the secondary namenode stores checkpoints.  It store
 </table>
 </p>
 
-<h4 id="toc_1.4.3.2">4.3.2 MapReduce</h4>
+<h4 id="toc_1.4.3.2">MapReduce</h4>
 <table>
 <tr>
 <th>
@@ -847,7 +851,7 @@ The JVM options used for the child process that runs reduce tasks. (Not availabl
 </tr>
 </table>
 
-<h3 id="toc_1.4.4">4.4 Hadoop守护进程与端口 </h3>
+<h3 id="toc_1.4.4">Hadoop守护进程与端口</h3>
 <ul>
 <li>
 守护进程运行一个RPC Server, 供守护进程间通信
@@ -1009,9 +1013,9 @@ The secondary namenode’s HTTP server address and port
 </table>
 </p>
 
-<h3 id="toc_1.4.5">4.5 其他Hadoop的配置 </h3>
+<h3 id="toc_1.4.5">其他Hadoop的配置</h3>
 
-<h4 id="toc_1.4.5.1">4.5.1 集群成员</h4>
+<h4 id="toc_1.4.5.1">集群成员</h4>
 <ul>
 <li>
 <strong>dfs.hosts:</strong> 加入集群中将作为datanode的机器列表
@@ -1027,28 +1031,28 @@ The secondary namenode’s HTTP server address and port
 
 </ul>
 
-<h4 id="toc_1.4.5.2">4.5.2 缓冲区大小 </h4>
+<h4 id="toc_1.4.5.2">缓冲区大小</h4>
 <ul>
 <li>
 <strong>io.file.buffer.size:</strong> i/o缓冲区大小，默认值 4KB, 可更改，比如128KB
 
 </ul>
 
-<h4 id="toc_1.4.5.3">4.5.3 HDFS block大小</h4>
+<h4 id="toc_1.4.5.3">HDFS block大小</h4>
 <ul>
 <li>
 <strong>dfs.block.size:</strong> HDFS块大小，默认值 64KB, 可更改，比如128MB 256MB
 
 </ul>
  
-<h4 id="toc_1.4.5.4">4.5.4 保留空间</h4>
+<h4 id="toc_1.4.5.4">保留空间</h4>
 <ul>
 <li>
 <strong>dfs.datanode.du.reserved:</strong> HDFS块大小，默认值 0, 不保留 , 单位为bytes
 
 </ul>
 
-<h4 id="toc_1.4.5.5">4.5.5 回收站 </h4>
+<h4 id="toc_1.4.5.5">回收站</h4>
 <ul>
 <li>
 通过fa.trash.interval设置保留时间,单位为钟，默认为0， 不保留，立刻删除
@@ -1061,7 +1065,7 @@ shell中直接使用
 
 </ul>
  
-<h4 id="toc_1.4.5.6">4.5.6 Reduce慢启动 </h4>
+<h4 id="toc_1.4.5.6">Reduce慢启动</h4>
 <ul>
 <li>
 默认情况下，调度器会等待一个job至少%5map task完成，才会启动reduce task
@@ -1074,7 +1078,7 @@ shell中直接使用
 
 </ul>
  
-<h4 id="toc_1.4.5.7">4.5.7 Task内存限制</h4>
+<h4 id="toc_1.4.5.7">Task内存限制</h4>
 <ul>
 <li>
 在一个集群中不能因为一个不好mapreduce任务，影响到整个集群
@@ -1203,7 +1207,7 @@ The maximum limit that users can set mapred.job.reduce.memory.mb to.
 </tr>
 </table>
 
-<h3 id="toc_1.4.6">4.6 创建用户</h3>
+<h3 id="toc_1.4.6">创建用户</h3>
 <ul>
 <li>
 创建用户
@@ -1220,7 +1224,7 @@ The maximum limit that users can set mapred.job.reduce.memory.mb to.
 
 </ul>
    
-<h2 id="toc_1.5">5 YARN配置</h2>
+<h2 id="toc_1.5">YARN配置</h2>
 <ol>
 <li>
 没有jobtracker和tasktracker
@@ -1288,7 +1292,7 @@ Configuration settings for YARN daemons: the resource manager, the job history s
 </tr>
 </table>
 
-<h3 id="toc_1.5.1">5.1 YARN守护进程的重要配置 </h3>
+<h3 id="toc_1.5.1">YARN守护进程的重要配置</h3>
 <ol>
 <li>
 mapred-site.xml仍然需要，用于通用的mapreduce配置
@@ -1385,7 +1389,7 @@ The ratio of virtual to physical memory for containers. Virtual memory usage may
 </tr>
 </table>
 
-<h4 id="toc_1.5.1.1">5.1.1 内存</h4>
+<h4 id="toc_1.5.1.1">内存</h4>
 <ol>
 <li>
 yarn并没有给task分配固定的运行槽，所以每个node运行task数量并不固定
@@ -1445,7 +1449,7 @@ yarn.nodemanager.vmem-pmem-ratio， 默认值 2.1
 </ul>
 </ol>
    
-<h3 id="toc_1.5.2">5.2 YARN的守护进程与端口</h3>
+<h3 id="toc_1.5.2">YARN的守护进程与端口</h3>
 <ul>
 <li>
 RPC Servers:
@@ -1604,6 +1608,56 @@ The shuffle handler’s HTTP port number. This is used for serving map outputs, 
 </td>
 </tr>
 </table>
+
+<h2 id="toc_1.6">安全</h2>
+<ol>
+<li>
+早期的Hadoop假设自身运行于一个安全的可信任的环境
+
+<li>
+它的权限设计用于防止误操作丢失数据，而不是用于认证访问
+
+<li>
+比如一个用户可以假装root进行操作
+
+<li>
+hadoop缺失就是一个认证机制，来保证用户就是他声称的角色
+
+<li>
+HDFS的系统权限实现的是授权，一个用户角色可以做哪些操作
+
+</ol>
+
+<p>
+解决方案：
+</p>
+<ul>
+<li>
+kerberos提供认证，但不管权限
+
+<li>
+HDFS提供授权
+
+</ul>
+ 
+<h3 id="toc_1.6.1">kerberos与hadoop</h3>
+<p>
+使用kerberos时，在用户使用一个service前，必须经过三个步骤，每个步骤包含一个与server交换信息的操作：
+</p>
+<ol>
+<li>
+Authentication. The client authenticates itself to the Authentication Server and receives a timestamped Ticket-Granting Ticket (TGT).
+
+<li>
+Authorization. The client uses the TGT to request a service ticket from the Ticket Granting Server.
+
+<li>
+Service request. The client uses the service ticket to authenticate itself to the server that is providing the service the client is using. In the case of Hadoop, this might be the namenode or the jobtracker.
+
+</ol>
+<p>
+<img src="kerberos.png" />
+</p>
 
 			</div>
 

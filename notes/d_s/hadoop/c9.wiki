@@ -340,3 +340,33 @@ Table: Important HDFS daemon properties
 | yarn.nodemanager.webapp.address     | 0.0.0.0:8042  | The node manager’s HTTP server address and port.  yarn.web-proxy.address The web app proxy server’s HTTP server address and port. If not set (the default), then the web app proxy server will run in the resource manager process |
 | mapreduce.jobhistory.webapp.address | 0.0.0.0:19888 | The job history server’s HTTP server address and port. This property is set in mapred-site.xml.                                                                                                                                     |
 | mapreduce.shuffle.port              | 8080          | The shuffle handler’s HTTP port number. This is used for serving map outputs, and is not a user-accessible web UI. This property is set in mapred-site.xml                                                                          |
+
+==安全 ==
+# 早期的Hadoop假设自身运行于一个安全的可信任的环境
+# 它的权限设计用于防止误操作丢失数据，而不是用于认证访问
+# 比如一个用户可以假装root进行操作
+# hadoop缺失就是一个认证机制，来保证用户就是他声称的角色
+# HDFS的系统权限实现的是授权，一个用户角色可以做哪些操作
+
+解决方案：
+* kerberos提供认证，但不管权限
+* HDFS提供授权
+ 
+===kerberos与hadoop ===
+使用kerberos时，在用户使用一个service前，必须经过三个步骤，每个步骤包含一个与server交换信息的操作：
+# Authentication. The client authenticates itself to the Authentication Server and receives a timestamped Ticket-Granting Ticket (TGT).
+# Authorization. The client uses the TGT to request a service ticket from the Ticket Granting Server.
+# Service request. The client uses the service ticket to authenticate itself to the server that is providing the service the client is using. In the case of Hadoop, this might be the namenode or the jobtracker.
+{{kerberos.png}}
+
+kerberos认证：
+# 通常使用kinit进行认证，它会提示输入一个密码
+# 但并不是每次都要这样，默认情况一旦认证可以持续10小时
+# 也不是必须使用密码，可以使用kutil生成一个文件，供kinit使用
+ 
+====一个例子 ====
+# hadoop中启用kerberos: 在core-site.xml中设置hadoop.security.authentication为kerberos
+# 启用服务级别的授权：在core-site.xml中设置hadoop.security.authorization为true
+# 配置ACL（Access Control Lists): 在hadoop-plicy.xml中配置
+  * 配置哪些用户或用户组可以连接haddop的哪些服务
+  * 服务被定义成协议级别的，比如 提交mapreduce, 访问namenode
