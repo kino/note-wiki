@@ -81,7 +81,17 @@
 <li><a href="#toc_1.4.5.4">4.5.4 保留空间</a>
 <li><a href="#toc_1.4.5.5">4.5.5 回收站 </a>
 <li><a href="#toc_1.4.5.6">4.5.6 Reduce慢启动 </a>
+<li><a href="#toc_1.4.5.7">4.5.7 Task内存限制</a>
 </ul>
+<li><a href="#toc_1.4.6">4.6 创建用户</a>
+</ul>
+<li><a href="#toc_1.5">5 YARN配置</a>
+<ul>
+<li><a href="#toc_1.5.1">5.1 YARN守护进程的重要配置 </a>
+<ul>
+<li><a href="#toc_1.5.1.1">5.1.1 内存</a>
+</ul>
+<li><a href="#toc_1.5.2">5.2 YARN的守护进程与端口</a>
 </ul>
 </ul>
 </ul>
@@ -1054,15 +1064,546 @@ shell中直接使用
 <h4 id="toc_1.4.5.6">4.5.6 Reduce慢启动 </h4>
 <ul>
 <li>
-默认情况下，高度器会等待一个job至少%5map task完成，才会启动reduce task
+默认情况下，调度器会等待一个job至少%5map task完成，才会启动reduce task
 
 <li>
 但即使taskreduce不启动，仍就占着一个reduce slot
 
 <li>
-<strong>:</strong> 设置等待时间，比如0.8，代表80%
+<strong>mapred.reduce.slowstart.completed.maps:</strong> 设置等待时间，比如0.8，代表80%
 
 </ul>
+ 
+<h4 id="toc_1.4.5.7">4.5.7 Task内存限制</h4>
+<ul>
+<li>
+在一个集群中不能因为一个不好mapreduce任务，影响到整个集群
+
+<li>
+比如 <code>mapred.child.java.opts</code> 设置过大
+
+<ul>
+<li>
+有两种方式可避免这种方式
+
+<ol>
+<li>
+操作系统级的设置，使用命令ulimit 可直接修改文件  /etc/security/limits.conf
+
+<li>
+hadoop中设置 mapred.child.ulimit,但必须比mapred.child.java.ops大，否则task可能起不来
+
+</ol>
+</ul>
+<li>
+如果用户没有设置要使用的内存大小，则使用默认值：(mapred.job.map.memory.mb and mapred.job.reduce.memory.mb）
+
+<li>
+task内存监控相关属性：
+
+</ul>
+<table>
+<tr>
+<td>
+Property name
+</td>
+<td>
+Type
+</td>
+<td>
+Default value
+</td>
+<td>
+Description
+</td>
+</tr>
+<tr>
+<td>
+mapred.cluster.map.memory.mb
+</td>
+<td>
+int
+</td>
+<td>
+-1
+</td>
+<td>
+The amount of virtual memory, in MB, that defines a map slot. Map tasks that require more than this amount of memory will use more than one map slot.
+</td>
+</tr>
+<tr>
+<td>
+mapred.cluster.reduce.memory.mb
+</td>
+<td>
+int
+</td>
+<td>
+-1
+</td>
+<td>
+The amount of virtual memory, in MB, that defines a reduce slot. Reduce tasks that require more than this amount of memory will use more than one reduce slot.
+</td>
+</tr>
+<tr>
+<td>
+mapred.job.map.memory.mb
+</td>
+<td>
+int
+</td>
+<td>
+-1
+</td>
+<td>
+The amount of virtual memory, in MB, that a map task requires to run. If a map task exceeds this limit, it may be terminated and marked as failed.
+</td>
+</tr>
+<tr>
+<td>
+mapred.job.reduce.memory.mb
+</td>
+<td>
+int
+</td>
+<td>
+-1
+</td>
+<td>
+The amount of virtual memory, in MB, that a reduce task requires to run. If a reduce task exceeds this limit, it may be terminated and marked as failed.
+</td>
+</tr>
+<tr>
+<td>
+mapred.cluster.max.map.memory.mb
+</td>
+<td>
+int
+</td>
+<td>
+-1
+</td>
+<td>
+The maximum limit that users can set mapred.job.map.memory.mb to.
+</td>
+</tr>
+<tr>
+<td>
+mapred.cluster.max.reduce.memory.mb
+</td>
+<td>
+int
+</td>
+<td>
+-1
+</td>
+<td>
+The maximum limit that users can set mapred.job.reduce.memory.mb to.
+</td>
+</tr>
+</table>
+
+<h3 id="toc_1.4.6">4.6 创建用户</h3>
+<ul>
+<li>
+创建用户
+<pre  class="brush:bash">
+    % hadoop fs -mkdir /user/username
+    % hadoop fs -chown username:username /user/username
+</pre>
+
+<li>
+数据限制
+<pre  class="brush:bash">
+   % hadoop dfsadmin -setSpaceQuota 1t /user/username
+</pre>
+
+</ul>
+   
+<h2 id="toc_1.5">5 YARN配置</h2>
+<ol>
+<li>
+没有jobtracker和tasktracker
+
+<li>
+resourcemanager：通常运行于namenode可独立的机器
+
+<li>
+nodemanager: 运行于每个工作结点
+
+<li>
+<strong>start-yarn.sh:</strong>
+
+<ul>
+<li>
+用于启动集群中yarn的守护进程
+
+<li>
+会在脚本所在的机器启动一个resource manager
+
+<li>
+会在每个工作结点启动一个node manager, 结点列在配置文件slaves中
+
+</ul>
+<li>
+yarn还有两个守护进程，一个用于查看历史job,一个用于查看正在运行的job
+
+<li>
+yarn的配置文件
+
+</ol>
+<table>
+<tr>
+<td>
+Filename
+</td>
+<td>
+Format
+</td>
+<td>
+Description
+</td>
+</tr>
+<tr>
+<td>
+yarn-env.sh
+</td>
+<td>
+Bash script
+</td>
+<td>
+Environment variables that are used in the scripts to run YARN
+</td>
+</tr>
+<tr>
+<td>
+yarn-site.xml
+</td>
+<td>
+Hadoop configuration XML
+</td>
+<td>
+Configuration settings for YARN daemons: the resource manager, the job history server, the webapp proxy server, and the node managers
+</td>
+</tr>
+</table>
+
+<h3 id="toc_1.5.1">5.1 YARN守护进程的重要配置 </h3>
+<ol>
+<li>
+mapred-site.xml仍然需要，用于通用的mapreduce配置
+
+<li>
+但takstracker 和 jobtracker相关的配置不再需要
+
+</ol>
+
+<table>
+<tr>
+<td>
+Property name
+</td>
+<td>
+Type
+</td>
+<td>
+Default value
+</td>
+<td>
+Description
+</td>
+</tr>
+<tr>
+<td>
+yarn.resourcemanager.address
+</td>
+<td>
+Hostname and port
+</td>
+<td>
+0.0.0.0:8032
+</td>
+<td>
+The hostname and port that the resource manager’s RPC server runs on.
+</td>
+</tr>
+<tr>
+<td>
+yarn.nodemanager.local-dirs
+</td>
+<td>
+Comma-separated directory names
+</td>
+<td>
+/tmp/nm-localdir
+</td>
+<td>
+A list of directories where node managers allow containers to store intermediate data. The data is cleared out when the application ends.
+</td>
+</tr>
+<tr>
+<td>
+yarn.nodemanager.aux-services
+</td>
+<td>
+Comma-separated service names
+</td>
+<td>
+A list of auxiliary services run by the node manager. A service is implemented by the class defined by the property
+</td>
+<td>
+yarn.nodemanager.aux-services.service-name.class. By default, no auxiliary services are specified.
+</td>
+</tr>
+<tr>
+<td>
+yarn.nodemanager.resource.memory-mb
+</td>
+<td>
+int
+</td>
+<td>
+8192
+</td>
+<td>
+The amount of physical memory (in MB) that may be allocated to containers being run by the node manager.
+</td>
+</tr>
+<tr>
+<td>
+yarn.nodemanager.vmem-pmemratio
+</td>
+<td>
+float
+</td>
+<td>
+2.1
+</td>
+<td>
+The ratio of virtual to physical memory for containers. Virtual memory usage may exceed the allocation by this amount
+</td>
+</tr>
+</table>
+
+<h4 id="toc_1.5.1.1">5.1.1 内存</h4>
+<ol>
+<li>
+yarn并没有给task分配固定的运行槽，所以每个node运行task数量并不固定
+
+<li>
+而是task向nodemanager申请要使用的内存
+
+<li>
+nodemanager从一个内存池中分配内存
+
+<li>
+所一个node所运行task的数目，依赖于它们总共申请的内存大小，不是一个固定数值
+
+<li>
+这样做可以有效的提升集群的利用率
+
+<ul>
+<li>
+比如在按槽分配中
+
+<li>
+需要运行一个map,但map槽没了，但还有reduce槽，这在mapreduce初期很正常
+
+</ul>
+<li>
+属性yarn.nodemanager.resource.memory-mb(default 8,192 MB.)用于指定参与containers分配的内存池大小
+
+<li>
+如何确定一个task所需内存的大小 ：
+
+<ul>
+<li>
+mapred.child.java.opts, 设定运行map或reduce task的jvm堆的大小 
+
+<li>
+mapreduce.map.memory.mb (or mapreduce.reduce. memory.mb), 设定运行map或reduce task所需内存的大小  
+
+</ul>
+<li>
+为分配内存指定一个最小值和一个最大值
+
+<ul>
+<li>
+yarn.scheduler.capacity.minimum-allocation-mb,  最小值的默认值1024M
+
+<li>
+yarn.scheduler.capacity.maximum-allocation-mb,  最大值的默认值10240M
+
+</ul>
+<li>
+虚拟内存大小限制
+
+<ul>
+<li>
+yarn.nodemanager.vmem-pmem-ratio， 默认值 2.1
+
+</ul>
+</ol>
+   
+<h3 id="toc_1.5.2">5.2 YARN的守护进程与端口</h3>
+<ul>
+<li>
+RPC Servers:
+
+</ul>
+<table>
+<tr>
+<td>
+Property name
+</td>
+<td>
+Default value
+</td>
+<td>
+Description
+</td>
+</tr>
+<tr>
+<td>
+yarn.resourcemanager.address
+</td>
+<td>
+0.0.0.0:8032
+</td>
+<td>
+The resource manager’s RPC server address and port. This is used by the client (typically outside the cluster) to communicate with the resource manager.
+</td>
+</tr>
+<tr>
+<td>
+yarn.resourcemanager.admin.address
+</td>
+<td>
+0.0.0.0:8033
+</td>
+<td>
+The resource manager’s admin RPC server address and port. This is used by the admin client (invoked with yarn rmadmin, typically run outside the cluster) to communicate with the resource manager.
+</td>
+</tr>
+<tr>
+<td>
+yarn.resourcemanager.scheduler.address
+</td>
+<td>
+0.0.0.0:8030
+</td>
+<td>
+The resource manager scheduler’s RPC server address and port. This is used by (in-cluster) application masters to communicate with the resource manager.
+</td>
+</tr>
+<tr>
+<td>
+yarn.resourcemanager.resourcetracker.address
+</td>
+<td>
+0.0.0.0:8031
+</td>
+<td>
+The resource manager resource tracker’s RPC server address and port. This is used by the (in-cluster) node managers to communicate with the resource manager.
+</td>
+</tr>
+<tr>
+<td>
+yarn.nodemanager.address
+</td>
+<td>
+0.0.0.0:0
+</td>
+<td>
+The node manager’s RPC server address and port. This is used by (in-cluster) application masters to communicate with node managers.
+</td>
+</tr>
+<tr>
+<td>
+yarn.nodemanager.localizer.address
+</td>
+<td>
+0.0.0.0:8040
+</td>
+<td>
+The node manager localizer’s RPC server address and port.
+</td>
+</tr>
+<tr>
+<td>
+mapreduce.jobhistory.address
+</td>
+<td>
+0.0.0.0:10020
+</td>
+<td>
+The job history server’s RPC server address and port. This is used by the client (typically outside the cluster) to query job history. This property is set in mapred-site.xml.
+</td>
+</tr>
+</table>
+ 
+<ul>
+<li>
+HTTP Servers:
+
+</ul>
+<table>
+<tr>
+<td>
+Property name
+</td>
+<td>
+Default value
+</td>
+<td>
+Description
+</td>
+</tr>
+<tr>
+<td>
+yarn.resourcemanager.webapp.address
+</td>
+<td>
+0.0.0.0:8088
+</td>
+<td>
+The resource manager’s HTTP server address and port.
+</td>
+</tr>
+<tr>
+<td>
+yarn.nodemanager.webapp.address
+</td>
+<td>
+0.0.0.0:8042
+</td>
+<td>
+The node manager’s HTTP server address and port.  yarn.web-proxy.address The web app proxy server’s HTTP server address and port. If not set (the default), then the web app proxy server will run in the resource manager process
+</td>
+</tr>
+<tr>
+<td>
+mapreduce.jobhistory.webapp.address
+</td>
+<td>
+0.0.0.0:19888
+</td>
+<td>
+The job history server’s HTTP server address and port. This property is set in mapred-site.xml.
+</td>
+</tr>
+<tr>
+<td>
+mapreduce.shuffle.port
+</td>
+<td>
+8080
+</td>
+<td>
+The shuffle handler’s HTTP port number. This is used for serving map outputs, and is not a user-accessible web UI. This property is set in mapred-site.xml
+</td>
+</tr>
+</table>
 
 			</div>
 

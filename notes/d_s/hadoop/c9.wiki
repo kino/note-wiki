@@ -249,8 +249,94 @@ Table: Important HDFS daemon properties
 * 编程需要特殊 api
  
 ====Reduce慢启动 ====
-* 默认情况下，高度器会等待一个job至少%5map task完成，才会启动reduce task
+* 默认情况下，调度器会等待一个job至少%5map task完成，才会启动reduce task
 * 但即使taskreduce不启动，仍就占着一个reduce slot
 * *mapred.reduce.slowstart.completed.maps:* 设置等待时间，比如0.8，代表80%
+ 
+====Task内存限制 ====
+* 在一个集群中不能因为一个不好mapreduce任务，影响到整个集群
+* 比如 `mapred.child.java.opts` 设置过大
+  * 有两种方式可避免这种方式
+    # 操作系统级的设置，使用命令ulimit 可直接修改文件  /etc/security/limits.conf
+    # hadoop中设置 mapred.child.ulimit,但必须比mapred.child.java.ops大，否则task可能起不来
+* 如果用户没有设置要使用的内存大小，则使用默认值：(mapred.job.map.memory.mb and mapred.job.reduce.memory.mb）
+* task内存监控相关属性：
+| Property name                       | Type | Default value | Description                                                                                                                                                    |
+| mapred.cluster.map.memory.mb        | int  | -1            | The amount of virtual memory, in MB, that defines a map slot. Map tasks that require more than this amount of memory will use more than one map slot.          |
+| mapred.cluster.reduce.memory.mb     | int  | -1            | The amount of virtual memory, in MB, that defines a reduce slot. Reduce tasks that require more than this amount of memory will use more than one reduce slot. |
+| mapred.job.map.memory.mb            | int  | -1            | The amount of virtual memory, in MB, that a map task requires to run. If a map task exceeds this limit, it may be terminated and marked as failed.             |
+| mapred.job.reduce.memory.mb         | int  | -1            | The amount of virtual memory, in MB, that a reduce task requires to run. If a reduce task exceeds this limit, it may be terminated and marked as failed.       |
+| mapred.cluster.max.map.memory.mb    | int  | -1            | The maximum limit that users can set mapred.job.map.memory.mb to.                                                                                              |
+| mapred.cluster.max.reduce.memory.mb | int  | -1            | The maximum limit that users can set mapred.job.reduce.memory.mb to.                                                                                           |
 
+===创建用户 ===
+* 创建用户
+{{{ class="brush:bash"
+    % hadoop fs -mkdir /user/username
+    % hadoop fs -chown username:username /user/username
+    }}}
+* 数据限制
+{{{ class="brush:bash"
+   % hadoop dfsadmin -setSpaceQuota 1t /user/username
+   }}}
+   
+==YARN配置 ==
+# 没有jobtracker和tasktracker
+# resourcemanager：通常运行于namenode可独立的机器
+# nodemanager: 运行于每个工作结点
+# *start-yarn.sh:*
+  * 用于启动集群中yarn的守护进程
+  * 会在脚本所在的机器启动一个resource manager
+  * 会在每个工作结点启动一个node manager, 结点列在配置文件slaves中
+# yarn还有两个守护进程，一个用于查看历史job,一个用于查看正在运行的job
+# yarn的配置文件
+| Filename      | Format                   | Description                                                                                                                           |
+| yarn-env.sh   | Bash script              | Environment variables that are used in the scripts to run YARN                                                                        |
+| yarn-site.xml | Hadoop configuration XML | Configuration settings for YARN daemons: the resource manager, the job history server, the webapp proxy server, and the node managers |
 
+===YARN守护进程的重要配置 ===
+# mapred-site.xml仍然需要，用于通用的mapreduce配置
+# 但takstracker 和 jobtracker相关的配置不再需要
+
+| Property name                       | Type                            | Default value                                                                                                       | Description                                                                                                                               |
+| yarn.resourcemanager.address        | Hostname and port               | 0.0.0.0:8032                                                                                                        | The hostname and port that the resource manager’s RPC server runs on.                                                                    |
+| yarn.nodemanager.local-dirs         | Comma-separated directory names | /tmp/nm-localdir                                                                                                    | A list of directories where node managers allow containers to store intermediate data. The data is cleared out when the application ends. |
+| yarn.nodemanager.aux-services       | Comma-separated service names   | A list of auxiliary services run by the node manager. A service is implemented by the class defined by the property | yarn.nodemanager.aux-services.service-name.class. By default, no auxiliary services are specified.                                        |
+| yarn.nodemanager.resource.memory-mb | int                             | 8192                                                                                                                | The amount of physical memory (in MB) that may be allocated to containers being run by the node manager.                                  |
+| yarn.nodemanager.vmem-pmemratio     | float                           | 2.1                                                                                                                 | The ratio of virtual to physical memory for containers. Virtual memory usage may exceed the allocation by this amount                     |
+
+====内存 ====
+# yarn并没有给task分配固定的运行槽，所以每个node运行task数量并不固定
+# 而是task向nodemanager申请要使用的内存
+# nodemanager从一个内存池中分配内存
+# 所一个node所运行task的数目，依赖于它们总共申请的内存大小，不是一个固定数值
+# 这样做可以有效的提升集群的利用率
+  * 比如在按槽分配中
+  * 需要运行一个map,但map槽没了，但还有reduce槽，这在mapreduce初期很正常
+# 属性yarn.nodemanager.resource.memory-mb(default 8,192 MB.)用于指定参与containers分配的内存池大小
+# 如何确定一个task所需内存的大小 ：
+  * mapred.child.java.opts, 设定运行map或reduce task的jvm堆的大小 
+  * mapreduce.map.memory.mb (or mapreduce.reduce. memory.mb), 设定运行map或reduce task所需内存的大小  
+# 为分配内存指定一个最小值和一个最大值
+  * yarn.scheduler.capacity.minimum-allocation-mb,  最小值的默认值1024M
+  * yarn.scheduler.capacity.maximum-allocation-mb,  最大值的默认值10240M
+# 虚拟内存大小限制
+  * yarn.nodemanager.vmem-pmem-ratio， 默认值 2.1
+   
+===YARN的守护进程与端口 ===
+* RPC Servers:
+| Property name                                | Default value | Description                                                                                                                                                                                          |
+| yarn.resourcemanager.address                 | 0.0.0.0:8032  | The resource manager’s RPC server address and port. This is used by the client (typically outside the cluster) to communicate with the resource manager.                                            |
+| yarn.resourcemanager.admin.address           | 0.0.0.0:8033  | The resource manager’s admin RPC server address and port. This is used by the admin client (invoked with yarn rmadmin, typically run outside the cluster) to communicate with the resource manager. |
+| yarn.resourcemanager.scheduler.address       | 0.0.0.0:8030  | The resource manager scheduler’s RPC server address and port. This is used by (in-cluster) application masters to communicate with the resource manager.                                            |
+| yarn.resourcemanager.resourcetracker.address | 0.0.0.0:8031  | The resource manager resource tracker’s RPC server address and port. This is used by the (in-cluster) node managers to communicate with the resource manager.                                       |
+| yarn.nodemanager.address                     | 0.0.0.0:0     | The node manager’s RPC server address and port. This is used by (in-cluster) application masters to communicate with node managers.                                                                 |
+| yarn.nodemanager.localizer.address           | 0.0.0.0:8040  | The node manager localizer’s RPC server address and port.                                                                                                                                           |
+| mapreduce.jobhistory.address                 | 0.0.0.0:10020 | The job history server’s RPC server address and port. This is used by the client (typically outside the cluster) to query job history. This property is set in mapred-site.xml.                     |
+ 
+* HTTP Servers:
+| Property name                       | Default value | Description                                                                                                                                                                                                                          |
+| yarn.resourcemanager.webapp.address | 0.0.0.0:8088  | The resource manager’s HTTP server address and port.                                                                                                                                                                                |
+| yarn.nodemanager.webapp.address     | 0.0.0.0:8042  | The node manager’s HTTP server address and port.  yarn.web-proxy.address The web app proxy server’s HTTP server address and port. If not set (the default), then the web app proxy server will run in the resource manager process |
+| mapreduce.jobhistory.webapp.address | 0.0.0.0:19888 | The job history server’s HTTP server address and port. This property is set in mapred-site.xml.                                                                                                                                     |
+| mapreduce.shuffle.port              | 8080          | The shuffle handler’s HTTP port number. This is used for serving map outputs, and is not a user-accessible web UI. This property is set in mapred-site.xml                                                                          |
