@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Administering Hadoop </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">烂笔头</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1">Administering Hadoop</h1>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1">Administering Hadoop</a>
+<ul>
+<li><a href="#toc_1.1">HDFS</a>
+<ul>
+<li><a href="#toc_1.1.1">持久化数据结构</a>
+<ul>
+<li><a href="#toc_1.1.1.1">Namenode的目录结构</a>
+<li><a href="#toc_1.1.1.2">文件系统映象与编辑日志</a>
+<li><a href="#toc_1.1.1.3">Namenode的目录结构</a>
+<li><a href="#toc_1.1.1.4">Secondary Namenode的目录结构</a>
+<li><a href="#toc_1.1.1.5">Datanode的目录结构</a>
+</ul>
+<li><a href="#toc_1.1.2">安全模式</a>
+<li><a href="#toc_1.1.3">审核日志</a>
+<li><a href="#toc_1.1.4">工具集</a>
+</ul>
+<li><a href="#toc_1.2">监控</a>
+<li><a href="#toc_1.3">维护</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">HDFS</h2>
+
+<h3 id="toc_1.1.1">持久化数据结构</h3>
+<p>
+Namenode, Secondary Namenode, Datanode在磁盘上数据是如何存储组织的。
+</p>
+
+<h4 id="toc_1.1.1.1">Namenode的目录结构</h4>
+<pre  class="brush:bash">
+    ${dfs.name.dir}/
+    └── current/
+        ├── VERSION
+        ├── edits
+        ├── fsimage
+        └── fstime
+</pre>
+<ol>
+<li>
+dfs.name.dir 可以指定几个文件夹列表
+
+<li>
+每个文件夹中存放相同的数据
+
+<li>
+推荐其中一个使用NFS文件夹
+
+<li>
+文件VERSION：
+<pre  class="brush:bash">
+    #Tue Mar 10 19:21:36 GMT 2009
+    namespaceID=134368441 #文件系统的唯一id号
+                          #文件系统第一次格式化时创建
+                          #用于检测新添加的datanode,因为它们不知道这个id号
+    cTime=0 # namenode存储创建的时间
+            # 对于新格式化的设备总是0
+            # 升级时会更新这个时间
+    storageType=NAME_NODE # 表名该文件夹存储什么样的数据
+                          # 这个文件夹说明存放namenode的数据
+    layoutVersion=-18 # 文件系统存储数据所使用结构的版本
+                      # 是一个负数
+                      # 升级会变成一个更小的负数，下一个版本-19
+</pre>
+
+</ol>
+
+<h4 id="toc_1.1.1.2">文件系统映象与编辑日志</h4>
+<p>
+<strong>编辑日志edit log:</strong>
+</p>
+<ol>
+<li>
+当对HDFS进行一个写操作时
+
+<li>
+就会在edit log中产生一条记录
+
+<li>
+namenode会在内存中保留一份整个HDFS的元数据
+
+<ul>
+<li>
+它会在edit log更改后更改
+
+<li>
+它服务于对HDFS的读操作
+
+</ul>
+<li>
+edit log的flush与sync
+
+<ul>
+<li>
+它会在向客户端返回success code之前进行
+
+<li>
+namenode需要写多个目录
+
+<li>
+要保证每一个目录都写到了，才返回
+
+</ul>
+</ol>
+
+<p>
+<strong>fsimage:</strong>
+</p>
+<ol>
+<li>
+HDFS元数据checkpoint的持久化数据
+
+<li>
+并不是每个写操作都会触发更新，否则的话这个文件会增长过快
+
+<li>
+当namenode失败时
+
+<ol>
+<li>
+会通过该文件恢复内存中的元数据
+
+<li>
+replay edit log中的操作
+
+</ol>
+<li>
+namenode启动时就是进行的上述操作
+
+</ol>
+ 
+<p>
+<strong>fsimage中的内容:</strong>
+</p>
+<ol>
+<li>
+HDFS中所有文件和目录的inodes
+
+<li>
+一个inode代表一个文件或目录的元数据
+
+<li>
+对于文件
+
+<ul>
+<li>
+replication level
+
+<li>
+modification and access times
+
+<li>
+access permissions
+
+<li>
+block size
+
+<li>
+由哪些blocks组成
+
+</ul>
+<li>
+对于目录
+
+<ul>
+<li>
+modification time
+
+<li>
+permissions
+
+<li>
+quota metadata is stored.
+
+</ul>
+</ol>
+
+<p>
+edit log并没有大小限制，而namenode运行时，并不会有影响，
+但当namenode重启时，会花很长的时间replay这个文件里的操作.
+解决方案就是使用secondary namenode.
+</p>
+
+<p>
+<strong>secondary namenode:</strong>
+</p>
+<ol>
+<li>
+用于根据主结点中的内存元数据生成checkpoint
+
+<li>
+进程的处理过程:
+
+<ol>
+<li>
+The secondary asks the primary to roll its edits file, so new edits go to a new file.
+
+<li>
+The secondary retrieves fsimage and edits from the primary (using HTTP GET).
+
+<li>
+The secondary loads fsimage into memory, applies each operation from edits, then
+    creates a new consolidated fsimage file.
+
+<li>
+The secondary sends the new fsimage back to the primary (using HTTP POST).
+
+<li>
+The primary replaces the old fsimage with the new one from the secondary and the
+    old edits file with the new one it started in step 1. It also updates the fstime file to
+    record the time that the checkpoint was taken.
+
+</ol>
+<li>
+最后primary就会拥有一个最新的fsimage文件和一个小的edit log 文件
+
+<li>
+管理员可以手动触发这个操作: <code>hadoop dfsadmin -saveNamespace</code>
+
+<li>
+这个过程的自动触发有两种情况
+
+<ul>
+<li>
+每小时触发一次，由属性 <code>fs.checkpoint.period</code> 指定
+
+<li>
+当edit log到达64MB时，由属性 <code>fs.checkpoint.size</code> 指定
+
+</ul>
+<li>
+由上面可看出secondary namenode需要有和namenode相近的内存
+
+</ol>
+<p>
+<img src="namenode-checkpointing.png" />
+</p>
+
+<h4 id="toc_1.1.1.3">Namenode的目录结构</h4>
+
+<h4 id="toc_1.1.1.4">Secondary Namenode的目录结构</h4>
+
+<h4 id="toc_1.1.1.5">Datanode的目录结构</h4>
+
+<h3 id="toc_1.1.2">安全模式</h3>
+
+<h3 id="toc_1.1.3">审核日志</h3>
+
+<h3 id="toc_1.1.4">工具集</h3>
+
+<h2 id="toc_1.2">监控</h2>
+
+<h2 id="toc_1.3">维护</h2>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>
