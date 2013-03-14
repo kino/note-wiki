@@ -7,4 +7,5 @@
 # [[hadoop/c5|Developing a MapRduce Application ]]
 # [[hadoop/c6|How MapRduce Works ]]
 # [[hadoop/c9|Setting up a Hadoop Cluster ]]
+# [[hadoop/c10|Administering Hadoop ]]
 # [[hadoop/c6|temp ]]

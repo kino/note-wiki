@@ -1,0 +1,110 @@
+%title Administering Hadoop 
+=Administering Hadoop =
+
+%toc
+
+==HDFS==
+
+===持久化数据结构 ===
+Namenode, Secondary Namenode, Datanode在磁盘上数据是如何存储组织的。
+
+====Namenode的目录结构 ====
+{{{ class="brush:bash"
+    ${dfs.name.dir}/
+    └── current/
+        ├── VERSION
+        ├── edits
+        ├── fsimage
+        └── fstime
+  }}}
+# dfs.name.dir 可以指定几个文件夹列表
+# 每个文件夹中存放相同的数据
+# 推荐其中一个使用NFS文件夹
+# 文件VERSION：
+{{{ class="brush:bash"
+    #Tue Mar 10 19:21:36 GMT 2009
+    namespaceID=134368441 #文件系统的唯一id号
+                          #文件系统第一次格式化时创建
+                          #用于检测新添加的datanode,因为它们不知道这个id号
+    cTime=0 # namenode存储创建的时间
+            # 对于新格式化的设备总是0
+            # 升级时会更新这个时间
+    storageType=NAME_NODE # 表名该文件夹存储什么样的数据
+                          # 这个文件夹说明存放namenode的数据
+    layoutVersion=-18 # 文件系统存储数据所使用结构的版本
+                      # 是一个负数
+                      # 升级会变成一个更小的负数，下一个版本-19
+  }}}
+
+====文件系统映象与编辑日志 ====
+*编辑日志edit log:*
+# 当对HDFS进行一个写操作时
+# 就会在edit log中产生一条记录
+# namenode会在内存中保留一份整个HDFS的元数据
+  * 它会在edit log更改后更改
+  * 它服务于对HDFS的读操作
+# edit log的flush与sync
+  * 它会在向客户端返回success code之前进行
+  * namenode需要写多个目录
+  * 要保证每一个目录都写到了，才返回
+
+*fsimage:*
+# HDFS元数据checkpoint的持久化数据
+# 并不是每个写操作都会触发更新，否则的话这个文件会增长过快
+# 当namenode失败时
+  # 会通过该文件恢复内存中的元数据
+  # replay edit log中的操作
+# namenode启动时就是进行的上述操作
+ 
+*fsimage中的内容:*
+# HDFS中所有文件和目录的inodes
+# 一个inode代表一个文件或目录的元数据
+# 对于文件
+  * replication level
+  * modification and access times
+  * access permissions
+  * block size
+  * 由哪些blocks组成
+# 对于目录
+  * modification time
+  * permissions
+  * quota metadata is stored.
+
+edit log并没有大小限制，而namenode运行时，并不会有影响，
+但当namenode重启时，会花很长的时间replay这个文件里的操作.
+解决方案就是使用secondary namenode.
+
+*secondary namenode:*
+# 用于根据主结点中的内存元数据生成checkpoint
+# 进程的处理过程:
+  # The secondary asks the primary to roll its edits file, so new edits go to a new file.
+  # The secondary retrieves fsimage and edits from the primary (using HTTP GET).
+  # The secondary loads fsimage into memory, applies each operation from edits, then
+    creates a new consolidated fsimage file.
+  # The secondary sends the new fsimage back to the primary (using HTTP POST).
+  # The primary replaces the old fsimage with the new one from the secondary and the
+    old edits file with the new one it started in step 1. It also updates the fstime file to
+    record the time that the checkpoint was taken.
+# 最后primary就会拥有一个最新的fsimage文件和一个小的edit log 文件
+# 管理员可以手动触发这个操作: `hadoop dfsadmin -saveNamespace`
+# 这个过程的自动触发有两种情况
+  * 每小时触发一次，由属性 `fs.checkpoint.period` 指定
+  * 当edit log到达64MB时，由属性 `fs.checkpoint.size` 指定
+# 由上面可看出secondary namenode需要有和namenode相近的内存
+{{namenode-checkpointing.png}}
+
+====Namenode的目录结构 ====
+
+====Secondary Namenode的目录结构 ====
+
+====Datanode的目录结构 ====
+
+===安全模式 ===
+
+===审核日志 ===
+
+===工具集 ===
+
+==监控 ==
+
+==维护 ==
