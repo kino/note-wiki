@@ -93,13 +93,106 @@ edit log并没有大小限制，而namenode运行时，并不会有影响，
 # 由上面可看出secondary namenode需要有和namenode相近的内存
 {{namenode-checkpointing.png}}
 
-====Namenode的目录结构 ====
-
 ====Secondary Namenode的目录结构 ====
+{{{ class="brush:bash"
+    ${fs.checkpoint.dir}/
+    ├── current/
+    │   ├── VERSION
+    │   ├── edits
+    │   ├── fsimage
+    │   └── fstime
+    └── previous.checkpoint/
+         ├── VERSION
+         ├── edits
+         ├── fsimage
+         └── fstime
+  }}}
+# checkpointing进程完毕后，secondary namenode也会拥有一个检查点,放在文件夹previous.checkpoint里
+# 这份数据可以作为namenode元数据的备份
+# secondary namenode的current，previous checkpoint和主namenode的元数据文件夹的结构是一样的
+# namenode失败时
+  # 可以通过-importCheckpoint选项启动secondary namenode, 其将作为主namenode
+  # 它会从fs.checkpoint.dir文件夹里获取最新元数据放入dfs.name.dir里
 
 ====Datanode的目录结构 ====
+{{{ class="brush:bash"
+    ${dfs.data.dir}/
+    └── current/
+         ├── VERSION
+         ├── blk_<id_1>
+         ├── blk_<id_1>.meta
+         ├── blk_<id_2>
+         ├── blk_<id_2>.meta
+         ├── ...
+         ├── blk_<id_64>
+         ├── blk_<id_64>.meta
+         ├── subdir0/
+         ├── subdir1/
+         ├── ...
+         └── subdir63/
+  }}}
+# datanode的目录不需要预先格式化，它会在启动时自动创建
+# 同namenode一样，这里也会有一个VERSION文件
+  * namespceID, cTime 和 layoutVersion同namenode里的一样
+  * namespceID是从namenode里接收的, 当datanode第一次连接时
+  * storgeID是全局内是唯一的，namenode用它来唯一确定一个datanode
+  * storageType用于表明该目录是做什么用的，这里是用于存储datanode数据的
+# 两种以blk_为前缀的文件
+  * 一种就是HDFS块, 存储原始数据
+  * 第二种是HDFS块的元数据，以.meta为后缀， 存放了版本与类型信息，接着是一系列的校验值
+# 当HDFS块的数量到达一定数量后，会创建一个子目录，用于存放新的块和它们的元数据
+  * 通过属性 `dfs.datanode.numblocks` 设置这个数据
+  * 保证了每个文件夹拥有可维护数量的文件
+# 若dfs.data.dir设置了多个目录，分属于不同的磁盘
+  * HDFS会轮循使用这些目录
+  * 不同的目录下不会有重复的块，只有不同的datanode间才有不同的块
 
 ===安全模式 ===
+*Namenode的启动:*
+# 加载fsimage进内存
+# 接收edit log中的所有操作进内存
+# 内存中构建出一份新的fsimage
+# 创建一份新的空的edit log
+# 开始监听RPC和HTTP请求
+ 
+*安全模式:*
+# 上面最后一步前是运行于安全模式的
+# 可运行读元数据的操作，但也不保证完成
+# 读文件的操作，只有当文件的块全部就绪后才可以
+# 修改操作会全部失败
+ 
+*namenode不维护hdfs block的位置信息:*
+# namenode不会持久化hdfs block的位置信息
+# namenode在内存中会有一份这样的信息
+# 在安全模式下，datanode会告诉namenode它所包含的datanode列表
+# 在安全模式下，不会对datanode 进行任何复本操作和删除操作
+# 安全模式退出的条件：
+  # 达到最小复本条件，再等30秒
+  # 最小复本条件默认是99%的块达到了复本要求
+# 新格式化的hdfs集群， namenode并不会进行安全模式
+| Property name              | Type  | Default value | Description                                                                                                                                                                                                                                                                                                            |
+| dfs.replication.min        | int   | 1             | The minimum number of replicas that have to be written for a write to be successful.                                                                                                                                                                                                                                   |
+| dfs.safemode.threshold.pct | float | 0.999         | The proportion of blocks in the system that must meet the minimum replication level defined by dfs.replication.min before the namenode will exit safe mode. Setting this value to 0 or less forces the namenode not to start in safe mode. Setting this value to more than 1 means the namenode never exits safe mode. |
+| dfs.safemode.extension     | int   | 30,000        | The time, in milliseconds, to extend safe mode after the minimum replication condition defined by dfs.safemode.threshold.pct has been satisfied.  For small clusters (tens of nodes), it can be set to 0.                                                                                                              |
+
+===进入与离开安全模式 ===
+# 查看namenode是否在安全模式
+  {{{ class="brush:bash"
+     % hadoop dfsadmin -safemode get
+    }}}
+# 等待namenode退出安全模式
+  {{{ class="brush:bash"
+     hadoop dfsadmin -safemode wait
+     # command to read or write a file
+    }}}
+# 使namenode进入安全模式
+  {{{ class="brush:bash"
+     % hadoop dfsadmin -safemode enter
+    }}}
+# 使namenode离开安全模式
+  {{{ class="brush:bash"
+     % hadoop dfsadmin -safemode leave
+    }}}
 
 ===审核日志 ===
 

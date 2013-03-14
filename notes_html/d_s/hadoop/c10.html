@@ -34,40 +34,40 @@
 			</div>
 			<div id="middle">
 				
-<h1 id="toc_1">Administering Hadoop</h1>
+<h1 id="toc_1"> Administering Hadoop</h1>
 
 <div class="toc">
 <ul>
-<li><a href="#toc_1">Administering Hadoop</a>
+<li><a href="#toc_1"> Administering Hadoop</a>
 <ul>
-<li><a href="#toc_1.1">HDFS</a>
+<li><a href="#toc_1.1">1 HDFS</a>
 <ul>
-<li><a href="#toc_1.1.1">持久化数据结构</a>
+<li><a href="#toc_1.1.1">1.1 持久化数据结构 </a>
 <ul>
-<li><a href="#toc_1.1.1.1">Namenode的目录结构</a>
-<li><a href="#toc_1.1.1.2">文件系统映象与编辑日志</a>
-<li><a href="#toc_1.1.1.3">Namenode的目录结构</a>
-<li><a href="#toc_1.1.1.4">Secondary Namenode的目录结构</a>
-<li><a href="#toc_1.1.1.5">Datanode的目录结构</a>
+<li><a href="#toc_1.1.1.1">1.1.1 Namenode的目录结构 </a>
+<li><a href="#toc_1.1.1.2">1.1.2 文件系统映象与编辑日志 </a>
+<li><a href="#toc_1.1.1.3">1.1.3 Secondary Namenode的目录结构 </a>
+<li><a href="#toc_1.1.1.4">1.1.4 Datanode的目录结构 </a>
 </ul>
-<li><a href="#toc_1.1.2">安全模式</a>
-<li><a href="#toc_1.1.3">审核日志</a>
-<li><a href="#toc_1.1.4">工具集</a>
+<li><a href="#toc_1.1.2">1.2 安全模式</a>
+<li><a href="#toc_1.1.3">1.3 进入与离开安全模式</a>
+<li><a href="#toc_1.1.4">1.4 审核日志</a>
+<li><a href="#toc_1.1.5">1.5 工具集 </a>
 </ul>
-<li><a href="#toc_1.2">监控</a>
-<li><a href="#toc_1.3">维护</a>
+<li><a href="#toc_1.2">2 监控</a>
+<li><a href="#toc_1.3">3 维护</a>
 </ul>
 </ul>
 </div>
 
-<h2 id="toc_1.1">HDFS</h2>
+<h2 id="toc_1.1">1 HDFS</h2>
 
-<h3 id="toc_1.1.1">持久化数据结构</h3>
+<h3 id="toc_1.1.1">1.1 持久化数据结构 </h3>
 <p>
 Namenode, Secondary Namenode, Datanode在磁盘上数据是如何存储组织的。
 </p>
 
-<h4 id="toc_1.1.1.1">Namenode的目录结构</h4>
+<h4 id="toc_1.1.1.1">1.1.1 Namenode的目录结构 </h4>
 <pre  class="brush:bash">
     ${dfs.name.dir}/
     └── current/
@@ -105,7 +105,7 @@ dfs.name.dir 可以指定几个文件夹列表
 
 </ol>
 
-<h4 id="toc_1.1.1.2">文件系统映象与编辑日志</h4>
+<h4 id="toc_1.1.1.2">1.1.2 文件系统映象与编辑日志 </h4>
 <p>
 <strong>编辑日志edit log:</strong>
 </p>
@@ -276,21 +276,282 @@ The primary replaces the old fsimage with the new one from the secondary and the
 <img src="namenode-checkpointing.png" />
 </p>
 
-<h4 id="toc_1.1.1.3">Namenode的目录结构</h4>
+<h4 id="toc_1.1.1.3">1.1.3 Secondary Namenode的目录结构 </h4>
+<pre  class="brush:bash">
+    ${fs.checkpoint.dir}/
+    ├── current/
+    │   ├── VERSION
+    │   ├── edits
+    │   ├── fsimage
+    │   └── fstime
+    └── previous.checkpoint/
+         ├── VERSION
+         ├── edits
+         ├── fsimage
+         └── fstime
+</pre>
+<ol>
+<li>
+checkpointing进程完毕后，secondary namenode也会拥有一个检查点,放在文件夹previous.checkpoint里
 
-<h4 id="toc_1.1.1.4">Secondary Namenode的目录结构</h4>
+<li>
+这份数据可以作为namenode元数据的备份
 
-<h4 id="toc_1.1.1.5">Datanode的目录结构</h4>
+<li>
+secondary namenode的current，previous checkpoint和主namenode的元数据文件夹的结构是一样的
 
-<h3 id="toc_1.1.2">安全模式</h3>
+<li>
+namenode失败时
 
-<h3 id="toc_1.1.3">审核日志</h3>
+<ol>
+<li>
+可以通过-importCheckpoint选项启动secondary namenode, 其将作为主namenode
 
-<h3 id="toc_1.1.4">工具集</h3>
+<li>
+它会从fs.checkpoint.dir文件夹里获取最新元数据放入dfs.name.dir里
 
-<h2 id="toc_1.2">监控</h2>
+</ol>
+</ol>
 
-<h2 id="toc_1.3">维护</h2>
+<h4 id="toc_1.1.1.4">1.1.4 Datanode的目录结构 </h4>
+<pre  class="brush:bash">
+    ${dfs.data.dir}/
+    └── current/
+         ├── VERSION
+         ├── blk_&lt;id_1&gt;
+         ├── blk_&lt;id_1&gt;.meta
+         ├── blk_&lt;id_2&gt;
+         ├── blk_&lt;id_2&gt;.meta
+         ├── ...
+         ├── blk_&lt;id_64&gt;
+         ├── blk_&lt;id_64&gt;.meta
+         ├── subdir0/
+         ├── subdir1/
+         ├── ...
+         └── subdir63/
+</pre>
+<ol>
+<li>
+datanode的目录不需要预先格式化，它会在启动时自动创建
+
+<li>
+同namenode一样，这里也会有一个VERSION文件
+
+<ul>
+<li>
+namespceID, cTime 和 layoutVersion同namenode里的一样
+
+<li>
+namespceID是从namenode里接收的, 当datanode第一次连接时
+
+<li>
+storgeID是全局内是唯一的，namenode用它来唯一确定一个datanode
+
+<li>
+storageType用于表明该目录是做什么用的，这里是用于存储datanode数据的
+
+</ul>
+<li>
+两种以blk_为前缀的文件
+
+<ul>
+<li>
+一种就是HDFS块, 存储原始数据
+
+<li>
+第二种是HDFS块的元数据，以.meta为后缀， 存放了版本与类型信息，接着是一系列的校验值
+
+</ul>
+<li>
+当HDFS块的数量到达一定数量后，会创建一个子目录，用于存放新的块和它们的元数据
+
+<ul>
+<li>
+通过属性 <code>dfs.datanode.numblocks</code> 设置这个数据
+
+<li>
+保证了每个文件夹拥有可维护数量的文件
+
+</ul>
+<li>
+若dfs.data.dir设置了多个目录，分属于不同的磁盘
+
+<ul>
+<li>
+HDFS会轮循使用这些目录
+
+<li>
+不同的目录下不会有重复的块，只有不同的datanode间才有不同的块
+
+</ul>
+</ol>
+
+<h3 id="toc_1.1.2">1.2 安全模式</h3>
+<p>
+<strong>Namenode的启动:</strong>
+</p>
+<ol>
+<li>
+加载fsimage进内存
+
+<li>
+接收edit log中的所有操作进内存
+
+<li>
+内存中构建出一份新的fsimage
+
+<li>
+创建一份新的空的edit log
+
+<li>
+开始监听RPC和HTTP请求
+
+</ol>
+ 
+<p>
+<strong>安全模式:</strong>
+</p>
+<ol>
+<li>
+上面最后一步前是运行于安全模式的
+
+<li>
+可运行读元数据的操作，但也不保证完成
+
+<li>
+读文件的操作，只有当文件的块全部就绪后才可以
+
+<li>
+修改操作会全部失败
+
+</ol>
+ 
+<p>
+<strong>namenode不维护hdfs block的位置信息:</strong>
+</p>
+<ol>
+<li>
+namenode不会持久化hdfs block的位置信息
+
+<li>
+namenode在内存中会有一份这样的信息
+
+<li>
+在安全模式下，datanode会告诉namenode它所包含的datanode列表
+
+<li>
+在安全模式下，不会对datanode 进行任何复本操作和删除操作
+
+<li>
+安全模式退出的条件：
+
+<ol>
+<li>
+达到最小复本条件，再等30秒
+
+<li>
+最小复本条件默认是99%的块达到了复本要求
+
+</ol>
+<li>
+新格式化的hdfs集群， namenode并不会进行安全模式
+
+</ol>
+<table>
+<tr>
+<td>
+Property name
+</td>
+<td>
+Type
+</td>
+<td>
+Default value
+</td>
+<td>
+Description
+</td>
+</tr>
+<tr>
+<td>
+dfs.replication.min
+</td>
+<td>
+int
+</td>
+<td>
+1
+</td>
+<td>
+The minimum number of replicas that have to be written for a write to be successful.
+</td>
+</tr>
+<tr>
+<td>
+dfs.safemode.threshold.pct
+</td>
+<td>
+float
+</td>
+<td>
+0.999
+</td>
+<td>
+The proportion of blocks in the system that must meet the minimum replication level defined by dfs.replication.min before the namenode will exit safe mode. Setting this value to 0 or less forces the namenode not to start in safe mode. Setting this value to more than 1 means the namenode never exits safe mode.
+</td>
+</tr>
+<tr>
+<td>
+dfs.safemode.extension
+</td>
+<td>
+int
+</td>
+<td>
+30,000
+</td>
+<td>
+The time, in milliseconds, to extend safe mode after the minimum replication condition defined by dfs.safemode.threshold.pct has been satisfied.  For small clusters (tens of nodes), it can be set to 0.
+</td>
+</tr>
+</table>
+
+<h3 id="toc_1.1.3">1.3 进入与离开安全模式</h3>
+<ol>
+<li>
+查看namenode是否在安全模式
+<pre  class="brush:bash">
+     % hadoop dfsadmin -safemode get
+</pre>
+
+<li>
+等待namenode退出安全模式
+<pre  class="brush:bash">
+     hadoop dfsadmin -safemode wait
+     # command to read or write a file
+</pre>
+
+<li>
+使namenode进入安全模式
+<pre  class="brush:bash">
+     % hadoop dfsadmin -safemode enter
+</pre>
+
+<li>
+使namenode离开安全模式
+<pre  class="brush:bash">
+     % hadoop dfsadmin -safemode leave
+</pre>
+
+</ol>
+
+<h3 id="toc_1.1.4">1.4 审核日志</h3>
+
+<h3 id="toc_1.1.5">1.5 工具集 </h3>
+
+<h2 id="toc_1.2">2 监控</h2>
+
+<h2 id="toc_1.3">3 维护</h2>
 
 			</div>
 
