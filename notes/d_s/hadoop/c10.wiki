@@ -195,8 +195,95 @@ edit log并没有大小限制，而namenode运行时，并不会有影响，
     }}}
 
 ===审核日志 ===
+hadoop可以对所有的访问记录日志。
+默认没有打开，可以在log4j的配置文件里打开
 
 ===工具集 ===
+====dfsadmin====
+| Command            | Description                                                                                                                                                                                                                                                                                                                                                                                |
+|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -help              | Shows help for a given command, or all commands if no command is specified.                                                                                                                                                                                                                                                                                                                |
+| -report            | Shows filesystem statistics (similar to those shown in the web UI) and information on connected datanodes.                                                                                                                                                                                                                                                                                 |
+| -metasave          | Dumps information to a file in Hadoop’s log directory about blocks that are being replicated or deleted, as well as a list of connected datanodes.                                                                                                                                                                                                                                         |
+| -safemode          | Changes or queries the state of safe mode. See “Safe Mode” on page 344.                                                                                                                                                                                                                                                                                                                    |
+| -saveNamespace     | Saves the current in-memory filesystem image to a new fsimage file and resets the edits file. This operation may be performed only in safe mode.                                                                                                                                                                                                                                           |
+| -refreshNodes      | Updates the set of datanodes that are permitted to connect to the namenode. See “Commissioning and Decommissioning Nodes” on page 359.                                                                                                                                                                                                                                                     |
+| -upgradeProgress   | Gets information on the progress of an HDFS upgrade or forces an upgrade to proceed. See “Upgrades” on page 362.                                                                                                                                                                                                                                                                           |
+| -finalizeUpgrade   | Removes the previous version of the namenode and datanode storage directories. Used after an upgrade has been applied and the cluster is running successfully on the new version. See “Upgrades” on page 362.                                                                                                                                                                              |
+| -setQuota          | Sets directory quotas. Directory quotas set a limit on the number of names (files or directories) in the directory tree. Directory quotas are useful for preventing users from creating large numbers of small files, a measure that helps preserve the namenode’s memory (recall that accounting information for every file, directory, and block in the filesystem is stored in memory). |
+| -clrQuota          | Clears specified directory quotas.                                                                                                                                                                                                                                                                                                                                                         |
+| -setSpaceQuota     | Sets space quotas on directories. Space quotas set a limit on the size of files that may be stored in a directory tree. They are useful for giving users a limited amount of storage.                                                                                                                                                                                                      |
+| -clrSpaceQuota     | Clears specified space quotas.                                                                                                                                                                                                                                                                                                                                                             |
+| -refreshServiceAcl | Refreshes the namenode’s service-level authorization policy file.                                                                                                                                                                                                                                                                                                                          |
+
+====fsck====
+用于检查HDFS和HDFS中文件的健康状况。
+{{{ class="brush:bash"
+    % hadoop fsck /
+    ......................Status: HEALTHY
+    Total size:
+    511799225 B
+    Total dirs: 10
+    Total files: 22
+    Total blocks (validated): 22 (avg. block size 23263601 B)
+    Minimally replicated blocks: 22 (100.0 %)
+    Over-replicated blocks: 0 (0.0 %)
+    Under-replicated blocks: 0 (0.0 %)
+    Mis-replicated blocks: 0 (0.0 %)
+    Default replication factor: 3
+    Average block replication: 3.0
+    Corrupt blocks: 0
+    Missing replicas: 0 (0.0 %)
+    Number of data-nodes: 4
+    Number of racks: 1
+  }}}
+  
+# fsck仅仅从namenode获取数据
+# 不会和任何datanode通信
+# 也不会获取任何文件数据
+# 重要属性说明：
+  * *Over-replicated blocks:* 复本数量超过指定的数量，通常不是什么问题，namenode会删除不需要的
+  * *Under-replicated blocks:* 复本数量不足指定的数量，namenode会自动补足
+  * *Misreplicated blocks:* 不符合复本策略，比如多机架环境，复本都在同一机架，namenode会自动调整 
+  * *Corrupt blocks:* 损坏复本的块，如果复本中至少有一个正常的，就不会报告这项，而是namenode就会修复 
+  * *Missing replicas:* 丢失所有复本 
+# Corrupt和Missing是着重注意的，意味着数据已丢失，下面两个选项可以对这两种文件进行附加操作
+  * *-move* 移动到hdfs中的/lost+found文件夹中 
+  * *-delete* 直接删除
+# 获取一个文件的块信息
+  {{{ class="brush:bash"
+      % hadoop fsck /user/tom/part-00007 -files -blocks -racks
+      /user/tom/part-00007 25582428 bytes, 1 block(s): OK
+      0. blk_-3724870485760122836_1035 len=25582428 repl=3 [/default-rack/10.251.43.2:50010,
+      /default-rack/10.251.27.178:50010, /default-rack/10.251.123.163:50010]
+    }}}
+  * *-files*  显示 文件名 大小 块数量 健康状态
+  * *-blocks* 显示每个块的信息
+  * *-racks* 显示每个块的机架信息和datanode
+
+====datanode block scanner====
+# 用于定期检查验证一个datanode上所有的块
+# 可以查出并修复损坏的块
+# 它维护了一个需要检查块的列表
+# 块默认每三周检查一次，可以通过属性dfs.datanode.scan.period.hours设置
+# 通过http://datanode:50075/blockScannerReport 查看报表
+# 通过http://datanode:50075/blockScannerReport?listblocks 查看每一块的信息
+    
+====balancer====
+# 随着使用，集群中的datanode将变的不平衡，有些过度使用，有些使用很少
+# balancer 是一个守护进程，可以调整这种不平衡，将一些块从过度使用的datanode移到不常使用的datanode
+# 需要遵守复本策略
+# 拥有一个根据磁盘带宽，节流的机制
+# 工作到直到集群平衡
+  * datanode的使用比例和整个集群的使用比例在一个误差范围内，默认是10％
+  * 手工运行时，可以通过参数-threshold指定
+# 手工运行
+  {{{ class="brush:bash"
+      % start-balancer.sh
+    }}}
+# 一个时刻只能有一个实例运行
+# 最终会通过日志的方式产生一个报告
+# 默认限制datanode拷贝数据时的带宽大约为10M/s, 可能通过在hdfs-site.xml中的属性dfs.balance.bandwidthPerSec设置，
 
 ==监控 ==
 

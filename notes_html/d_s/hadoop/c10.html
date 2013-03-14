@@ -34,40 +34,46 @@
 			</div>
 			<div id="middle">
 				
-<h1 id="toc_1"> Administering Hadoop</h1>
+<h1 id="toc_1">Administering Hadoop</h1>
 
 <div class="toc">
 <ul>
-<li><a href="#toc_1"> Administering Hadoop</a>
+<li><a href="#toc_1">Administering Hadoop</a>
 <ul>
-<li><a href="#toc_1.1">1 HDFS</a>
+<li><a href="#toc_1.1">HDFS</a>
 <ul>
-<li><a href="#toc_1.1.1">1.1 持久化数据结构 </a>
+<li><a href="#toc_1.1.1">持久化数据结构</a>
 <ul>
-<li><a href="#toc_1.1.1.1">1.1.1 Namenode的目录结构 </a>
-<li><a href="#toc_1.1.1.2">1.1.2 文件系统映象与编辑日志 </a>
-<li><a href="#toc_1.1.1.3">1.1.3 Secondary Namenode的目录结构 </a>
-<li><a href="#toc_1.1.1.4">1.1.4 Datanode的目录结构 </a>
+<li><a href="#toc_1.1.1.1">Namenode的目录结构</a>
+<li><a href="#toc_1.1.1.2">文件系统映象与编辑日志</a>
+<li><a href="#toc_1.1.1.3">Secondary Namenode的目录结构</a>
+<li><a href="#toc_1.1.1.4">Datanode的目录结构</a>
 </ul>
-<li><a href="#toc_1.1.2">1.2 安全模式</a>
-<li><a href="#toc_1.1.3">1.3 进入与离开安全模式</a>
-<li><a href="#toc_1.1.4">1.4 审核日志</a>
-<li><a href="#toc_1.1.5">1.5 工具集 </a>
+<li><a href="#toc_1.1.2">安全模式</a>
+<li><a href="#toc_1.1.3">进入与离开安全模式</a>
+<li><a href="#toc_1.1.4">审核日志</a>
+<li><a href="#toc_1.1.5">工具集</a>
+<ul>
+<li><a href="#toc_1.1.5.1">dfsadmin</a>
+<li><a href="#toc_1.1.5.2">fsck</a>
+<li><a href="#toc_1.1.5.3">datanode block scanner</a>
+<li><a href="#toc_1.1.5.4">balancer</a>
 </ul>
-<li><a href="#toc_1.2">2 监控</a>
-<li><a href="#toc_1.3">3 维护</a>
+</ul>
+<li><a href="#toc_1.2">监控</a>
+<li><a href="#toc_1.3">维护</a>
 </ul>
 </ul>
 </div>
 
-<h2 id="toc_1.1">1 HDFS</h2>
+<h2 id="toc_1.1">HDFS</h2>
 
-<h3 id="toc_1.1.1">1.1 持久化数据结构 </h3>
+<h3 id="toc_1.1.1">持久化数据结构</h3>
 <p>
 Namenode, Secondary Namenode, Datanode在磁盘上数据是如何存储组织的。
 </p>
 
-<h4 id="toc_1.1.1.1">1.1.1 Namenode的目录结构 </h4>
+<h4 id="toc_1.1.1.1">Namenode的目录结构</h4>
 <pre  class="brush:bash">
     ${dfs.name.dir}/
     └── current/
@@ -105,7 +111,7 @@ dfs.name.dir 可以指定几个文件夹列表
 
 </ol>
 
-<h4 id="toc_1.1.1.2">1.1.2 文件系统映象与编辑日志 </h4>
+<h4 id="toc_1.1.1.2">文件系统映象与编辑日志</h4>
 <p>
 <strong>编辑日志edit log:</strong>
 </p>
@@ -276,7 +282,7 @@ The primary replaces the old fsimage with the new one from the secondary and the
 <img src="namenode-checkpointing.png" />
 </p>
 
-<h4 id="toc_1.1.1.3">1.1.3 Secondary Namenode的目录结构 </h4>
+<h4 id="toc_1.1.1.3">Secondary Namenode的目录结构</h4>
 <pre  class="brush:bash">
     ${fs.checkpoint.dir}/
     ├── current/
@@ -313,7 +319,7 @@ namenode失败时
 </ol>
 </ol>
 
-<h4 id="toc_1.1.1.4">1.1.4 Datanode的目录结构 </h4>
+<h4 id="toc_1.1.1.4">Datanode的目录结构</h4>
 <pre  class="brush:bash">
     ${dfs.data.dir}/
     └── current/
@@ -386,7 +392,7 @@ HDFS会轮循使用这些目录
 </ul>
 </ol>
 
-<h3 id="toc_1.1.2">1.2 安全模式</h3>
+<h3 id="toc_1.1.2">安全模式</h3>
 <p>
 <strong>Namenode的启动:</strong>
 </p>
@@ -516,7 +522,7 @@ The time, in milliseconds, to extend safe mode after the minimum replication con
 </tr>
 </table>
 
-<h3 id="toc_1.1.3">1.3 进入与离开安全模式</h3>
+<h3 id="toc_1.1.3">进入与离开安全模式</h3>
 <ol>
 <li>
 查看namenode是否在安全模式
@@ -545,13 +551,283 @@ The time, in milliseconds, to extend safe mode after the minimum replication con
 
 </ol>
 
-<h3 id="toc_1.1.4">1.4 审核日志</h3>
+<h3 id="toc_1.1.4">审核日志</h3>
+<p>
+hadoop可以对所有的访问记录日志。
+默认没有打开，可以在log4j的配置文件里打开
+</p>
 
-<h3 id="toc_1.1.5">1.5 工具集 </h3>
+<h3 id="toc_1.1.5">工具集</h3>
+<h4 id="toc_1.1.5.1">dfsadmin</h4>
+<table>
+<tr>
+<th>
+Command
+</th>
+<th>
+Description
+</th>
+</tr>
+<tr>
+<td>
+-help
+</td>
+<td>
+Shows help for a given command, or all commands if no command is specified.
+</td>
+</tr>
+<tr>
+<td>
+-report
+</td>
+<td>
+Shows filesystem statistics (similar to those shown in the web UI) and information on connected datanodes.
+</td>
+</tr>
+<tr>
+<td>
+-metasave
+</td>
+<td>
+Dumps information to a file in Hadoop’s log directory about blocks that are being replicated or deleted, as well as a list of connected datanodes.
+</td>
+</tr>
+<tr>
+<td>
+-safemode
+</td>
+<td>
+Changes or queries the state of safe mode. See “Safe Mode” on page 344.
+</td>
+</tr>
+<tr>
+<td>
+-saveNamespace
+</td>
+<td>
+Saves the current in-memory filesystem image to a new fsimage file and resets the edits file. This operation may be performed only in safe mode.
+</td>
+</tr>
+<tr>
+<td>
+-refreshNodes
+</td>
+<td>
+Updates the set of datanodes that are permitted to connect to the namenode. See “Commissioning and Decommissioning Nodes” on page 359.
+</td>
+</tr>
+<tr>
+<td>
+-upgradeProgress
+</td>
+<td>
+Gets information on the progress of an HDFS upgrade or forces an upgrade to proceed. See “Upgrades” on page 362.
+</td>
+</tr>
+<tr>
+<td>
+-finalizeUpgrade
+</td>
+<td>
+Removes the previous version of the namenode and datanode storage directories. Used after an upgrade has been applied and the cluster is running successfully on the new version. See “Upgrades” on page 362.
+</td>
+</tr>
+<tr>
+<td>
+-setQuota
+</td>
+<td>
+Sets directory quotas. Directory quotas set a limit on the number of names (files or directories) in the directory tree. Directory quotas are useful for preventing users from creating large numbers of small files, a measure that helps preserve the namenode’s memory (recall that accounting information for every file, directory, and block in the filesystem is stored in memory).
+</td>
+</tr>
+<tr>
+<td>
+-clrQuota
+</td>
+<td>
+Clears specified directory quotas.
+</td>
+</tr>
+<tr>
+<td>
+-setSpaceQuota
+</td>
+<td>
+Sets space quotas on directories. Space quotas set a limit on the size of files that may be stored in a directory tree. They are useful for giving users a limited amount of storage.
+</td>
+</tr>
+<tr>
+<td>
+-clrSpaceQuota
+</td>
+<td>
+Clears specified space quotas.
+</td>
+</tr>
+<tr>
+<td>
+-refreshServiceAcl
+</td>
+<td>
+Refreshes the namenode’s service-level authorization policy file.
+</td>
+</tr>
+</table>
 
-<h2 id="toc_1.2">2 监控</h2>
+<h4 id="toc_1.1.5.2">fsck</h4>
+<p>
+用于检查HDFS和HDFS中文件的健康状况。
+</p>
+<pre  class="brush:bash">
+    % hadoop fsck /
+    ......................Status: HEALTHY
+    Total size:
+    511799225 B
+    Total dirs: 10
+    Total files: 22
+    Total blocks (validated): 22 (avg. block size 23263601 B)
+    Minimally replicated blocks: 22 (100.0 %)
+    Over-replicated blocks: 0 (0.0 %)
+    Under-replicated blocks: 0 (0.0 %)
+    Mis-replicated blocks: 0 (0.0 %)
+    Default replication factor: 3
+    Average block replication: 3.0
+    Corrupt blocks: 0
+    Missing replicas: 0 (0.0 %)
+    Number of data-nodes: 4
+    Number of racks: 1
+</pre>
+  
+<ol>
+<li>
+fsck仅仅从namenode获取数据
 
-<h2 id="toc_1.3">3 维护</h2>
+<li>
+不会和任何datanode通信
+
+<li>
+也不会获取任何文件数据
+
+<li>
+重要属性说明：
+
+<ul>
+<li>
+<strong>Over-replicated blocks:</strong> 复本数量超过指定的数量，通常不是什么问题，namenode会删除不需要的
+
+<li>
+<strong>Under-replicated blocks:</strong> 复本数量不足指定的数量，namenode会自动补足
+
+<li>
+<strong>Misreplicated blocks:</strong> 不符合复本策略，比如多机架环境，复本都在同一机架，namenode会自动调整 
+
+<li>
+<strong>Corrupt blocks:</strong> 损坏复本的块，如果复本中至少有一个正常的，就不会报告这项，而是namenode就会修复 
+
+<li>
+<strong>Missing replicas:</strong> 丢失所有复本 
+
+</ul>
+<li>
+Corrupt和Missing是着重注意的，意味着数据已丢失，下面两个选项可以对这两种文件进行附加操作
+
+<ul>
+<li>
+<strong>-move</strong> 移动到hdfs中的/lost+found文件夹中 
+
+<li>
+<strong>-delete</strong> 直接删除
+
+</ul>
+<li>
+获取一个文件的块信息
+<pre  class="brush:bash">
+      % hadoop fsck /user/tom/part-00007 -files -blocks -racks
+      /user/tom/part-00007 25582428 bytes, 1 block(s): OK
+      0. blk_-3724870485760122836_1035 len=25582428 repl=3 [/default-rack/10.251.43.2:50010,
+      /default-rack/10.251.27.178:50010, /default-rack/10.251.123.163:50010]
+</pre>
+
+<ul>
+<li>
+<strong>-files</strong>  显示 文件名 大小 块数量 健康状态
+
+<li>
+<strong>-blocks</strong> 显示每个块的信息
+
+<li>
+<strong>-racks</strong> 显示每个块的机架信息和datanode
+
+</ul>
+</ol>
+
+<h4 id="toc_1.1.5.3">datanode block scanner</h4>
+<ol>
+<li>
+用于定期检查验证一个datanode上所有的块
+
+<li>
+可以查出并修复损坏的块
+
+<li>
+它维护了一个需要检查块的列表
+
+<li>
+块默认每三周检查一次，可以通过属性dfs.datanode.scan.period.hours设置
+
+<li>
+通过<a href="http://datanode:50075/blockScannerReport">http://datanode:50075/blockScannerReport</a> 查看报表
+
+<li>
+通过<a href="http://datanode:50075/blockScannerReport?listblocks">http://datanode:50075/blockScannerReport?listblocks</a> 查看每一块的信息
+
+</ol>
+    
+<h4 id="toc_1.1.5.4">balancer</h4>
+<ol>
+<li>
+随着使用，集群中的datanode将变的不平衡，有些过度使用，有些使用很少
+
+<li>
+balancer 是一个守护进程，可以调整这种不平衡，将一些块从过度使用的datanode移到不常使用的datanode
+
+<li>
+需要遵守复本策略
+
+<li>
+拥有一个根据磁盘带宽，节流的机制
+
+<li>
+工作到直到集群平衡
+
+<ul>
+<li>
+datanode的使用比例和整个集群的使用比例在一个误差范围内，默认是10％
+
+<li>
+手工运行时，可以通过参数-threshold指定
+
+</ul>
+<li>
+手工运行
+<pre  class="brush:bash">
+      % start-balancer.sh
+</pre>
+
+<li>
+一个时刻只能有一个实例运行
+
+<li>
+最终会通过日志的方式产生一个报告
+
+<li>
+默认限制datanode拷贝数据时的带宽大约为10M/s, 可能通过在hdfs-site.xml中的属性dfs.balance.bandwidthPerSec设置，
+
+</ol>
+
+<h2 id="toc_1.2">监控</h2>
+
+<h2 id="toc_1.3">维护</h2>
 
 			</div>
 
