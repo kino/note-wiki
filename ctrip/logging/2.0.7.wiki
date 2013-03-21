@@ -1,0 +1,69 @@
+
+# 192.168.63.39
+  # [[|[ ]]] 停Restful
+  # [[|[ ]]] 部署Restful
+  # [[|[ ]]] 启动Restful
+  # [[|[ ]]] 验证Restful
+  # [[|[ ]]] 停Logview
+  # [[|[ ]]] 部署Logview
+  # [[|[ ]]] 启动Logview
+  # [[|[ ]]] 验证TraceView
+  # [[|[ ]]] 停TraceView
+  # [[|[ ]]] 部署TraceView
+  # [[|[ ]]] 启动TraceView
+  # [[|[ ]]] 验证TraceView
+  # [[|[ ]]] 验证UrlReporter
+  # [[|[ ]]] 停UrlReporter
+  # [[|[ ]]] 部署UrlReporter
+  # [[|[ ]]] 启动UrlReporter
+  # [[|[ ]]] 验证UrlReporter
+# 192.168.63.40
+  # [[|[ ]]] 停Restful
+  # [[|[ ]]] 部署Restful
+  # [[|[ ]]] 启动Restful
+  # [[|[ ]]] 验证Restful
+  # [[|[ ]]] 停Logview
+  # [[|[ ]]] 部署Logview
+  # [[|[ ]]] 启动Logview
+  # [[|[ ]]] 验证TraceView
+  # [[|[ ]]] 停TraceView
+  # [[|[ ]]] 部署TraceView
+  # [[|[ ]]] 启动TraceView
+  # [[|[ ]]] 验证TraceView
+  # [[|[ ]]] 验证UrlReporter
+  # [[|[ ]]] 停UrlReporter
+  # [[|[ ]]] 部署UrlReporter
+  # [[|[ ]]] 启动UrlReporter
+  # [[|[ ]]] 验证UrlReporter
+# 192.168.63.36
+  # [[|[ ]]] 修改系统参数
+  # [[|[ ]]] 抽出集群
+  # [[|[ ]]] 等待队列消耗空
+  # [[|[ ]]] 停HBaseWriter HDFSWriter
+  # [[|[ ]]] 停Collector
+  # [[|[ ]]] 部署Collector HBaseWriter
+  # [[|[ ]]] 启Collector
+  # [[|[ ]]] 启HBaseWriter HDFSWriter
+  # [[|[ ]]] 送入集群
+# 192.168.63.37
+  # [[|[ ]]] 修改系统参数
+  # [[|[ ]]] 抽出集群
+  # [[|[ ]]] 等待队列消耗空
+  # [[|[ ]]] 停HBaseWriter HDFSWriter
+  # [[|[ ]]] 停Collector
+  # [[|[ ]]] 部署Collector HBaseWriter
+  # [[|[ ]]] 启Collector
+  # [[|[ ]]] 启HBaseWriter HDFSWriter
+  # [[|[ ]]] 送入集群
+# 192.168.63.38
+  # [[|[ ]]] 修改系统参数
+  # [[|[ ]]] 抽出集群
+  # [[|[ ]]] 等待队列消耗空
+  # [[|[ ]]] 停HBaseWriter HDFSWriter
+  # [[|[ ]]] 停Collector
+  # [[|[ ]]] 部署Collector HBaseWriter
+  # [[|[ ]]] 启Collector
+  # [[|[ ]]] 启HBaseWriter HDFSWriter
+  # [[|[ ]]] 送入集群
+ 
+

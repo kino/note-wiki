@@ -34,46 +34,79 @@
 			</div>
 			<div id="middle">
 				
-<h1 id="toc_1">Administering Hadoop</h1>
+<h1 id="toc_1"> Administering Hadoop</h1>
 
 <div class="toc">
 <ul>
-<li><a href="#toc_1">Administering Hadoop</a>
+<li><a href="#toc_1"> Administering Hadoop</a>
 <ul>
-<li><a href="#toc_1.1">HDFS</a>
+<li><a href="#toc_1.1">1 HDFS</a>
 <ul>
-<li><a href="#toc_1.1.1">持久化数据结构</a>
+<li><a href="#toc_1.1.1">1.1 持久化数据结构 </a>
 <ul>
-<li><a href="#toc_1.1.1.1">Namenode的目录结构</a>
-<li><a href="#toc_1.1.1.2">文件系统映象与编辑日志</a>
-<li><a href="#toc_1.1.1.3">Secondary Namenode的目录结构</a>
-<li><a href="#toc_1.1.1.4">Datanode的目录结构</a>
+<li><a href="#toc_1.1.1.1">1.1.1 Namenode的目录结构 </a>
+<li><a href="#toc_1.1.1.2">1.1.2 文件系统映象与编辑日志 </a>
+<li><a href="#toc_1.1.1.3">1.1.3 Secondary Namenode的目录结构 </a>
+<li><a href="#toc_1.1.1.4">1.1.4 Datanode的目录结构 </a>
 </ul>
-<li><a href="#toc_1.1.2">安全模式</a>
-<li><a href="#toc_1.1.3">进入与离开安全模式</a>
-<li><a href="#toc_1.1.4">审核日志</a>
-<li><a href="#toc_1.1.5">工具集</a>
+<li><a href="#toc_1.1.2">1.2 安全模式</a>
+<li><a href="#toc_1.1.3">1.3 进入与离开安全模式</a>
+<li><a href="#toc_1.1.4">1.4 审核日志</a>
+<li><a href="#toc_1.1.5">1.5 工具集 </a>
 <ul>
-<li><a href="#toc_1.1.5.1">dfsadmin</a>
-<li><a href="#toc_1.1.5.2">fsck</a>
-<li><a href="#toc_1.1.5.3">datanode block scanner</a>
-<li><a href="#toc_1.1.5.4">balancer</a>
+<li><a href="#toc_1.1.5.1">1.5.1 dfsadmin</a>
+<li><a href="#toc_1.1.5.2">1.5.2 fsck</a>
+<li><a href="#toc_1.1.5.3">1.5.3 datanode block scanner</a>
+<li><a href="#toc_1.1.5.4">1.5.4 balancer</a>
 </ul>
 </ul>
-<li><a href="#toc_1.2">监控</a>
-<li><a href="#toc_1.3">维护</a>
+<li><a href="#toc_1.2">2 监控</a>
+<ul>
+<li><a href="#toc_1.2.1">2.1 日志</a>
+<ul>
+<li><a href="#toc_1.2.1.1">2.1.1 设置日志级别</a>
+<li><a href="#toc_1.2.1.2">2.1.2 获取堆栈</a>
+</ul>
+<li><a href="#toc_1.2.2">2.2 度量</a>
+<ul>
+<li><a href="#toc_1.2.2.1">2.2.1 FileContext</a>
+<li><a href="#toc_1.2.2.2">2.2.2 GangliaContext</a>
+<li><a href="#toc_1.2.2.3">2.2.3 NullContextWithUpdateThread</a>
+<li><a href="#toc_1.2.2.4">2.2.4 CompositeContext</a>
+</ul>
+<li><a href="#toc_1.2.3">2.3 JMX</a>
+</ul>
+<li><a href="#toc_1.3">3 维护</a>
+<ul>
+<li><a href="#toc_1.3.1">3.1 日常维护</a>
+<ul>
+<li><a href="#toc_1.3.1.1">3.1.1 元数据备份 </a>
+<li><a href="#toc_1.3.1.2">3.1.2 数据备份</a>
+<li><a href="#toc_1.3.1.3">3.1.3 文件系统备份</a>
+<li><a href="#toc_1.3.1.4">3.1.4 文件系统Balancer</a>
+</ul>
+<li><a href="#toc_1.3.2">3.2 添加或移除结点 </a>
+<ul>
+<li><a href="#toc_1.3.2.1">3.2.1 添加新结点 </a>
+<li><a href="#toc_1.3.2.2">3.2.2 移除老结点 </a>
+</ul>
+<li><a href="#toc_1.3.3">3.3 升级</a>
+<ul>
+<li><a href="#toc_1.3.3.1">3.3.1 HDFS 数据与元数据升级</a>
+</ul>
+</ul>
 </ul>
 </ul>
 </div>
 
-<h2 id="toc_1.1">HDFS</h2>
+<h2 id="toc_1.1">1 HDFS</h2>
 
-<h3 id="toc_1.1.1">持久化数据结构</h3>
+<h3 id="toc_1.1.1">1.1 持久化数据结构 </h3>
 <p>
 Namenode, Secondary Namenode, Datanode在磁盘上数据是如何存储组织的。
 </p>
 
-<h4 id="toc_1.1.1.1">Namenode的目录结构</h4>
+<h4 id="toc_1.1.1.1">1.1.1 Namenode的目录结构 </h4>
 <pre  class="brush:bash">
     ${dfs.name.dir}/
     └── current/
@@ -111,7 +144,7 @@ dfs.name.dir 可以指定几个文件夹列表
 
 </ol>
 
-<h4 id="toc_1.1.1.2">文件系统映象与编辑日志</h4>
+<h4 id="toc_1.1.1.2">1.1.2 文件系统映象与编辑日志 </h4>
 <p>
 <strong>编辑日志edit log:</strong>
 </p>
@@ -282,7 +315,7 @@ The primary replaces the old fsimage with the new one from the secondary and the
 <img src="namenode-checkpointing.png" />
 </p>
 
-<h4 id="toc_1.1.1.3">Secondary Namenode的目录结构</h4>
+<h4 id="toc_1.1.1.3">1.1.3 Secondary Namenode的目录结构 </h4>
 <pre  class="brush:bash">
     ${fs.checkpoint.dir}/
     ├── current/
@@ -319,7 +352,7 @@ namenode失败时
 </ol>
 </ol>
 
-<h4 id="toc_1.1.1.4">Datanode的目录结构</h4>
+<h4 id="toc_1.1.1.4">1.1.4 Datanode的目录结构 </h4>
 <pre  class="brush:bash">
     ${dfs.data.dir}/
     └── current/
@@ -392,7 +425,7 @@ HDFS会轮循使用这些目录
 </ul>
 </ol>
 
-<h3 id="toc_1.1.2">安全模式</h3>
+<h3 id="toc_1.1.2">1.2 安全模式</h3>
 <p>
 <strong>Namenode的启动:</strong>
 </p>
@@ -522,7 +555,7 @@ The time, in milliseconds, to extend safe mode after the minimum replication con
 </tr>
 </table>
 
-<h3 id="toc_1.1.3">进入与离开安全模式</h3>
+<h3 id="toc_1.1.3">1.3 进入与离开安全模式</h3>
 <ol>
 <li>
 查看namenode是否在安全模式
@@ -551,14 +584,14 @@ The time, in milliseconds, to extend safe mode after the minimum replication con
 
 </ol>
 
-<h3 id="toc_1.1.4">审核日志</h3>
+<h3 id="toc_1.1.4">1.4 审核日志</h3>
 <p>
 hadoop可以对所有的访问记录日志。
 默认没有打开，可以在log4j的配置文件里打开
 </p>
 
-<h3 id="toc_1.1.5">工具集</h3>
-<h4 id="toc_1.1.5.1">dfsadmin</h4>
+<h3 id="toc_1.1.5">1.5 工具集 </h3>
+<h4 id="toc_1.1.5.1">1.5.1 dfsadmin</h4>
 <table>
 <tr>
 <th>
@@ -674,7 +707,7 @@ Refreshes the namenode’s service-level authorization policy file.
 </tr>
 </table>
 
-<h4 id="toc_1.1.5.2">fsck</h4>
+<h4 id="toc_1.1.5.2">1.5.2 fsck</h4>
 <p>
 用于检查HDFS和HDFS中文件的健康状况。
 </p>
@@ -761,7 +794,7 @@ Corrupt和Missing是着重注意的，意味着数据已丢失，下面两个选
 </ul>
 </ol>
 
-<h4 id="toc_1.1.5.3">datanode block scanner</h4>
+<h4 id="toc_1.1.5.3">1.5.3 datanode block scanner</h4>
 <ol>
 <li>
 用于定期检查验证一个datanode上所有的块
@@ -783,7 +816,7 @@ Corrupt和Missing是着重注意的，意味着数据已丢失，下面两个选
 
 </ol>
     
-<h4 id="toc_1.1.5.4">balancer</h4>
+<h4 id="toc_1.1.5.4">1.5.4 balancer</h4>
 <ol>
 <li>
 随着使用，集群中的datanode将变的不平衡，有些过度使用，有些使用很少
@@ -825,9 +858,370 @@ datanode的使用比例和整个集群的使用比例在一个误差范围内，
 
 </ol>
 
-<h2 id="toc_1.2">监控</h2>
+<h2 id="toc_1.2">2 监控</h2>
+<h3 id="toc_1.2.1">2.1 日志</h3>
+<p>
+每个守护里程都会产生日志。
+</p>
 
-<h2 id="toc_1.3">维护</h2>
+<h4 id="toc_1.2.1.1">2.1.1 设置日志级别</h4>
+<ol>
+<li>
+可以动态调整日志级别
+
+<li>
+通过网页调整
+
+<ul>
+<li>
+比如 <a href="http://jobtracker-host:50030/logLevel">http://jobtracker-host:50030/logLevel</a>
+
+</ul>
+<li>
+通过命令调整
+<pre  class="brush:bash">
+       % hadoop daemonlog -setlevel jobtracker-host:50030  org.apache.hadoop.mapred.JobTracker DEBUG
+</pre>
+
+</ol>
+
+<h4 id="toc_1.2.1.2">2.1.2 获取堆栈</h4>
+<ol>
+<li>
+任何一个守护进程都可以通过网页获取一个线程的堆栈
+
+<li>
+比如 <a href="http://jobtracker-host:50030/stacks.">http://jobtracker-host:50030/stacks.</a>
+
+</ol>
+
+<h3 id="toc_1.2.2">2.2 度量</h3>
+<ol>
+<li>
+HDFS和MapReduce的守护进程都会收集度量信息
+
+<li>
+比如，datanode收集：写入字节数， 复本块数，客户端请求数
+
+<li>
+这些度量会分四大类：
+
+<ul>
+<li>
+dfs
+
+<li>
+mapred
+
+<li>
+rpc
+
+<li>
+jvm
+
+</ul>
+<li>
+配置文件conf/hadoop-metrics.properties来控制开启如些度量信息，默认是不开启的
+<pre  class="brush:bash">
+      dfs.class=org.apache.hadoop.metrics.spi.NullContext
+      mapred.class=org.apache.hadoop.metrics.spi.NullContext
+      jvm.class=org.apache.hadoop.metrics.spi.NullContext
+      rpc.class=org.apache.hadoop.metrics.spi.NullContext
+</pre>
+
+</ol>
+
+<h4 id="toc_1.2.2.1">2.2.1 FileContext</h4>
+<ol>
+<li>
+将度量信息写入本地文件
+
+<li>
+支持两个配置属性
+
+<ol>
+<li>
+jvm.fileName
+
+<li>
+jvm.period 不设为默认为5s
+<pre  class="brush:bash">
+      jvm.class=org.apache.hadoop.metrics.file.FileContext
+      jvm.fileName=/tmp/jvm_metrics.log
+</pre>
+
+</ol>
+</ol>
+
+<h4 id="toc_1.2.2.2">2.2.2 GangliaContext</h4>
+<ol>
+<li>
+一个开源的针对大规模集群的分布式监控系统
+
+<li>
+支持一个配置属性：servers, 以空格和逗号分隔的被监控服务器列表
+
+</ol>
+ 
+<h4 id="toc_1.2.2.3">2.2.3 NullContextWithUpdateThread</h4>
+<ol>
+<li>
+不会往外吐数据，但会进行统计的，统计的信息在内存中
+
+<li>
+可以通过JMX暴露出去
+
+</ol>
+ 
+<h4 id="toc_1.2.2.4">2.2.4 CompositeContext</h4>
+<ul>
+<li>
+可以指定多个Context:
+<pre  class="brush:bash">
+      jvm.class=org.apache.hadoop.metrics.spi.CompositeContext
+      jvm.arity=2  # 指明个数
+      jvm.sub1.class=org.apache.hadoop.metrics.file.FileContext
+      jvm.fileName=/tmp/jvm_metrics.log
+      jvm.sub2.class=org.apache.hadoop.metrics.ganglia.GangliaContext
+      jvm.servers=ip-10-250-59-159.ec2.internal:8649
+</pre>
+
+</ul>
+     
+<h3 id="toc_1.2.3">2.3 JMX</h3>
+<ol>
+<li>
+可以通过JMX暴露rpc和dfs的度量信息，但不能暴露jvm和mapred的
+
+<li>
+可以通过JConsole查看
+
+<li>
+可以设置访问权限
+
+<li>
+可以通过第三方工具查看，比如jmxquery, 或Nagios的插件
+<pre  class="brush:bash">
+      % ./check_jmx -U service:jmx:rmi:///jndi/rmi://namenode-host:8004/jmxrmi -O \
+      hadoop:service=NameNode,name=FSNamesystemState -A UnderReplicatedBlocks \
+      -w 100 -c 1000 -username monitorRole -password secret
+      JMX OK - UnderReplicatedBlocks is 0
+</pre>
+
+<li>
+提供的MBeans:
+
+</ol>
+<table>
+<tr>
+<th>
+MBean class
+</th>
+<th>
+Daemons
+</th>
+<th>
+Metrics
+</th>
+</tr>
+<tr>
+<td>
+MBNameNodeActivityMBean
+</td>
+<td>
+Namenode
+</td>
+<td>
+Namenode activity metrics, such as the number of create file operations
+</td>
+</tr>
+<tr>
+<td>
+MBFSNamesystemMBean
+</td>
+<td>
+Namenode
+</td>
+<td>
+Namenode status metrics, such as the number of connected datanodes
+</td>
+</tr>
+<tr>
+<td>
+MBDataNodeActivityMBean
+</td>
+<td>
+Datanode
+</td>
+<td>
+Datanode activity metrics, such as the number of bytes read
+</td>
+</tr>
+<tr>
+<td>
+MBFSDatasetMBean
+</td>
+<td>
+Datanode
+</td>
+<td>
+Datanode storage metrics, such as capacity and free storage space
+</td>
+</tr>
+<tr>
+<td>
+MBRpcActivityMBean
+</td>
+<td>
+All daemons that use RPC: namenode, datanode, jobtracker, and tasktracker
+</td>
+<td>
+RPC statistics, such as average processing time
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.3">3 维护</h2>
+
+<h3 id="toc_1.3.1">3.1 日常维护</h3>
+<h4 id="toc_1.3.1.1">3.1.1 元数据备份 </h4>
+<ol>
+<li>
+namenode的元数据应该备份
+
+<li>
+应该保持多个备份：一小时的，一天的，一周的，一月的
+
+<li>
+通常的做法是启一个脚本定时备份secondary namenode的 previous.checkpoint的文件夹
+
+<li>
+检查血仇是否正常：启一个本地namenode进程，看能否正常加载到内存中
+
+</ol>
+ 
+<h4 id="toc_1.3.1.2">3.1.2 数据备份</h4>
+<ol>
+<li>
+HDFS中的数据也有丢失的可能
+
+<li>
+数据需要备份
+
+<li>
+备份哪些数据，通常是那些不可重新产生的
+
+<li>
+还可以对用户目录容量进行限制
+
+<li>
+工具distcp，可以将数据从一个集群拷到另一个集群
+
+</ol>
+ 
+<h4 id="toc_1.3.1.3">3.1.3 文件系统备份</h4>
+<ul>
+<li>
+使用fsck
+
+</ul>
+
+<h4 id="toc_1.3.1.4">3.1.4 文件系统Balancer</h4>
+<ul>
+<li>
+使用balancer
+
+</ul>
+
+<h3 id="toc_1.3.2">3.2 添加或移除结点 </h3>
+<p>
+因扩容增加结点，因故障移除结点。
+</p>
+
+<h4 id="toc_1.3.2.1">3.2.1 添加新结点 </h4>
+<ol>
+<li>
+配置hdfs-site.xml指向 namenode
+
+<li>
+配置mapred-site.xml指向jobtracker
+
+<li>
+启动datanode与jobtracker守护进程
+
+</ol>
+ 
+<p>
+<strong>集群中的机器应该是经过申核的:</strong>
+</p>
+<ol>
+<li>
+不能随便一台机器都可以加入集群
+
+<li>
+如果这台机器不可靠，数据容易丢失
+
+<li>
+通过dfs.hosts控制可以连接namenode的结点
+
+<li>
+通过mapred.hosts控制可以连接jobtracker的结点
+
+</ol>
+ 
+<p>
+<strong>dfs.hosts,mapred.hosts与slave文件的区别 :</strong>
+</p>
+<ol>
+<li>
+*.hosts文件控制能连接主结点的机器，也就是说明结点的合法性
+
+<li>
+slaves文件用于进行集群操作时，在哪些机器上进行操作
+
+</ol>
+ 
+<p>
+<strong>操作步骤:</strong>
+</p>
+<ol>
+<li>
+Add the network addresses of the new nodes to the include file(dfs.hosts mapred.hosts).
+
+<li>
+Update the namenode with the new set of permitted datanodes using this command:
+<pre  calss="brush:bash">
+    % hadoop dfsadmin -refreshNodes
+</pre>
+
+<li>
+Update the jobtracker with the new set of permitted tasktrackers using:
+<pre  calss="brush:bash">
+      % hadoop mradmin -refreshNodes
+</pre>
+
+<li>
+Update the slaves file with the new nodes, so that they are included in future operations performed by the Hadoop control scripts.
+
+<li>
+Start the new datanodes and tasktrackers.
+
+<li>
+Check that the new datanodes and tasktrackers appear in the web UI.
+
+</ol>
+ 
+<h4 id="toc_1.3.2.2">3.2.2 移除老结点 </h4>
+
+<h3 id="toc_1.3.3">3.3 升级</h3>
+<h4 id="toc_1.3.3.1">3.3.1 HDFS 数据与元数据升级</h4>
+<p>
+<strong>开始升级:</strong>
+<strong>等待升级完成:</strong>
+<strong>检查升级:</strong>
+<strong>回滚升级:</strong>
+<strong>完成升级:</strong>
+</p>
 
 			</div>
 

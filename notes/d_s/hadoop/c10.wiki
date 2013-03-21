@@ -286,5 +286,148 @@ hadoop可以对所有的访问记录日志。
 # 默认限制datanode拷贝数据时的带宽大约为10M/s, 可能通过在hdfs-site.xml中的属性dfs.balance.bandwidthPerSec设置，
 
 ==监控 ==
+===日志 ===
+每个守护里程都会产生日志。
+
+====设置日志级别 ====
+# 可以动态调整日志级别
+# 通过网页调整
+  * 比如 http://jobtracker-host:50030/logLevel
+# 通过命令调整
+  {{{ class="brush:bash"
+       % hadoop daemonlog -setlevel jobtracker-host:50030  org.apache.hadoop.mapred.JobTracker DEBUG
+    }}}
+
+====获取堆栈 ====
+# 任何一个守护进程都可以通过网页获取一个线程的堆栈
+# 比如 http://jobtracker-host:50030/stacks.
+
+===度量 ===
+# HDFS和MapReduce的守护进程都会收集度量信息
+# 比如，datanode收集：写入字节数， 复本块数，客户端请求数
+# 这些度量会分四大类：
+  * dfs
+  * mapred
+  * rpc
+  * jvm
+# 配置文件conf/hadoop-metrics.properties来控制开启如些度量信息，默认是不开启的
+  {{{ class="brush:bash"
+      dfs.class=org.apache.hadoop.metrics.spi.NullContext
+      mapred.class=org.apache.hadoop.metrics.spi.NullContext
+      jvm.class=org.apache.hadoop.metrics.spi.NullContext
+      rpc.class=org.apache.hadoop.metrics.spi.NullContext
+    }}}
+
+====FileContext ====
+# 将度量信息写入本地文件
+# 支持两个配置属性
+  # jvm.fileName
+  # jvm.period 不设为默认为5s
+  {{{ class="brush:bash"
+      jvm.class=org.apache.hadoop.metrics.file.FileContext
+      jvm.fileName=/tmp/jvm_metrics.log
+    }}}
+
+====GangliaContext ====
+# 一个开源的针对大规模集群的分布式监控系统
+# 支持一个配置属性：servers, 以空格和逗号分隔的被监控服务器列表
+ 
+====NullContextWithUpdateThread ====
+# 不会往外吐数据，但会进行统计的，统计的信息在内存中
+# 可以通过JMX暴露出去
+ 
+====CompositeContext ====
+* 可以指定多个Context:
+  {{{ class="brush:bash"
+      jvm.class=org.apache.hadoop.metrics.spi.CompositeContext
+      jvm.arity=2  # 指明个数
+      jvm.sub1.class=org.apache.hadoop.metrics.file.FileContext
+      jvm.fileName=/tmp/jvm_metrics.log
+      jvm.sub2.class=org.apache.hadoop.metrics.ganglia.GangliaContext
+      jvm.servers=ip-10-250-59-159.ec2.internal:8649
+     }}}
+     
+===JMX ===
+# 可以通过JMX暴露rpc和dfs的度量信息，但不能暴露jvm和mapred的
+# 可以通过JConsole查看
+# 可以设置访问权限
+# 可以通过第三方工具查看，比如jmxquery, 或Nagios的插件
+  {{{ class="brush:bash"
+      % ./check_jmx -U service:jmx:rmi:///jndi/rmi://namenode-host:8004/jmxrmi -O \
+      hadoop:service=NameNode,name=FSNamesystemState -A UnderReplicatedBlocks \
+      -w 100 -c 1000 -username monitorRole -password secret
+      JMX OK - UnderReplicatedBlocks is 0
+     }}}
+# 提供的MBeans:
+| MBean class             | Daemons                                                                   | Metrics                                                                 |
+|-------------------------|---------------------------------------------------------------------------|-------------------------------------------------------------------------|
+| MBNameNodeActivityMBean | Namenode                                                                  | Namenode activity metrics, such as the number of create file operations |
+| MBFSNamesystemMBean     | Namenode                                                                  | Namenode status metrics, such as the number of connected datanodes      |
+| MBDataNodeActivityMBean | Datanode                                                                  | Datanode activity metrics, such as the number of bytes read             |
+| MBFSDatasetMBean        | Datanode                                                                  | Datanode storage metrics, such as capacity and free storage space       |
+| MBRpcActivityMBean      | All daemons that use RPC: namenode, datanode, jobtracker, and tasktracker | RPC statistics, such as average processing time                         |
 
 ==维护 ==
+
+===日常维护 ===
+====元数据备份 ====
+# namenode的元数据应该备份
+# 应该保持多个备份：一小时的，一天的，一周的，一月的
+# 通常的做法是启一个脚本定时备份secondary namenode的 previous.checkpoint的文件夹
+# 检查血仇是否正常：启一个本地namenode进程，看能否正常加载到内存中
+ 
+====数据备份 ====
+# HDFS中的数据也有丢失的可能
+# 数据需要备份
+# 备份哪些数据，通常是那些不可重新产生的
+# 还可以对用户目录容量进行限制
+# 工具distcp，可以将数据从一个集群拷到另一个集群
+ 
+====文件系统备份 ====
+* 使用fsck
+
+====文件系统Balancer ====
+* 使用balancer
+
+===添加或移除结点 ===
+因扩容增加结点，因故障移除结点。
+
+====添加新结点 ====
+# 配置hdfs-site.xml指向 namenode
+# 配置mapred-site.xml指向jobtracker
+# 启动datanode与jobtracker守护进程
+ 
+*集群中的机器应该是经过申核的:*
+# 不能随便一台机器都可以加入集群
+# 如果这台机器不可靠，数据容易丢失
+# 通过dfs.hosts控制可以连接namenode的结点
+# 通过mapred.hosts控制可以连接jobtracker的结点
+ 
+*dfs.hosts,mapred.hosts与slave文件的区别 :*
+# *.hosts文件控制能连接主结点的机器，也就是说明结点的合法性
+# slaves文件用于进行集群操作时，在哪些机器上进行操作
+ 
+*操作步骤:*
+# Add the network addresses of the new nodes to the include file(dfs.hosts mapred.hosts).
+# Update the namenode with the new set of permitted datanodes using this command:
+  {{{ calss="brush:bash"
+    % hadoop dfsadmin -refreshNodes
+    }}}
+# Update the jobtracker with the new set of permitted tasktrackers using:
+  {{{ calss="brush:bash"
+      % hadoop mradmin -refreshNodes
+    }}}
+# Update the slaves file with the new nodes, so that they are included in future operations performed by the Hadoop control scripts.
+# Start the new datanodes and tasktrackers.
+# Check that the new datanodes and tasktrackers appear in the web UI.
+ 
+====移除老结点 ====
+
+===升级 ===
+====HDFS 数据与元数据升级 ====
+*开始升级:*
+*等待升级完成:*
+*检查升级:*
+*回滚升级:*
+*完成升级:*
+
