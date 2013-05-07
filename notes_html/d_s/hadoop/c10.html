@@ -1167,6 +1167,9 @@ HDFS中的数据也有丢失的可能
 <li>
 通过mapred.hosts控制可以连接jobtracker的结点
 
+<li>
+这两种文件可以叫做include文件
+
 </ol>
  
 <p>
@@ -1212,14 +1215,168 @@ Check that the new datanodes and tasktrackers appear in the web UI.
 </ol>
  
 <h4 id="toc_1.3.2.2">3.2.2 移除老结点 </h4>
+<ol>
+<li>
+当一次性关闭不同机架上多个datanode时，很可能丢失数据
+
+<li>
+所以如果想要移除一台datanode时，应该先告知namenode，在datanode停机前，将数据复制到其他datanode
+
+</ol>
+
+<p>
+如果想要移除一个结点，可以将该文件放在exclude文件中:
+</p>
+<ul>
+<li>
+hdfs对应dfs.hosts.exclude
+
+<li>
+mapreduce对应mapred.hosts.exclude
+
+</ul>
+
+<p>
+一个tacktracker是否允许连接jobtracker
+</p>
+<ol>
+<li>
+出现在include文件中，且不能出现在exclude文件中
+
+<li>
+include文件为空，意味着所有结点都在include中
+
+</ol>
+
+<p>
+一个datanode能否连接namenode
+</p>
+<ol>
+<li>
+同时出现在include文件和exclude文件中，可以连接，但很快会被解除委任
+
+</ol>
+
+
+<p>
+ HDFS include and exclude file precedence:
+<table>
+<tr>
+<td>
+Node appears in include file
+</td>
+<td>
+Node appears in exclude file
+</td>
+<td>
+Interpretation
+</td>
+</tr>
+<tr>
+<td>
+No
+</td>
+<td>
+No
+</td>
+<td>
+Node may not connect.
+</td>
+</tr>
+<tr>
+<td>
+No
+</td>
+<td>
+Yes
+</td>
+<td>
+Node may not connect.
+</td>
+</tr>
+<tr>
+<td>
+Yes
+</td>
+<td>
+No
+</td>
+<td>
+Node may connect.
+</td>
+</tr>
+<tr>
+<td>
+Yes
+</td>
+<td>
+Yes
+</td>
+<td>
+Node may connect and will be decommissioned
+</td>
+</tr>
+</table>
+</p>
+
+<p>
+从集群中移除一个结点：
+</p>
+<ol>
+<li>
+Add the network addresses of the nodes to be decommissioned to the exclude file.  Do not update the include file at this point.
+
+<li>
+Update the namenode with the new set of permitted datanodes, using this command:
+<pre class="brush:bash">
+    % hadoop dfsadmin -refreshNodes
+</pre>
+
+<li>
+Update the jobtracker with the new set of permitted tasktrackers using:
+<pre class="brush:bash">
+     % hadoop mradmin -refreshNodes
+</pre>
+
+<li>
+Go to the web UI and check whether the admin state has changed to “Decommission In Progress” for the datanodes being decommissioned. They will start copying their blocks to other datanodes in the cluster.
+
+<li>
+When all the datanodes report their state as “Decommissioned,” all the blocks have been replicated. Shut down the decommissioned nodes.
+
+<li>
+Remove the nodes from the include file, and run:
+<pre class="brush:bash">
+     % hadoop dfsadmin -refreshNodes
+     % hadoop mradmin -refreshNodes
+</pre>
+
+</ol>
+<p>
+7. Remove the nodes from the slaves file
+</p>
 
 <h3 id="toc_1.3.3">3.3 升级</h3>
+
 <h4 id="toc_1.3.3.1">3.3.1 HDFS 数据与元数据升级</h4>
+
 <p>
 <strong>开始升级:</strong>
+</p>
+
+<p>
 <strong>等待升级完成:</strong>
+</p>
+
+<p>
 <strong>检查升级:</strong>
+</p>
+
+<p>
 <strong>回滚升级:</strong>
+</p>
+
+<p>
 <strong>完成升级:</strong>
 </p>
 

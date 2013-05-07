@@ -402,6 +402,7 @@ hadoop可以对所有的访问记录日志。
 # 如果这台机器不可靠，数据容易丢失
 # 通过dfs.hosts控制可以连接namenode的结点
 # 通过mapred.hosts控制可以连接jobtracker的结点
+# 这两种文件可以叫做include文件
  
 *dfs.hosts,mapred.hosts与slave文件的区别 :*
 # *.hosts文件控制能连接主结点的机器，也就是说明结点的合法性
@@ -422,12 +423,58 @@ hadoop可以对所有的访问记录日志。
 # Check that the new datanodes and tasktrackers appear in the web UI.
  
 ====移除老结点 ====
+# 当一次性关闭不同机架上多个datanode时，很可能丢失数据
+# 所以如果想要移除一台datanode时，应该先告知namenode，在datanode停机前，将数据复制到其他datanode
+
+如果想要移除一个结点，可以将该文件放在exclude文件中:
+* hdfs对应dfs.hosts.exclude
+* mapreduce对应mapred.hosts.exclude
+
+一个tacktracker是否允许连接jobtracker
+# 出现在include文件中，且不能出现在exclude文件中
+# include文件为空，意味着所有结点都在include中
+
+一个datanode能否连接namenode
+# 同时出现在include文件和exclude文件中，可以连接，但很快会被解除委任
+
+
+ HDFS include and exclude file precedence:
+| Node appears in include file | Node appears in exclude file | Interpretation                              |
+| No                           | No                           | Node may not connect.                       |
+| No                           | Yes                          | Node may not connect.                       |
+| Yes                          | No                           | Node may connect.                           |
+| Yes                          | Yes                          | Node may connect and will be decommissioned |
+
+从集群中移除一个结点：
+# Add the network addresses of the nodes to be decommissioned to the exclude file.  Do not update the include file at this point.
+# Update the namenode with the new set of permitted datanodes, using this command:
+  {{{class="brush:bash"
+    % hadoop dfsadmin -refreshNodes
+    }}}
+# Update the jobtracker with the new set of permitted tasktrackers using:
+  {{{class="brush:bash"
+     % hadoop mradmin -refreshNodes
+    }}}
+# Go to the web UI and check whether the admin state has changed to “Decommission In Progress” for the datanodes being decommissioned. They will start copying their blocks to other datanodes in the cluster.
+# When all the datanodes report their state as “Decommissioned,” all the blocks have been replicated. Shut down the decommissioned nodes.
+# Remove the nodes from the include file, and run:
+  {{{class="brush:bash"
+     % hadoop dfsadmin -refreshNodes
+     % hadoop mradmin -refreshNodes
+    }}}
+7. Remove the nodes from the slaves file
 
 ===升级 ===
+
 ====HDFS 数据与元数据升级 ====
+
 *开始升级:*
+
 *等待升级完成:*
+
 *检查升级:*
+
 *回滚升级:*
+
 *完成升级:*
 
