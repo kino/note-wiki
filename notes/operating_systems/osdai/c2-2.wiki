@@ -1,5 +1,6 @@
-%title Processes - Interprocess Communication
-=进程　Processes=
+%title Processes - Interprocess Communication 
+
+=进程　Processes= 
 %toc
 
 ==进程间通信　Interprocess Communication==
@@ -9,4 +10,36 @@
 # 两个或多个进程参与临界活动critical activities时，如何不互相影响
 # 存在信赖关系时，如何确定合适的次序
 
-这三个问题中的后两个同样对线程生效。因为线程共享地址空间，所以第一个问题简单
+这三个问题中的后两个同样对线程生效。因为线程共享地址空间，所以第一个问题对线程来说简单
+
+===竞争条件 Race Condition===
+当两个或多个进程读写某些共享数据时，最终结果严格依赖于它们运行的时序，这种情况被称之为竞争条件。
+
+===临界区 Critical Sections ===
+
+解决竞争条件的问题，需要保证在同一时刻只有一个进程对共享数据进行读写。
+
+换言之，我们需要 *"互斥 mutual exclusion"* :
+* 某种方法来保证当一个进程使用共享变量或文件时，其他进程不允许做同样的事情。
+
+*Critical region* or *Critical setions* : 我们把程序中访问共享内存的部分叫做临界区。
+* 如果使得两个进程不能同时处于临界区，就可以避免竞争条件
+
+一个好的方案需要满足四个条件：
+# 任何两个进程不能同时处于临界区
+# 不对cpu的速度和数目做任何假设
+# 临界区外的进程不能阻塞其他进程
+# 一个进程不能在临界区外永远等待
+
+===忙等待实现互斥===
+
+
+*关闭中断 Disabling Interrupts*:
+
+*锁变量 Lock Variables*:
+
+*严格轮换 Strict Alternation:*
+
+*Peterson的解决方案:*
+
+*TSL指令 The TSL instruction:*
