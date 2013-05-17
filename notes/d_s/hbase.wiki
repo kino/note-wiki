@@ -3,3 +3,4 @@
 # [[hbase/HBase_Introduction|HBase 技术介绍 ]]
  
 # [[hbase/c1|HBase 介绍 ]]
+# [[hbase/c2|HBase 安装 ]]

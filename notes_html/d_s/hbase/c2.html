@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>HBase 安装</title>
+<meta http-equiv="Content-Type" content="text/html; charset=cp936">
+
+<script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../../js/main.js"></script>
+<script type="text/javascript" src="../../js/ASCIIMathML.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../../style.css">
+<link rel="Stylesheet" type="text/css" href="../../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../../index.html">鐑傜瑪澶�</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+<h1 id="toc_1"> HBase 安装</h1>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1"> HBase 安装</a>
+<ul>
+<li><a href="#toc_1.1">1 内存</a>
+<li><a href="#toc_1.2">2 磁盘</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">1 内存</h2>
+<ol>
+<li>
+regionsever的内存大小设置超过16G，被认为是危险的
+
+<li>
+因为GC时可以因为重写碎片化的内存堆，而花费大量的时间
+
+<li>
+从而regionserver被认为死掉了
+
+</ol>
+
+<h2 id="toc_1.2">2 磁盘</h2>
+<ol>
+<li>
+磁盘数最好与cpu内核数达到一个平衡
+
+<li>
+比如一个八核心cpu，最好挂载6块磁盘
+
+<li>
+多了或许并不能改善性能
+
+</ol>
+
+<ul>
+<li>
+master:raid 1 + 0 或 raid 0 + 1
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 鐜嬪叴鏈�
+			</div>
+		</div>
+	<div>
+</body>
+</html>
