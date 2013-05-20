@@ -33,6 +33,11 @@
 
 ===忙等待实现互斥===
 
+*忙等待 Busy Waiting*: 
+# 持续地检测一个值，直到它具有某一特定值
+# 应该避免忙等待，因为它浪费CPU 时间
+# 但在预期等待时间很短时，可以使用
+# 使用busy waiting的锁变量，称之为自旋锁spin lock
 
 *关闭中断 Disabling Interrupts*:
 # 每个进程在进入临界区后，关闭中断
@@ -53,9 +58,94 @@
 
 
 *锁变量 Lock Variables*:
+# 使用一个锁变量lock
+# 如果该变量为0，进程可进入临界区，并置为1
+# 如果该变量为1，说明已经有进程进入临界区，需要等待
+# 这种方案是有漏洞的，因变变量的检查与重置并不是一个原子操作
 
 *严格轮换 Strict Alternation:*
+{{{ class="brush:c"
+    //对于线程a
+    while (TRUE){
+        while(turn != 0) /* loop */;
+        critical_region();
+        turn  = 1;
+        noncritical_region();
+    }
+                            
+    //对于线程b
+    while (TRUE) {
+        while(turn != 1) /* loop */;
+        critical_region();
+        turn  = 0;
+        noncritical_region();
+    } 
+  }}}
+# 注意上面不等同于锁变量
+  # 进程a在turn等于0时才能进入临界区
+  # 进程b在turn等于1时才能进入临界区
+# 也就是两个进程严格遵循一个进一次临界区的规则
+# 如果现在轮到进程a进入临界区，它又不进入，进程b将永远无法进入临界区，这违反了上面第三条规则
 
 *Peterson的解决方案:*
+{{{ class="brush:c"
+    #define FALSE 0 
+    #define TRUE 1 
+    #define N 2                      /* number of processes */
+
+    int turn;                        /* whose turn is it? */
+    int interested[N];               /* all values initially 0 (FALSE)*/ 
+    void enter_region(int process)   /* process is 0 or 1 */
+    {
+        int other;                   /* number of the other process */ 
+        other = 1 - process;         /* the opposite of process */
+        interested[process] = TRUE;  /* show that you are interested */ 
+        turn = process;              /* set flag */
+        while (turn == process && interested[other] == TRUE)   /* null statement */;
+    }
+    void leave_region(int process)   /* process: who is leaving */ 
+    {
+        interested[process] = FALSE; /* indicate departure from critical region */ 
+    }
+  }}}
+# 1981年，G.L.Peterson发明的一种简单互斥算法
+# 两个进程竞争临界区
+# 它使用了一个共享变量指定下一个可以进入临界共的进程
+# 而进入的条件是，轮到自己且对方不在临界区内
+# 进入临界区的进程，在离开临界区时，会清除一个标志
+
 
 *TSL指令 The TSL instruction:*
+{{{ class="brush:c"
+    enter_region:
+        TSL REGISTER,LOCK       |copy LOCK to register and set LOCK to 1 
+        CMP REGISTER,#0         |if it was non zero, LOCK was set, so loop
+        JNE ENTER_REGION        |was LOCK zero?
+        RET                     |return to caller; critical region entered
+    leave_region:
+        MOVE LOCK,#0            |store a 0 in LOCK
+        RET                     |return to caller
+  }}}
+# 需要硬件支持
+# 提供一个指令，TSL
+  # 测试并上锁， Test and Set Lock, TSL
+  # 它将内存中的一个字读入寄存器，将该内存地址设置一个非0值
+  # 保证读操作和写操作是不可分隔的，即原子的
+  # 执行该指令的CPU会锁住内存总线，禁止其他CPU在该指令结束前访问内存
+# 一个进程在进入临界区时使用TSL指令
+# 离开临界区时，使用MOV指令移除锁变量
+# 这是一个需要硬件支持的锁变量
+  
+*忙等待的本质:*
+# 一个进程需要进入临界区时
+# 先检查是否允许进入
+# 若不允许，则原地踏步等待，直到允许为止
+# 浪费CPU
+ 
+*优先级翻转问题 Priority Inversion Problem:*
+# 进程H与进程L竞争临界区，进程H优先级高
+# 进程H进入阻塞状态（等待IO完成），进程L进入临界区
+# 进程H进入就绪状态（IO完成）， 进程L还未退出临界区
+# 进程调度算法调用进程H，等待进入临界区
+# 因为优先级问题，进程L无法被调度到，无法退出临界区
+# 进程H也无法进入临界区
