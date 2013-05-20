@@ -3,15 +3,33 @@
 
 %toc
 
+==CPU ==
+# master和slave应该使用一样的cpu
+
+
 ==内存 ==
 # regionsever的内存大小设置超过16G，被认为是危险的
 # 因为GC时可以因为重写碎片化的内存堆，而花费大量的时间
 # 从而regionserver被认为死掉了
 
 ==磁盘 ==
+# 使用JBOD
 # 磁盘数最好与cpu内核数达到一个平衡
 # 比如一个八核心cpu，最好挂载6块磁盘
 # 多了或许并不能改善性能
+# 磁盘总的IO需求，也是考虑磁盘数目的一个重要因素
 
 * master:raid 1 + 0 或 raid 0 + 1
+
+==Domain Name Service ==
+# HBase使用本地变量hostname获取自身的ip
+# 正向与返回DNS解析都需要工作，通过下列命令验证：
+  {{{ class="brush:bash"
+    ping -c 1 $(hostname)
+    //需要返回公网地址，而不是127.0.0.1, 不然不能正常工作，如果需要可以修改/etc/hosts
+    }}}
+# 配置 `hbase.regionserver.dns.interface` (多网卡时，指定使用的网卡）
+# 配置 `hbase.regionserver.dns.nameserver` (选择系统默认外的nameserver)
+
+
 
