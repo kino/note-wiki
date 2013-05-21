@@ -2,8 +2,8 @@
 <html>
 <head>
 
-<title>HBase ��װ</title>
-<meta http-equiv="Content-Type" content="text/html; charset=cp936">
+<title>HBase 安装</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <script type="text/javascript" src="../../js/jquery-1.6.4.min.js"></script>
 
@@ -34,49 +34,240 @@
 			</div>
 			<div id="middle">
 				
-<h1 id="toc_1"> HBase ��װ</h1>
+<h1 id="toc_1"> HBase 安装</h1>
 
 <div class="toc">
 <ul>
-<li><a href="#toc_1"> HBase ��װ</a>
+<li><a href="#toc_1"> HBase 安装</a>
 <ul>
-<li><a href="#toc_1.1">1 �ڴ�</a>
-<li><a href="#toc_1.2">2 ����</a>
+<li><a href="#toc_1.1">1 CPU</a>
+<li><a href="#toc_1.2">2 内存</a>
+<li><a href="#toc_1.3">3 磁盘</a>
+<li><a href="#toc_1.4">4 Domain Name Service</a>
+<li><a href="#toc_1.5">5 文件句柄限制或进程数限制</a>
+<li><a href="#toc_1.6">6 Datanode Handlers</a>
+<li><a href="#toc_1.7">7 关闭系统的Swap</a>
+<li><a href="#toc_1.8">8 以完全分布式模式启动</a>
 </ul>
 </ul>
 </div>
 
-<h2 id="toc_1.1">1 �ڴ�</h2>
+<h2 id="toc_1.1">1 CPU</h2>
 <ol>
 <li>
-regionsever���ڴ��С���ó���16G������Ϊ��Σ�յ�
-
-<li>
-��ΪGCʱ������Ϊ��д��Ƭ�����ڴ�ѣ������Ѵ�����ʱ��
-
-<li>
-�Ӷ�regionserver����Ϊ������
+master和slave应该使用一样的cpu
 
 </ol>
 
-<h2 id="toc_1.2">2 ����</h2>
+
+<h2 id="toc_1.2">2 内存</h2>
 <ol>
 <li>
-�����������cpu�ں����ﵽһ��ƽ��
+regionsever的内存大小设置超过16G，被认为是危险的
 
 <li>
-����һ���˺���cpu����ù���6�����
+因为GC时可以因为重写碎片化的内存堆，而花费大量的时间
 
 <li>
-���˻��������ܸ�������
+从而regionserver被认为死掉了
+
+</ol>
+
+<h2 id="toc_1.3">3 磁盘</h2>
+<ol>
+<li>
+使用JBOD
+
+<li>
+磁盘数最好与cpu内核数达到一个平衡
+
+<li>
+比如一个八核心cpu，最好挂载6块磁盘
+
+<li>
+多了或许并不能改善性能
+
+<li>
+磁盘总的IO需求，也是考虑磁盘数目的一个重要因素
 
 </ol>
 
 <ul>
 <li>
-master:raid 1 + 0 �� raid 0 + 1
+master:raid 1 + 0 或 raid 0 + 1
 
 </ul>
+
+<h2 id="toc_1.4">4 Domain Name Service</h2>
+<ol>
+<li>
+HBase使用本地变量hostname获取自身的ip
+
+<li>
+正向与返回DNS解析都需要工作，通过下列命令验证：
+<pre  class="brush:bash">
+    ping -c 1 $(hostname)
+    //需要返回公网地址，而不是127.0.0.1, 不然不能正常工作，如果需要可以修改/etc/hosts
+</pre>
+
+<li>
+配置 <code>hbase.regionserver.dns.interface</code> (多网卡时，指定使用的网卡）
+
+<li>
+配置 <code>hbase.regionserver.dns.nameserver</code> (选择系统默认外的nameserver)
+
+</ol>
+
+<h2 id="toc_1.5">5 文件句柄限制或进程数限制</h2>
+<ol>
+<li>
+增加相应的限制，不然可能得到如下异常：
+<pre  class="brush:bash">
+2010-04-06 03:04:37,542 INFO org.apache.hadoop.hdfs.DFSClient: Exception
+in createBlockOutputStream java.io.EOFException
+2010-04-06 03:04:37,542 INFO org.apache.hadoop.hdfs.DFSClient: Abandoning
+block blk_-6935524980745310745_1391901
+</pre>
+
+</ol>
+
+<h2 id="toc_1.6">6 Datanode Handlers</h2>
+<ol>
+<li>
+同一时刻可以服务的文件总数
+
+<li>
+通过配置<code>dfs.datanode.max.xrvievers</code>设置
+
+<li>
+至少设置为4096
+
+<li>
+当该配置被超过时，会有如下导演：
+<pre  class="brush:bash">
+10/12/08 20:10:31 INFO hdfs.DFSClient: Could not obtain block
+blk_XXXXXXXXXXXXXXXXXXXXXX_YYYYYYYY from any node: java.io.IOException:
+No live nodes contain current block. Will get new block locations from
+namenode and retry...
+</pre>
+
+</ol>
+
+<h2 id="toc_1.7">7 关闭系统的Swap</h2>
+
+<h2 id="toc_1.8">8 以完全分布式模式启动</h2>
+<ol>
+<li>
+hbase-site.xml
+<pre  class="brush:xml">
+    &lt;configuration&gt;
+    ...
+    &lt;property&gt;
+        &lt;name&gt;hbase.rootdir&lt;/name&gt;
+        &lt;value&gt;hdfs://namenode.foo.com:9000/hbase&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;hbase.cluster.distributed&lt;/name&gt;
+        &lt;value&gt;true&lt;/value&gt;&lt;!--true--&gt;
+    &lt;/property&gt;
+    ...
+    &lt;/configuration&gt;
+</pre>
+
+<li>
+regionservers
+
+<ol>
+<li>
+一行一个，指明regionservers
+
+<li>
+类似于hadoop中的slaves
+
+</ol>
+<li>
+启动ZooKeeper
+
+<ol>
+<li>
+ZooKeeper可以单独运行，也可以由hbase代管
+
+<ol>
+<li>
+通过hbase-env.sh中的变量HBASE_MANAGES_ZK指定
+
+</ol>
+<li>
+如果由HBase代管
+
+<ol>
+<li>
+就可以在HBase集群启动或关闭的同时启动或关闭ZooKeeper
+
+<li>
+可以在hbase-site.xml配置文件中为zookeeper配置参数，以hbase.zookeeper.property为前缀
+
+<li>
+zoo.zfg如果在classpath中存在的话，优先级比hbase-site.xml的zookeeper的配置高
+
+<li>
+但zookeeper的有些配置必须在hbase-site.xml中指定
+
+<li>
+如果想要避免混淆，最好不要使用zoo.cfg
+
+</ol>
+<li>
+zookeeper结点的数目最好是奇数个1 3 5 7
+
+</ol>
+</ol>
+<table>
+<tr>
+<th>
+Property
+</th>
+<th>
+zoo.cfg + hbase-site.xml
+</th>
+<th>
+hbase-site.xml only
+</th>
+</tr>
+<tr>
+<td>
+hbase.zookeeper.quorum
+</td>
+<td>
+Constructed from server.n lines as specified in zoo.cfg. Overrides any setting in hbase-site.xml.
+</td>
+<td>
+Used as specified.
+</td>
+</tr>
+<tr>
+<td>
+hbase.zookeeper.property.*
+</td>
+<td>
+All values from zoo.cfg override any value specified in hbase-site.xml.
+</td>
+<td>
+Used as specified.
+</td>
+</tr>
+<tr>
+<td>
+zookeeper.*
+</td>
+<td>
+Only taken from hbase-site.xml.
+</td>
+<td>
+Only taken from hbase-site.xml.
+</td>
+</tr>
+</table>
 
 			</div>
 
