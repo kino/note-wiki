@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>报表数据采集框架设计文档 </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../style.css">
+<link rel="Stylesheet" type="text/css" href="../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1"> 报表数据采集框架设计文档</h1>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1"> 报表数据采集框架设计文档</a>
+<ul>
+<li><a href="#toc_1.1">1 概述</a>
+<li><a href="#toc_1.2">2 设计目标</a>
+<li><a href="#toc_1.3">3 总体架构</a>
+<li><a href="#toc_1.4">4 核心算法</a>
+<ul>
+<li><a href="#toc_1.4.1">4.1 需求 </a>
+<li><a href="#toc_1.4.2">4.2 设计一种结构 </a>
+<li><a href="#toc_1.4.3">4.3 加工算法</a>
+</ul>
+<li><a href="#toc_1.5">5 HBase Schema 设计</a>
+<li><a href="#toc_1.6">6 数据采集模块</a>
+<li><a href="#toc_1.7">7 数据统计聚合模块</a>
+<li><a href="#toc_1.8">8 RestApi</a>
+<li><a href="#toc_1.9">9 新增Domain</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">1 概述</h2>
+
+<p>
+目前logging系统采集到了数据，接下来需要以一种好的方式展现给用户，给用户提供更多的帮助。
+而图形方式的报表将是一种很好的选择。比如日志报表、URL报表、SQL报表、WEBService报表等。
+</p>
+
+<p>
+使用metrics可以是种方案，但metrics在速度上有一定的限制，因为它是即时计算。所以想到了使用预先生成结果，使用时可以直接使用，提升用户体验，并可以保留历史统计数据。
+</p>
+
+<p>
+由于基础数据量庞大和以后的易扩展和通用性，比较好的选择是设计一套通用的预处理框架。
+</p>
+
+<h2 id="toc_1.2">2 设计目标</h2>
+<ol>
+<li>
+设计一套通用的数据处理框架，可预生成各类报表和报表图片
+
+<li>
+易扩展，很方便的添加新的需求
+
+</ol>
+
+<h2 id="toc_1.3">3 总体架构</h2>
+<p>
+下面是组件的组成：
+</p>
+
+<p>
+<img src="data-processing.png" />
+</p>
+
+<ul>
+<li>
+<strong>RawDataCollector:</strong> 
+
+<ol>
+<li>
+负责收集报表生成的原始数据
+
+<li>
+需要定义出原始数据应该满足的一种模式
+
+<li>
+提供接口，方便添加原始数据
+
+<li>
+原始数据会存入HBase
+
+</ol>
+<li>
+<strong>DataHouse:</strong>
+
+<ol>
+<li>
+原始数据和加工结果存储的地方
+
+<li>
+加工结果可能作为原始数据进一步加工
+
+<li>
+所以原始数据和加工结果要使用类似的存储结构
+
+</ol>
+<li>
+<strong>Report Manufactory:</strong>
+
+<ol>
+<li>
+负责将原始数据加工成可以直接使用的报表
+
+<li>
+加式的结果可以进一步加工
+
+<li>
+加工方式要有通用性，做到和业务无关
+
+<li>
+可以预定义几种加工方式
+
+</ol>
+</ul>
+
+<h2 id="toc_1.4">4 核心算法</h2>
+<h3 id="toc_1.4.1">4.1 需求 </h3>
+<p>
+简单来说我们需要一个对象的度量数值在一小时内的变化情况，在一天内的变化情况，在一周内的变化情况 ... ...
+</p>
+
+<ul>
+<li>
+如果是一小时，将以分钟为单位聚合，产生60个点
+
+<li>
+如果是一天，将以小时为单位聚合，产生24个点
+
+<li>
+如果是一周，将以天为单位聚合，产生7个点
+
+</ul>
+
+<p>
+而原始数据就是以分钟为单位收集到的数据，然后处理引擎就可以以此产生最终的小时结果，再以小时结果产生天的结果，再以天的结果产生周的结果 ...
+</p>
+
+<p>
+另一种维度的聚合，除了时间维度聚合外，还需要一个范围的聚合，比如一个对象内某种子对象在这个数值上的变化。
+</p>
+
+<p>
+所以原始数据将是以最小对象为单位收集的，然后逐步聚合成大对象。
+</p>
+
+<p>
+可以来看一个具体的例子, 比如有个应用HotelBooking, 拥有10台服务器Server1 ~ Server10, 想看它的一个url /hotels的访问次数分布情况。
+</p>
+<ol>
+<li>
+可以收集这个url /hotels 每分钟在每台server上的访问次数
+
+<li>
+经过聚合可以得到这个url每小时在每台server上访问次数分布
+
+<li>
+上面再聚合可以得到这个url在整个应用上每小时的访问次数分布
+
+<li>
+以此类推可以得到这个url在每天在每台server或整个应用上的分布情况
+
+<li>
+在双维度上不停聚合，就可以得到想要的结果，双维度就是时间维度和范围维度，他们都是从小向大的聚合。
+
+</ol>
+
+<h3 id="toc_1.4.2">4.2 设计一种结构 </h3>
+<p>
+为了做到与业务无关和通用性，需要设计一种结构，方便在双维度上聚合。
+</p>
+
+<table>
+<tr>
+<td>
+type
+</td>
+<td>
+timestamp
+</td>
+<td>
+target
+</td>
+<td>
+p0
+</td>
+<td>
+p1
+</td>
+<td>
+p2
+</td>
+<td>
+p3
+</td>
+<td>
+value
+</td>
+</tr>
+</table>
+
+<ul>
+<li>
+<strong>type:</strong> 说明要统计的类型，比如count,将决定最终聚合的具体算法，最后将提供有限的几种类型
+
+<li>
+<strong>timestamp:</strong>:指明该条记录是哪个时间点的聚合，比如哪一分钟，哪一小时，哪一天
+
+<ol>
+<li>
+对于不同时间刻度的时间聚合可以放到不同的地方，在HBase中就是不同的表中
+
+<li>
+这样对于timestamp代表的是小时聚合还是天聚合就没有疑问了。
+
+</ol>
+<li>
+<strong>target:</strong>:表明对哪种对象的统计，比如'URL','SQL','WEBSERVICE' etc.
+
+<li>
+<strong>p0 ~ pN</strong>: 代表范围，从最大向小过度
+
+<ol>
+<li>
+p0 代表一个具体的appId
+
+<li>
+p1 代表一个具体的url
+
+<li>
+p2 代表一个具体的server
+
+</ol>
+<li>
+type与target可以合并成一个字段
+
+</ul>
+
+<h3 id="toc_1.4.3">4.3 加工算法</h3>
+<p>
+有了数据，如何进行进一步加工,可以将一次时间聚合作为一次操作，
+在此操作过程中，流式扫描区间内的记录，按范围维度聚合成想要的结果
+<table>
+<tr>
+<td>
+p0p1p2..pN
+</td>
+<td>
+p0p1p2..pN-1
+</td>
+<td>
+...
+</td>
+<td>
+p0p1p2
+</td>
+<td>
+p0p1
+</td>
+<td>
+p0
+</td>
+</tr>
+</table>
+</p>
+
+<p>
+<img src="report-aa.png" />
+</p>
+
+<ol>
+<li>
+首先决定聚合某个时间段的度量值，比如某小时，某天
+
+<li>
+从对应的数据源逐条获取该时间段的记录
+
+<li>
+对于每条记录，产生所需每种范围的聚合记录
+
+<li>
+并判定如果是已聚合完的可以flush出去
+
+</ol>
+
+<h2 id="toc_1.5">5 HBase Schema 设计</h2>
+<p>
+计划使用HBase进行数据存储，并根据时间维度进行分表存储。
+</p>
+
+<p>
+<img src="report-hbase.png" />
+</p>
+
+<ol>
+<li>
+分钟级的原始数据将存储在表 <code>freeway.report.minute</code> 里
+
+<li>
+小时级的数据将存储在表 <code>freeway.report.hour</code> 里, 由表 <code>freeway.report.minute</code>里的数据聚合而来
+
+<li>
+天级的数据将存储在表<code>freeway.report.day</code>里, 由表<code>freeway.report.hour</code>里的数据聚合而来
+
+<li>
+周级的数据将存储在表<code>freeway.report.week</code>里, 由表<code>freeway.report.day</code>里的数据聚合而来
+
+</ol>
+
+<p>
+<strong>而这些表将采用统一的schema设计。 </strong>
+</p>
+
+<h2 id="toc_1.6">6 数据采集模块</h2>
+
+<h2 id="toc_1.7">7 数据统计聚合模块</h2>
+
+<h2 id="toc_1.8">8 RestApi</h2>
+
+<h2 id="toc_1.9">9 新增Domain</h2>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

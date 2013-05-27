@@ -1,0 +1,113 @@
+%title HBase 安装
+=HBase 安装=
+
+%toc
+
+==CPU ==
+# master和slave应该使用一样的cpu
+
+
+==内存 ==
+# regionsever的内存大小设置超过16G，被认为是危险的
+# 因为GC时可以因为重写碎片化的内存堆，而花费大量的时间
+# 从而regionserver被认为死掉了
+
+==磁盘 ==
+# 使用JBOD
+# 磁盘数最好与cpu内核数达到一个平衡
+# 比如一个八核心cpu，最好挂载6块磁盘
+# 多了或许并不能改善性能
+# 磁盘总的IO需求，也是考虑磁盘数目的一个重要因素
+
+* master:raid 1 + 0 或 raid 0 + 1
+
+==Domain Name Service ==
+# HBase使用本地变量hostname获取自身的ip
+# 正向与返回DNS解析都需要工作，通过下列命令验证：
+  {{{ class="brush:bash"
+    ping -c 1 $(hostname)
+    //需要返回公网地址，而不是127.0.0.1, 不然不能正常工作，如果需要可以修改/etc/hosts
+    }}}
+# 配置 `hbase.regionserver.dns.interface` (多网卡时，指定使用的网卡）
+# 配置 `hbase.regionserver.dns.nameserver` (选择系统默认外的nameserver)
+
+==文件句柄限制或进程数限制 ==
+# 增加相应的限制，不然可能得到如下异常：
+{{{ class="brush:bash"
+2010-04-06 03:04:37,542 INFO org.apache.hadoop.hdfs.DFSClient: Exception
+in createBlockOutputStream java.io.EOFException
+2010-04-06 03:04:37,542 INFO org.apache.hadoop.hdfs.DFSClient: Abandoning
+block blk_-6935524980745310745_1391901
+}}}
+
+==Datanode Handlers ==
+# 同一时刻可以服务的文件总数
+# 通过配置`dfs.datanode.max.xrvievers`设置
+# 至少设置为4096
+# 当该配置被超过时，会有如下导演：
+{{{ class="brush:bash"
+10/12/08 20:10:31 INFO hdfs.DFSClient: Could not obtain block
+blk_XXXXXXXXXXXXXXXXXXXXXX_YYYYYYYY from any node: java.io.IOException:
+No live nodes contain current block. Will get new block locations from
+namenode and retry...
+}}}
+
+==关闭系统的Swap ==
+
+==以完全分布式模式启动 ==
+# hbase-site.xml
+{{{ class="brush:xml"
+    <configuration>
+    ...
+    <property>
+        <name>hbase.rootdir</name>
+        <value>hdfs://namenode.foo.com:9000/hbase</value>
+    </property>
+    <property>
+        <name>hbase.cluster.distributed</name>
+        <value>true</value><!--true-->
+    </property>
+    ...
+    </configuration>
+  }}}
+# regionservers
+  # 一行一个，指明regionservers
+  # 类似于hadoop中的slaves
+# 启动ZooKeeper
+  # ZooKeeper可以单独运行，也可以由hbase代管
+    # 通过hbase-env.sh中的变量HBASE_MANAGES_ZK指定
+  # 如果由HBase代管
+    # 就可以在HBase集群启动或关闭的同时启动或关闭ZooKeeper
+    # 可以在hbase-site.xml配置文件中为zookeeper配置参数，以hbase.zookeeper.property为前缀
+    # zoo.zfg如果在classpath中存在的话，优先级比hbase-site.xml的zookeeper的配置高
+    # 但zookeeper的有些配置必须在hbase-site.xml中指定
+    # 如果想要避免混淆，最好不要使用zoo.cfg
+  # zookeeper结点的数目最好是奇数个1 3 5 7
+| Property                   | zoo.cfg + hbase-site.xml                                                                          | hbase-site.xml only             |
+|----------------------------|---------------------------------------------------------------------------------------------------|---------------------------------|
+| hbase.zookeeper.quorum     | Constructed from server.n lines as specified in zoo.cfg. Overrides any setting in hbase-site.xml. | Used as specified.              |
+| hbase.zookeeper.property.* | All values from zoo.cfg override any value specified in hbase-site.xml.                           | Used as specified.              |
+| zookeeper.*                | Only taken from hbase-site.xml.                                                                   | Only taken from hbase-site.xml. |
+
+==配置 ==
+# 配置文件都放在一个conf目录中
+# hbase-env.sh配置一些启动参数，主要是启动脚本在用
+# hbase-site.xml覆盖默认配置，指定使用什么文件系统等
+# 分布式模式下，记得将所有的配置同步到所有的结点
+
+===hbase-site.xml与hbase-default.xml ===
+* hbase-site.xml的配置会覆盖hbase-default.xml的配置
+
+可以指定一些使用hdfs的客户端配置，有三种方法：
+* Add a pointer to your HADOOP_CONF_DIR to the HBASE_CLASSPATH environment variable in hbase-env.sh.
+* Add a copy of hdfs-site.xml (or hadoop-site.xml) or, better, symbolic links, under ${HBASE_HOME}/conf.
+* Add them to hbase-site.xml directly.
+比如可设置hbase使用hdfs进的复本数(dfs.replication )
+
+===hbase-env.sh ===
+# 配置jvm参数
+# 配置日志目录、进程优先级、SSH选项、存储PID文件的位置
+ 
+===regionserver ===
+# 文本文件
+# 一行一个hostname,代表一个regionserver
