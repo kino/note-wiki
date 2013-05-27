@@ -338,13 +338,128 @@ p0
 
 <p>
 <strong>而这些表将采用统一的schema设计。 </strong>
+<table>
+<tr>
+<th rowspan="2" colspan="7">
+RowKey
+</th>
+<th colspan="2">
+Column Family
+</th>
+</tr>
+<tr>
+<th>
+data
+</th>
+<th>
+image
+</th>
+</tr>
+<tr>
+<td>
+type
+</td>
+<td>
+timestamp
+</td>
+<td>
+target
+</td>
+<td>
+p0
+</td>
+<td>
+p1
+</td>
+<td>
+p2
+</td>
+<td>
+p3
+</td>
+<td>
+report data
+</td>
+<td>
+image data
+</td>
+</tr>
+</table>
 </p>
 
+<ul>
+<li>
+RowKey的含义参考上面所说
+
+<li>
+Column Family:
+
+<ul>
+<li>
+data, 存放具体的数字数据
+
+<li>
+image, 根据数据生成的报表图片，可以直接使用
+
+</ul>
+</ul>
+
 <h2 id="toc_1.6">6 数据采集模块</h2>
+<p>
+<img src="report-data-collector.png" />
+</p>
+
+<ol>
+<li>
+应该假定数据源，是存在多种的
+
+<li>
+<strong>Collect Interface</strong>:暴露适合的数据采集接口
+
+<ul>
+<li>
+可以添加一条分钟级的原始数据
+
+<li>
+可以更改已存在的一条数据
+
+</ul>
+<li>
+<strong>Domain Object:</strong> 定义出合适的领域模型
+
+<ul>
+<li>
+易于在各组件之间传递数据
+
+<li>
+使内存中的数据语义化
+
+<li>
+易于计算
+
+</ul>
+<li>
+<strong>Persistent Interface</strong>:数据持久化接口
+
+<ul>
+<li>
+将数据持久到HBase中
+
+<li>
+实现接口解耦
+
+</ul>
+</ol>
 
 <h2 id="toc_1.7">7 数据统计聚合模块</h2>
+<p>
+<img src="report-data-manufactory.png" />
+</p>
 
 <h2 id="toc_1.8">8 RestApi</h2>
+<p>
+<img src="report-api.png" />
+</p>
 
 <h2 id="toc_1.9">9 新增Domain</h2>
 

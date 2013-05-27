@@ -97,11 +97,35 @@
 # 周级的数据将存储在表`freeway.report.week`里, 由表`freeway.report.day`里的数据聚合而来
 
 *而这些表将采用统一的schema设计。 *
+| RowKey | >         | >      | >  | >  | >  | >  | Column Family | >          |
+| \/     | >         | >      | >  | >  | >  | >  | data          | image      |
+|--------|-----------|--------|----|----|----|----|---------------|------------|
+| type   | timestamp | target | p0 | p1 | p2 | p3 | report data   | image data |
+
+* RowKey的含义参考上面所说
+* Column Family:
+  * data, 存放具体的数字数据
+  * image, 根据数据生成的报表图片，可以直接使用
 
 ==数据采集模块 ==
+{{report-data-collector.png}}
+
+# 应该假定数据源，是存在多种的
+# *Collect Interface*:暴露适合的数据采集接口
+  * 可以添加一条分钟级的原始数据
+  * 可以更改已存在的一条数据
+# *Domain Object:* 定义出合适的领域模型
+  * 易于在各组件之间传递数据
+  * 使内存中的数据语义化
+  * 易于计算
+# *Persistent Interface*:数据持久化接口
+  * 将数据持久到HBase中
+  * 实现接口解耦
 
 ==数据统计聚合模块 ==
+{{report-data-manufactory.png}}
 
 ==RestApi ==
+{{report-api.png}}
 
 ==新增Domain ==
