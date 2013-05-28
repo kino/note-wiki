@@ -107,6 +107,43 @@
   * data, 存放具体的数字数据
   * image, 根据数据生成的报表图片，可以直接使用
 
+==我们需要的报表 ==
+目前我们需要的报表分以下几种类型：
+* Count:访问次数
+* Latency：latency分布
+* Avg：平均耗时
+* Min：最小耗时
+* Max：最大耗时
+
+需要对以下对象进行统计：
+* URL: 携程的URL
+* SQL: DAL层的Sql执行
+* WebService: 产品之间的WebService调用
+
+数据采集：
+# 目前的数据来源主要来自CFramework中的框架埋点
+# 可以在Writer中将此类metrics转换为原始数据
+
+===URL Report ===
+以URL Report为例，来看数据来源：
+# Visit Count:
+  * Arch.CFramework.StartUp.Tracing.Url_HttpRequest_Count
+# Latency Distribution:
+  * 暂无metrics支持
+  * 自身统计或等metrics埋点
+# Avg Latency:
+  * Arch.CFramework.StartUp.Tracing.Url_HttpRequest_Cost_Avg
+  * 问题是无法聚合，需要添加count的tag
+# Min Latency:
+  * Arch.CFramework.StartUp.Tracing.Url_HttpRequest_Cost_Min
+# Max Latency:
+  * Arch.CFramework.StartUp.Tracing.Url_HttpRequest_Cost_Max
+# Long Url Count:
+# Long Url Ratio:
+# Top N Visited Url:
+# Bottom N Visited Url:
+
+
 ==数据采集模块 ==
 {{report-data-collector.png}}
 
@@ -125,7 +162,35 @@
 ==数据统计聚合模块 ==
 {{report-data-manufactory.png}}
 
+* *Task:*
+  * 把数据操作包装成一个定时调度的Task
+  * 每小时执行一次上一小时的聚合操作
+  * 每天执行一次前一天的聚合操作
+* *DataProcessor:*
+  * 数据聚合引擎
+  * 上面核心算法的实现
+* *ImageGenerator:*
+  * 图片生成器
+  * 为需要的每条数据预先生成报表图片
+  * 根据策略可以添加基准线
+
 ==RestApi ==
 {{report-api.png}}
 
+目前大概会提供四种数据的报表log, url, sql, webservice.
+需要提供友好的api,根据参数获取报表数据或图片
+# log:
+  * 提供Error Count的报表
+# url, log, webservice类似，提供上面url所需的报表：
+  * Visit Count
+  * Latency Distribution
+  * Avg Latency
+  * Min Latency
+  * Max Latency
+  * Long Cost Count
+  * Long Cost Ratio
+  * Top N Visited
+  * Bottom N Visited
+
 ==新增Domain ==
+需要为了用到的数据载体定义出领域模型。
