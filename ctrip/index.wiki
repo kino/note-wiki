@@ -15,6 +15,14 @@
 * [[logging/application_for_mysql|Application for Mysql]]
 * [[logging/log_browser|LogBrowser设计文档 ]]
 * [[logging/log_report|报表数据采集框架设计文档 ]]
+* [[logging/log_assistant|Logging任务调度框架 ]]
 * [[logging/2.0.7|to do ]]
+* [[logging/hive_ad_hoc_log_query|Hive Ad Hoc Log Query ]]
+* [[hbase/hbase&hadoop|HBase & Hadoop ]]
+* [[hbase/Logging-Rawlog-rowkey-design|Logging Rawlog表rowkey设计]]
+* [[hbase/jinqiao-cluster|金桥Hadoop&HBase集群切换]]
+* [[hbase/jinqiao-plan|金桥Hadoop&HBase集群切换步骤]]
+* [[logging/logging-structure|Logging Collector Writer物理部署调整]]
+* [[logging/trace_api|TraceApi设计文档 ]]
  
  

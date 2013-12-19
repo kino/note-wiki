@@ -1,0 +1,64 @@
+%title TraceApi设计文档 
+
+=TraceApi设计文档 =
+
+%toc
+
+==概述 ==
+Trace对于Trouble Shooting, 解析模块依赖关系优化设计，程序性能调优有着重要的价值。从长远来看，对于大数据分析，数据挖掘也是重要的基础数据。
+
+目前我们使用的Trace实现是借鉴了Twitter的开源项目Zipkin, 借鉴了他的schema设计，并使用了他的前端实现。
+
+但随着数据量的越来越大，由于携程的特殊使用场景，这种实现方式需要改进一下。在这种实现方式下：
+* span与log绑定发送，应用端存在内存泄漏的风险
+* 查询web应用是基于play的，并且是非maven项目，与现有logging应用分离且难以维护。
+* api与界面没有分离
+* 难以扩展与修改
+* 针对目前schema的写实现，难以支持现有的数据量，有时会有积累
+* 与Span有关的Log存储了两份，一份单独存储，一份作为span的一部分存储，严重浪费空间
+
+==设计目标 ==
+这次重新设计主要实现以下目标：
+* Agent端实现span与log的分离发送(谢延辉团队)
+* 写实现重新设计，提高性能，并且负责建立span与log的依赖关系
+* 设计实现查询Api，供数据查询与查询界面使用
+* 提供新的trace查询界面（储诚栋团队）
+
+==总体架构 ==
+
+{{centrallogging_trace.png}}
+
+基本理念：
+* *写:* Span 与 Log相互独立的写入HBase
+* *读:* Api读时，再将相应的Span与Log组合成Trace的概念
+
+主要模块与功能：
+* *Agent:* 
+  # 负责从应用端采集数据，发往Collector. 
+  # 改造后，需要将Span与Log分别发送
+* *Collector&Writer:*
+  # 负责将Span与Log分别写入HBase
+  # 向后兼容，对于Span与Log一体的情况，负责将其拆分填充必要信息，再分别写入HBase
+* *HBase(Storage):* 用作存储，设计出合理的Schema
+* *RestApi:*
+  # 负责向外提供合理的rest风格api
+  # 负责将相关的Span与Log分别查询出来，再组装成Trace,作为Api的结果返回
+* *LogBrowser:*
+  # 负责提供界面
+  # 使用RestApi查询出Trace信息，再将其渲染成可神化的图形
+
+需要注意的地方：* 由于Span与Log是分离发送，查询时在组合。所以需要存储如何组合的依赖关系。这个需要在Agent端就填充好。这个需要扩展字段并升级thrift协议. *
+
+==领域模型 ==
+
+==Restful Api 接口 ==
+
+==HBase Schema设计 ==
+
+== 写模块实现 ==
+
+== 读模块实现 ==
+
+== Agent端相关 ==
+
+== Web界面 ==

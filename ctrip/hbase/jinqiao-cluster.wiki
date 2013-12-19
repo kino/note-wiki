@@ -1,0 +1,47 @@
+%title 金桥Hadoop&HBase集群切换
+=金桥Hadoop&HBase集群切换=
+%toc
+
+
+
+==CLogging切换 ==
+计划在20130822进行切换
+服务端切换：
+# 在金桥与福泉部署好已配置好的collector与writer(指向金桥集群)
+# 在福泉停掉老的collector与writer
+# 福泉与金桥开启新的collector，开始积累数据
+# 将freeway.tsdb-uid表与freeway.metrictag表迁移到金桥
+# 启动新的配置好的writer,开始往金桥写数据
+# CLogging完成切换
+# 将老的metrics数据，freeway.tsdb表与自定义namespace的tsdb表迁往金桥，这个过程有点慢
+ 
+应用切换：
+# logBrowser与restApi需要将现有集群切开，启两套
+# 切之前的数据在一个点查，切之后的数据在另一个地方查
+# 到时只能通过ip访问
+注意:
+# 这次metrics的数据要进一个独立的hbase实例
+# CLogging其他数据进另一个独立的集群
+
+
+==IIS切换 ==
+# 提供hbase client配置
+# 计划20130821进行写入测试
+# 切换后需要通知iis数据的消费者进行相应的修改
+# 目前已知的消费者是alert，由陆文负责
+
+==BI切换 ==
+计划在20130822完成前三步，剩余由bi部门接手
+# 将/user/biuser下的数据迁往金桥
+# 将福泉路Hive的meta data同步到金桥
+# 将最近几天rcfile同步的金桥
+# bi部门进行测试
+# 测试通过后，job正式切换
+# 将这段时间的增量数据同步到金桥，同步文件列表由bi部门提供
+
+==UBT切换 ==
+# 使用金桥集群进行基本功能测试
+# 写入数据切换
+# 读数据切换
+# rcfile同步
+我们负责集群配置与rcfile同步，具体如何切换与切换日期由ubt小组决定与执行 

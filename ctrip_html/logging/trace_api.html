@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>TraceApi设计文档 </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../style.css">
+<link rel="Stylesheet" type="text/css" href="../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1"> TraceApi设计文档</h1>
+
+<div class="toc">
+<ul>
+<li><a href="#toc_1"> TraceApi设计文档</a>
+<ul>
+<li><a href="#toc_1.1">1 概述</a>
+<li><a href="#toc_1.2">2 设计目标</a>
+<li><a href="#toc_1.3">3 总体架构</a>
+<li><a href="#toc_1.4">4 领域模型</a>
+<ul>
+<li><a href="#toc_1.4.1">4.1 成员及关系 </a>
+<li><a href="#toc_1.4.2">4.2 实体定义</a>
+</ul>
+<li><a href="#toc_1.5">5 Restful Api 接口</a>
+<ul>
+<li><a href="#toc_1.5.1">5.1 概述</a>
+<li><a href="#toc_1.5.2">5.2 Api接口定义</a>
+<ul>
+<li><a href="#toc_1.5.2.1">5.2.1 Meta Api</a>
+<li><a href="#toc_1.5.2.2">5.2.2 Trace Api</a>
+</ul>
+</ul>
+<li><a href="#toc_1.6">6 HBase Schema设计</a>
+<ul>
+<li><a href="#toc_1.6.0.1">6.0.1 表freeway.trace.index</a>
+<li><a href="#toc_1.6.0.2">6.0.2 表freeway.trace</a>
+<li><a href="#toc_1.6.0.3">6.0.3 表freeway.span</a>
+</ul>
+</ul>
+<li><a href="#toc_1.7">7 读写实现</a>
+<ul>
+<li><a href="#toc_1.7.1">7.1 写模块实现 </a>
+<li><a href="#toc_1.7.2">7.2 读模块实现 </a>
+</ul>
+<li><a href="#toc_1.8">8 Thrift协议升级</a>
+<li><a href="#toc_1.9">9 Agent端相关 </a>
+<li><a href="#toc_1.10">10 Web界面</a>
+</ul>
+</ul>
+</div>
+
+<h2 id="toc_1.1">1 概述</h2>
+<p>
+Trace对于Trouble Shooting, 解析模块依赖关系优化设计，程序性能调优有着重要的价值。从长远来看，对于大数据分析，数据挖掘也是重要的基础数据。
+</p>
+
+<p>
+目前我们使用的Trace实现是借鉴了Twitter的开源项目Zipkin, 借鉴了他的schema设计，并使用了他的前端实现。
+</p>
+
+<p>
+但随着数据量的越来越大，由于携程的特殊使用场景，这种实现方式需要改进一下。在这种实现方式下：
+</p>
+<ul>
+<li>
+span与log绑定发送，应用端存在内存泄漏的风险
+
+<li>
+查询web应用是基于play的，并且是非maven项目，与现有logging应用分离且难以维护。
+
+<li>
+api与界面没有分离
+
+<li>
+难以扩展与修改
+
+<li>
+针对目前schema的写实现，难以支持现有的数据量，有时会有积累
+
+<li>
+与Span有关的Log存储了两份，一份单独存储，一份作为span的一部分存储，严重浪费空间
+
+</ul>
+
+<h2 id="toc_1.2">2 设计目标</h2>
+<p>
+这次重新设计主要实现以下目标：
+</p>
+<ul>
+<li>
+Agent端实现span与log的分离发送(谢延辉团队)
+
+<li>
+写实现重新设计，提高性能，并且负责建立span与log的依赖关系
+
+<li>
+设计实现查询Api，供数据查询与查询界面使用
+
+<li>
+提供新的trace查询界面（储诚栋团队）
+
+</ul>
+
+<h2 id="toc_1.3">3 总体架构</h2>
+
+<p>
+<img src="centrallogging_trace.png" />
+</p>
+
+<p>
+基本理念：
+</p>
+<ul>
+<li>
+<strong>写:</strong> Span 与 Log相互独立的写入HBase
+
+<li>
+<strong>读:</strong> Api读时，再将相应的Span与Log组合成Trace的概念
+
+</ul>
+
+<p>
+主要模块与功能：
+</p>
+<ul>
+<li>
+<strong>Agent:</strong> 
+
+<ol>
+<li>
+负责从应用端采集数据，发往Collector. 
+
+<li>
+改造后，需要将Span与Log分别发送
+
+</ol>
+<li>
+<strong>Collector&amp;Writer:</strong>
+
+<ol>
+<li>
+负责将Span与Log分别写入HBase
+
+<li>
+向后兼容，对于Span与Log一体的情况，负责将其拆分填充必要信息，再分别写入HBase
+
+</ol>
+<li>
+<strong>HBase(Storage):</strong> 用作存储，设计出合理的Schema
+
+<li>
+<strong>RestApi:</strong>
+
+<ol>
+<li>
+负责向外提供合理的rest风格api
+
+<li>
+负责将相关的Span与Log分别查询出来，再组装成Trace,作为Api的结果返回
+
+</ol>
+<li>
+<strong>LogBrowser:</strong>
+
+<ol>
+<li>
+负责提供界面
+
+<li>
+使用RestApi查询出Trace信息，再将其渲染成可神化的图形
+
+</ol>
+</ul>
+
+<p>
+需要注意的地方: <strong>由于Span与Log是分离发送，查询时在组合。所以需要存储如何组合的依赖关系。这个需要在Agent端就填充好。这个需要扩展字段并升级thrift协议.</strong>
+</p>
+
+<h2 id="toc_1.4">4 领域模型</h2>
+
+<h3 id="toc_1.4.1">4.1 成员及关系 </h3>
+<p>
+<img src="centrallogging_tracedomain.png" />
+</p>
+
+<p>
+上图中的对象：
+</p>
+<ul>
+<li>
+<strong>Trace:</strong> 代表一次调用追踪
+
+<li>
+<strong>BaseEventDomain:</strong> 基类，代表了数据来源。
+
+<li>
+<strong>Span:</strong> 代表一个trace实例中的一次方法追踪
+
+<li>
+<strong>Log:</strong> 代表一条日志
+
+</ul>
+
+<p>
+<strong>总结:</strong> 
+</p>
+<ul>
+<li>
+一个Trace代表一次调用追踪
+
+<li>
+Trace可以被看作是抽象的，相关的Span组合在一起，就有了Trace的概念, Trace与Span一对多关系
+
+<li>
+一个Trace中的所有Span组成一个树形结构，即除了RootSpan外，任何一个Span都有一个Parent Span
+
+<li>
+每个Span中可能包含多条Log
+
+<li>
+Log可以单独存在，即并不属于任何Span
+
+<li>
+Log如果存在于Span，同时只能存在于一个Span中，Span与Log一对多关系
+
+</ul>
+
+<h3 id="toc_1.4.2">4.2 实体定义</h3>
+
+<p>
+<strong>BaseEventDomain:</strong> 
+<table>
+<tr>
+<th>
+属性 
+</th>
+<th>
+类型
+</th>
+<th>
+说明
+</th>
+</tr>
+<tr>
+<td>
+type
+</td>
+<td>
+String
+</td>
+<td>
+数据分类，保留使用 
+</td>
+</tr>
+<tr>
+<td>
+hostName
+</td>
+<td>
+String
+</td>
+<td>
+数据来源的服务器的host name
+</td>
+</tr>
+<tr>
+<td>
+hostIP
+</td>
+<td>
+String
+</td>
+<td>
+数据来源的服务器的ip
+</td>
+</tr>
+<tr>
+<td>
+processId
+</td>
+<td>
+String
+</td>
+<td>
+产生该数据的进程号 
+</td>
+</tr>
+<tr>
+<td>
+threadId
+</td>
+<td>
+long
+</td>
+<td>
+产生该数据的线程号 
+</td>
+</tr>
+<tr>
+<td>
+sequenceNo
+</td>
+<td>
+long
+</td>
+<td>
+来自于同一数据源(具体到线程)的某一类数据产生的顺序序列号 
+</td>
+</tr>
+<tr>
+<td>
+route
+</td>
+<td>
+String
+</td>
+<td>
+路由打点信息，数据从agent发出到持久化，经过和角色的时间戳信息
+</td>
+</tr>
+</table>
+</p>
+
+<p>
+<strong>Log:</strong> 
+<table>
+<tr>
+<th>
+属性 
+</th>
+<th>
+类型
+</th>
+<th>
+说明
+</th>
+</tr>
+<tr>
+<td>
+rowKey
+</td>
+<td>
+String
+</td>
+<td>
+Log在Hbase中的row key
+</td>
+</tr>
+<tr>
+<td>
+logId
+</td>
+<td>
+long
+</td>
+<td>
+Log的id号，一般由agent产生，并不是全局唯一
+</td>
+</tr>
+<tr>
+<td>
+logType
+</td>
+<td>
+LogType
+</td>
+<td>
+Log的类型 
+</td>
+</tr>
+<tr>
+<td>
+logLevel
+</td>
+<td>
+LogLevel
+</td>
+<td>
+Log的level
+</td>
+</tr>
+<tr>
+<td>
+traceId
+</td>
+<td>
+long
+</td>
+<td>
+Log产生时，如果存在trace,trace的Id号 
+</td>
+</tr>
+<tr>
+<td>
+spanId
+</td>
+<td>
+String
+</td>
+<td>
+如果Log是在某个Span生命周期记的，对应Span的id号 
+</td>
+</tr>
+<tr>
+<td>
+source
+</td>
+<td>
+String
+</td>
+<td>
+Log的来源，比如某个类名
+</td>
+</tr>
+<tr>
+<td>
+title
+</td>
+<td>
+String
+</td>
+<td>
+日志title
+</td>
+</tr>
+<tr>
+<td>
+message
+</td>
+<td>
+String
+</td>
+<td>
+日志内容
+</td>
+</tr>
+<tr>
+<td>
+attributs
+</td>
+<td>
+String
+</td>
+<td>
+日志附加属性，键值对
+</td>
+</tr>
+<tr>
+<td>
+createdTime
+</td>
+<td>
+String
+</td>
+<td>
+数据来源的服务器的host name
+</td>
+</tr>
+</table>
+</p>
+
+<p>
+<strong>Span:</strong> 
+<table>
+<tr>
+<th>
+属性 
+</th>
+<th>
+类型
+</th>
+<th>
+说明
+</th>
+</tr>
+<tr>
+<td>
+rowKey
+</td>
+<td>
+String
+</td>
+<td>
+Span在Hbase中的row key
+</td>
+</tr>
+<tr>
+<td>
+serviceName
+</td>
+<td>
+String
+</td>
+<td>
+对应的service name
+</td>
+</tr>
+<tr>
+<td>
+spanName
+</td>
+<td>
+String
+</td>
+<td>
+对应的service的method name
+</td>
+</tr>
+<tr>
+<td>
+spanType
+</td>
+<td>
+SpanType
+</td>
+<td>
+Log的level
+</td>
+</tr>
+<tr>
+<td>
+traceId
+</td>
+<td>
+long
+</td>
+<td>
+span所属trace的Id号 
+</td>
+</tr>
+<tr>
+<td>
+spanId
+</td>
+<td>
+long
+</td>
+<td>
+span的id号，一般由agent产生，并不是全局唯一
+</td>
+</tr>
+<tr>
+<td>
+parentId
+</td>
+<td>
+long
+</td>
+<td>
+此span父span的id号 
+</td>
+</tr>
+<tr>
+<td>
+startTime
+</td>
+<td>
+String
+</td>
+<td>
+span的开始时间 
+</td>
+</tr>
+<tr>
+<td>
+stopTime
+</td>
+<td>
+String
+</td>
+<td>
+span的结束时间 
+</td>
+</tr>
+<tr>
+<td>
+isUnfinished
+</td>
+<td>
+String
+</td>
+<td>
+此span是否是正常结束的，通过stop方法
+</td>
+</tr>
+<tr>
+<td>
+logs
+</td>
+<td>
+List
+</td>
+<td>
+此span所包含的日志 
+</td>
+</tr>
+</table>
+</p>
+
+<p>
+<strong>Trace:</strong> 
+<table>
+<tr>
+<th>
+属性 
+</th>
+<th>
+类型
+</th>
+<th>
+说明
+</th>
+</tr>
+<tr>
+<td>
+rowKey
+</td>
+<td>
+String
+</td>
+<td>
+Trace在Hbase中的row key
+</td>
+</tr>
+<tr>
+<td>
+traceId
+</td>
+<td>
+long
+</td>
+<td>
+trace的Id号 
+</td>
+</tr>
+<tr>
+<td>
+spans
+</td>
+<td>
+List
+</td>
+<td>
+此trace所包含的Span
+</td>
+</tr>
+</table>
+</p>
+
+<h2 id="toc_1.5">5 Restful Api 接口</h2>
+
+<p>
+<img src="logging-rest_trace.png" />
+</p>
+
+<h3 id="toc_1.5.1">5.1 概述</h3>
+
+<p>
+用于提供trace相关的rest api, 主要返回两种数据xml和json. trace相关的api主要分为两类：
+</p>
+<ul>
+<li>
+<strong>meta:</strong> 元数据接口，用于获取追踪过的某个app的service和method(spanName)。
+
+<li>
+<strong>data:</strong> 数据接口，根据查询条件获取具体的trace实例
+
+</ul>
+
+<h3 id="toc_1.5.2">5.2 Api接口定义</h3>
+
+<h4 id="toc_1.5.2.1">5.2.1 Meta Api</h4>
+<table>
+<tr>
+<th>
+Api 地址
+</th>
+<th>
+支持的方法 
+</th>
+<th>
+请求参数
+</th>
+<th>
+返回
+</th>
+<th>
+描述
+</th>
+</tr>
+<tr>
+<td colspan="5">
+<em><strong>/logging/meta/apps/{appId}/appServices</strong></em>
+</td>
+</tr>
+<tr>
+<td>
+&nbsp;
+</td>
+<td>
+GET
+</td>
+<td>
+路径参数：appId
+</td>
+<td>
+JSON/XML
+</td>
+<td>
+获取某个应用的开启过trace的service列表
+</td>
+</tr>
+<tr>
+<td colspan="5">
+<em><strong>/logging/meta/apps/{appId}/appServices/{serviceName}</strong></em>
+</td>
+</tr>
+<tr>
+<td>
+&nbsp;
+</td>
+<td>
+GET
+</td>
+<td>
+路径参数：appId，serviceName
+</td>
+<td>
+JSON/XML
+</td>
+<td>
+获取某个应用的某个具体的Service,返回值包含这个service的method列表
+</td>
+</tr>
+</table>
+
+<h4 id="toc_1.5.2.2">5.2.2 Trace Api</h4>
+<table>
+<tr>
+<th>
+Api 地址
+</th>
+<th>
+支持的方法 
+</th>
+<th>
+请求参数
+</th>
+<th>
+返回
+</th>
+<th>
+描述
+</th>
+</tr>
+<tr>
+<td colspan="5">
+<em><strong>/logging/data/traces</strong></em>
+</td>
+</tr>
+<tr>
+<td>
+&nbsp;
+</td>
+<td>
+GET
+</td>
+<td>
+URL 参数：appId, serviceName, methodName, startDate, endDate
+</td>
+<td>
+JSON/XML
+</td>
+<td>
+根据查询条件获取trace实例列表
+</td>
+</tr>
+<tr>
+<td colspan="5">
+<em><strong>/logging/data/traces/{traceId}</strong></em>
+</td>
+</tr>
+<tr>
+<td>
+&nbsp;
+</td>
+<td>
+GET
+</td>
+<td>
+路径参数：traceId
+</td>
+<td>
+JSON/XML
+</td>
+<td>
+根据traceId获取某一个具体的trace实例
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.6">6 HBase Schema设计</h2>
+
+<p>
+为了实现上述目标，需要重新设计trace相关的数据如何在hbase中存储。
+log存储不在改变，主要是trace和span相关的hbase table schema的设计。
+</p>
+
+<h4 id="toc_1.6.0.1">6.0.1 表freeway.trace.index</h4>
+<table>
+<tr>
+<th colspan="12">
+rowkey
+</th>
+<th>
+column family:trace
+</th>
+</tr>
+<tr>
+<td>
+AppId
+</td>
+<td>
+Days
+</td>
+<td>
+Seconds
+</td>
+<td>
+DC
+</td>
+<td>
+ServiceName
+</td>
+<td>
+SpanName
+</td>
+<td>
+HostName
+</td>
+<td>
+IP
+</td>
+<td>
+ThreadId
+</td>
+<td>
+TraceId
+</td>
+<td>
+SpanId
+</td>
+<td>
+AddtionalInfo
+</td>
+<td rowspan="2">
+freeway.trace RowKey
+</td>
+</tr>
+<tr>
+<td>
+3B
+</td>
+<td>
+1B
+</td>
+<td>
+3B
+</td>
+<td>
+1B
+</td>
+<td>
+4B
+</td>
+<td>
+4B
+</td>
+<td>
+4B
+</td>
+<td>
+1B
+</td>
+<td>
+1B
+</td>
+<td>
+1B
+</td>
+<td>
+1B
+</td>
+<td>
+9B x 8 +7
+</td>
+</tr>
+</table>
+
+<p>
+实际上是span的index, 每一个span增加一条记录。 <strong>rowkey组成:</strong>
+</p>
+
+<ol>
+<li>
+<strong>AppId:</strong> 一数字,为了优化存储，足够散列，由原始appId计算获得:  appid-&gt;bitreveal
+
+<li>
+<strong>Days:</strong> 距离1970/01/01 00:00的天数对30取模
+
+<li>
+<strong>Seconds:</strong> 倒序 距离一天结束的秒数，即 3600*24 - (Hour x 3600 + Seconds) , 
+
+<li>
+<strong>DC:</strong> 数据中心，保留使用
+
+<li>
+<strong>ServiceName:</strong> 对ServiceName取4字节的Hash 
+
+<li>
+<strong>SpanName:</strong> 对SpanName取4字节的Hash 
+
+<li>
+<strong>HostName:</strong> 对HostName取4字节的Hash 
+
+<li>
+<strong>IP:</strong> 转换成数字
+
+<li>
+<strong>ThreadId:</strong> 数字
+
+<li>
+<strong>TraceId:</strong> 数字 
+
+<li>
+<strong>SpanId:</strong> 数字 
+
+<li>
+<strong>AddtionalInfo:</strong>
+
+<ol>
+<li>
+共8对，每对间使用|分隔
+
+<li>
+每对的key value使用:分隔
+
+<li>
+key和value都是长度4B, 是分别对原始key和vaue取Hash获得
+
+<li>
+排好序
+
+</ol>
+</ol>
+  
+<h4 id="toc_1.6.0.2">6.0.2 表freeway.trace</h4>
+<table>
+<tr>
+<th rowspan="2" colspan="2">
+rowkey
+</th>
+<th colspan="5">
+column family:span
+</th>
+</tr>
+<tr>
+<th>
+spanId-1
+</th>
+<th>
+spanId-2
+</th>
+<th>
+spanId-3
+</th>
+<th>
+...
+</th>
+<th>
+spanId-n
+</th>
+</tr>
+<tr>
+<td>
+hashCode
+</td>
+<td>
+traceId
+</td>
+<td>
+log RowKey list
+</td>
+<td>
+log RowKey list
+</td>
+<td>
+log RowKey list
+</td>
+<td>
+...
+</td>
+<td>
+log RowKey list
+</td>
+</tr>
+</table>
+
+<h4 id="toc_1.6.0.3">6.0.3 表freeway.span</h4>
+<table>
+<tr>
+<th colspan="2">
+rowkey
+</th>
+<th>
+column family:content
+</th>
+</tr>
+<tr>
+<td>
+hashCode
+</td>
+<td>
+traceId-spanId
+</td>
+<td>
+span serialized content
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.7">7 读写实现</h2>
+<p>
+<img src="centrallogging_tracequery.png" />
+</p>
+
+<h3 id="toc_1.7.1">7.1 写模块实现 </h3>
+<p>
+主要分为两部分：
+</p>
+<ul>
+<li>
+收到一条log时
+
+<ul>
+<li>
+在正常存储log的同时，需要向表freeway.trace添加相应的数据
+
+</ul>
+<li>
+收到一个span时
+
+<ul>
+<li>
+向freeway.trace.index添加一条记录
+
+<li>
+向freeway.span添加一条记录
+
+<li>
+向freeway.trace作一条确认操作，因为有些span没有log
+
+</ul>
+</ul>
+
+<ul>
+<li>
+<em><strong>ToDo:详细设计</strong></em>
+
+</ul>
+ 
+<h3 id="toc_1.7.2">7.2 读模块实现 </h3>
+<p>
+读模块即查询模块，可以分为四个步骤实现：
+</p>
+
+<ol>
+<li>
+获取目标trace的rowkey列表
+
+<ul>
+<li>
+直接知道traceId, 转换成rowkey
+
+<li>
+组装查询条件从表freeway.trace.index查询出，使用scan方法
+
+</ul>
+<li>
+获取对应的log与span的rowkey列表
+
+<ul>
+<li>
+根据上一步骤得到的rowkey list, 从表freeway.trace中multiget出对应的记录
+
+<li>
+可以得到log与span的rowkey list
+
+</ul>
+<li>
+查询出所有的log与span
+
+<ul>
+<li>
+根据上一步骤的数据，分别从表freeway.rawlog与表freeway.span中得到原始的log与span数据
+
+</ul>
+<li>
+将查询出的数据根据依赖关系组合成目标对象Trace实例列表，作为结果返回
+
+</ol>
+
+
+<ul>
+<li>
+<em><strong>ToDo:详细设计</strong></em>
+
+</ul>
+ 
+<h2 id="toc_1.8">8 Thrift协议升级</h2>
+<ul>
+<li>
+Log增加一个指向spanId的字段
+
+<li>
+Span中增加一个tag列表
+
+<ul>
+<li>
+有些场景下span信息本身太少，通过增加tag，可以一定的增加信息携带量，为后续分析带来便利，减少与log的join操作
+
+<li>
+Agent端可以考虑增加startSpan的api，以支持该特性
+
+</ul>
+</ul>
+
+<h2 id="toc_1.9">9 Agent端相关 </h2>
+<ul>
+<li>
+实现log与span的分离发送
+
+<li>
+需要thrift协议升级
+
+</ul>
+
+<p>
+ <em><strong>谢延辉团队实现 </strong></em>
+</p>
+ 
+<h2 id="toc_1.10">10 Web界面</h2>
+<ul>
+<li>
+负责trace相关的界面
+
+<li>
+Trace RestApi的需求方
+
+</ul>
+
+<p>
+ <em><strong>储诚栋团队实现 </strong></em>
+</p>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

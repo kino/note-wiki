@@ -1,0 +1,38 @@
+%title 金桥Hadoop&HBase集群切换步骤
+
+FQ:福泉路
+
+JQ:金桥
+
+# 创建HBase表：
+  # /hbase_logging
+    # logging所需要的表
+    # rawlog表通过java程序创建  
+  # /hbase_ubt
+    # metrics所需要的表
+    # 自定义namespace的metrics表
+  # check
+# 停掉FQ所有的collector与writer,先停collector, 再停writer. check;
+# 开始Copy FQ的tsdb.uid表到/hbase_ubt相就的表中
+# 清空FQ的diskqueue目录。 check
+# 确认FQ&JQ所有的Writer都是关闭状态。
+# 启动FQ所有的新的collector, 并确认开始收集数据。check
+# *以上五步，需要一台一台处理 *
+# 更新Mysql中HBase的配置，确保metrics写入 jQ的hbase实例/hbase_ubt
+# 重新部署LogBrowser与RestApi, 验证是否正常工作
+# 停止LogViewer服务，增加指导性信息。
+# 更新TraceViewer的查询地址到JQ,并重启。
+# dashboard 查询端指向JQ的hbase实例/hbase_ubt.需要江伟配合
+# 等待并确认tsdb.uid表同步完
+# 启动JQ的一台writer.
+# 运行测试程序，查看log metrics span的写入情况是否正常
+# 启动FQ&JQ所有的writer.
+# 查看集群工作状态。
+
+后续：
+# 同步FQ的metrics老数据到JQ的/hbase_ubt
+# 同步FQ的trace老数据到JQ的/hbase_logging
+
+出错回滚：
+# 停掉新部署的collector
+# 启动老的FQ collector和wrtier

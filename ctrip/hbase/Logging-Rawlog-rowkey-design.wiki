@@ -1,0 +1,67 @@
+%title  Logging Rawlog表rowkey设计
+
+=Logging Rawlog表rowkey设计=
+
+%toc
+==目前Rawlog表的问题==
+# region数量庞大，空region 率大
+  * 共有12791个region
+  * 11409空region, 比例为89.19%
+  * 剩余的region大小也是极度不均衡，最大的region 287G, <1m的region有129个
+# 读写不均衡
+  * 现有的rowkey设计，简单来说是appid+date的顺序序列
+  * 简单来说对于每个appid都有一个写热点，这不仅没有利用到分布式的优点，还会极大的降低整个hbase集群的服务能力
+  * 读存在同样的问题，一次读基本上会集中在一个region上，这对于scan是好的，但目前我们所有的log查询都是基于mutiget的，还不如分散来的性能好。
+ 
+==解决方案==
+现有的log查询方案：
+# 从logindex表获取log的rowkey
+# 根据rowkey使用mutiget获取具体的log
+
+所以不在需要顺序的rowkey设计。
+
+# 解决region数量庞大的问题
+  * 使用预分的region
+  * 根据实际数据量，预分出足够的region, 后续保证尽量少的出现split
+# 解决空region率，大小不均衡，及读写不均衡
+  * 这些问题可以一起解决
+  * 写的时候足够散列的（平均）写到这些region上
+  * 理想状态下各region大小会完全一致
+  * 读写理想状态下也会完成一致
+  * 可以减少split的次数，理想状态下不会再出现，同样减少了该表region的blance出现的次数，理想状态下不会出现。
+ 
+现在进行改造的优势是，我们有生产数据进行支持，金桥是一个全新的集群，这是一个机会，可以不考虑老数据的迁移（到时福泉与金桥应用并行运行，避免迁移数据）
+
+===预分region的数量===
+# 目前生产rawlog表的大小为2938.5G， 也就是3T，保存了7天的数据
+# 考虑到以后的数据增量，以10T为存储目标，一个region2G， 可以预分5000个region
+
+===如何实现足够散列写（或对region平均写）===
+# 理论上可以对region依次写入一条log, 轮循一遍后，再次从头轮循，这样可以达到绝对平均
+# 实际解决方案, 可以设计一种rowkey结构
+| hashcode   | unique-id                          |
+|------------|------------------------------------|
+| 1 ~ 100000 | appid + hostip + timestamp + logid |
+
+# 从通用角度，rowkey 分为两部分
+  # *hashcode*: 散列值，用于将数据散列到各region上
+  # *unique-id*: 这条数据的一个唯一id, 这个基本上和业务相关
+# 对于rowlog表
+  # *hashcode*: 可以是一个1 ~ 100000的int值
+  # *unique-id*: 可以是一个由appid + hostip + timestamp + logid 组成的唯一id, 也是现有的rowkey设计
+# 如果预分5000个region, 每个region将占有20个散列值(startKey-endKey)：1-20, 21-40, .... 99981-100000
+
+
+===工作量===
+# 只要修改writer端rowlog的rowkey生成策略
+# 对于其他地方完全透明
+# 编码的话只要两个小时就足够了，后续就是支持工作了。
+# 如何获取一条log的hashcode, 有几种方案:
+  # writer每收一条log可以递增，到达100000，归1
+  # 也可以每次取1-100000的随机值，效率最低
+  # 为了去除1-20的连续写， 可以
+    # 可以分配一个int[100000],里面存放shuffle后的1-100000的值
+    # 每来一条log从数组里取一个值int[i++]
+    # 到达数组结尾后可以直接从头再取，或shuffle后再从头取
+    # 或着一开始就预先shuffle好几个数组，待用。
+

@@ -1,0 +1,117 @@
+%title Logging Collector物理部署调整
+
+=Logging Collector物理部署调整=
+
+原先的部署方案：
+# collector 与 writer部署在同一台机器上
+# 所有的writer的功能启在同一个进程
+# collector与writer是一对一的功能
+
+由于业务的发展，现在发生了很大的变化
+# collector几乎没变
+# writer扩展了很多新的功能，将来也会有越来越多的业务
+
+现需要作出一些调整：
+# collector与writer物理分离，部署在不同的机器上。
+  * writer不会影响到collector的性能
+  * collector逻辑相对简单，但要求绝对稳定
+# collector与writer的数量也不在是一对一
+# writer根据功能分进程
+  * 在一个进程内，会互相影响，一个出问题也会导致其他的出问题
+  * 分开后，log,metrics,hdfs将不在互相影响
+ 
+writer由一个拆分成了五个独立的writer,分别以独立的进程运行
+* *writer-log:*  用于将日志写入hbase
+* *writer-metrics:* 用于将metrics写入hbase
+* *writer-span:* 用于将span写入hbase
+* *writer-business:* writer的其他功能，比如用于统计一些logging系统本身的metrics并收集元数据
+* *writer-hdfs:* 用于将logging产生的所有数据写入rcfile
+
+
+==需要多少台Collector与writer==
+*Collector:*
+* 高可用
+* 网络IO
+* 磁盘大小
+
+*Writer:*
+* 高可用（较collector低）
+* CPU
+* 内存
+* 网络IO
+
+
+*目前金桥的临时部署方案：*
+* 部署了3台collector机器
+* 为一台collector部署了2台writer，用于消耗数据
+* 一台writer上部署了5个writer进程
+ 
+下图是在13:25集到的collector的网络流量
+* 入口约10M/s, 最高可达到14m/s, 高高峰期甚至达到20m/s
+* 出口约30M/s, 最高可达到53m/s
+{{2.png}}
+
+下图是在13:25集到的writer的网络流量
+* 入口高的话可达到50m/s
+* 出口高的话可达到97m/s
+{{1.png}}
+
+可看出：
+* 通过网络IO来衡量collector的能力的话
+  * 若collector出口不应该超过50m/s
+  * 其能力也达到了它的上限
+* 现有业务模型下，1:2的比例是合理的，一台collector配置两台writer
+  * writer的网络io达到一定程度
+  * cpu维持在30% ~ 50%
+  
+可以认为3台collector与6台writer在现状下是满负荷运行，为了logging系统的稳定运行与未来一段时间内的增量，可以提供一宝的冗余，建议:
+* collector扩展到5台
+* writer相应的扩展到10台
+
+==部署方案==
+
+===现有方案===
+{{80.png}}
+
+===过渡方案===
+* logging最终是要迁移到金桥的，还是需要先在金桥启动collector
+* 福泉启动3台collector, 金桥启动2台collector
+* 让部分应用直接将日志写入金桥的collector
+* collector与writer的比例暂定为1:1
+ 
+{{79.png}}
+
+===最终方案 ===
+{{77.png}}
+
+
+
+
+
+| 服务器       | IP             | 域名                                 | CPU/RAM/HD | OS     | 用途                           |            |
+|--------------|----------------|--------------------------------------|------------|--------|--------------------------------|------------|
+| SVR2206HP360 | 192.168.63.36  | collector.logging.sh.ctriptravel.com |            | CentOS | 用于Collector                  |            |
+| SVR2207HP360 | 192.168.63.37  | \/                                   | \/         | \/     | \/                             | \/         |
+| SVR2208HP360 | 192.168.63.38  | \/                                   | \/         | \/     | \/                             | \/         |
+| SVR2589HP360 | 192.168.63.1   | \/                                   | \/         | \/     | \/                             | \/         |
+| SVR2590HP360 | 192.168.63.2   | \/                                   | \/         | \/     | \/                             | \/         |
+| SVR2594HP360 | 192.168.63.6   | \/                                   | \/         | \/     | \/                             | \/         |
+| SVR2591HP360 | 192.168.63.3   |                                      |            | CentOS | 用于Writer                     |            |
+| SVR2592HP360 | 192.168.63.4   | \/                                   | \/         | \/     | \/                             | \/         |
+| SVR2593HP360 | 192.168.63.5   | \/                                   | \/         | \/     | \/                             | \/         |
+| SH02SVR2570  | 10.8.74.90     | \/                                   | \/         | \/     | \/                             | \/         |
+| SH02SVR2571  | 10.8.74.91     | \/                                   | \/         | \/     | \/                             | \/         |
+| SH02SVR2572  | 10.8.74.92     | \/                                   | \/         | \/     | \/                             | \/         |
+| SH02SVR2573  | 10.8.74.93     | \/                                   | \/         | \/     | \/                             | \/         |
+| SH02SVR2574  | 10.8.74.94     | \/                                   | \/         | \/     | \/                             | \/         |
+| SVR2025HP360 | 192.168.79.113 |                                      |            | CentOS | 用于Writer                     | 暂借的机器 |
+| SVR2028HP360 | 192.168.79.114 | \/                                   | \/         | \/     | \/                             | \/         |
+| SVR2209HP360 | 192.168.63.39  | traceview.logging.sh.ctriptravel.com |            | CentOS | 应用服务器，用于部署TraceView  |            |
+| SVR2210HP360 | 192.168.63.40  | \/                                   | \/         | \/     | \/                             | \/         |
+| VMS01227     | 192.168.63.9   | browser.logging.sh.ctriptravel.com   |            | CentOS | 应用服务器，用于部署LogBrowser |            |
+| VMS01232     | 192.168.63.10  | \/                                   | \/         | \/     | \/                             | \/         |
+| VMS01233     | 192.168.63.11  | \/                                   | \/         | \/     | \/                             | \/         |
+| VMS01228     | 192.168.79.183 | rest.logging.sh.ctriptravel.com      |            | CentOS | 应用服务器，用于部署RestApi    |            |
+| VMS01229     | 192.168.79.184 | \/                                   | \/         | \/     | \/                             | \/         |
+| VMS01230     | 192.168.79.185 | \/                                   | \/         | \/     | \/                             | \/         |
+| VMS01231     | 192.168.79.186 | \/                                   | \/         | \/     | \/                             | \/         |

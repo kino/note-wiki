@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Logging Collector物理部署调整</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../style.css">
+<link rel="Stylesheet" type="text/css" href="../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1"> Logging Collector物理部署调整</h1>
+
+<p>
+原先的部署方案：
+</p>
+<ol>
+<li>
+collector 与 writer部署在同一台机器上
+
+<li>
+所有的writer的功能启在同一个进程
+
+<li>
+collector与writer是一对一的功能
+
+</ol>
+
+<p>
+由于业务的发展，现在发生了很大的变化
+</p>
+<ol>
+<li>
+collector几乎没变
+
+<li>
+writer扩展了很多新的功能，将来也会有越来越多的业务
+
+</ol>
+
+<p>
+现需要作出一些调整：
+</p>
+<ol>
+<li>
+collector与writer物理分离，部署在不同的机器上。
+
+<ul>
+<li>
+writer不会影响到collector的性能
+
+<li>
+collector逻辑相对简单，但要求绝对稳定
+
+</ul>
+<li>
+collector与writer的数量也不在是一对一
+
+<li>
+writer根据功能分进程
+
+<ul>
+<li>
+在一个进程内，会互相影响，一个出问题也会导致其他的出问题
+
+<li>
+分开后，log,metrics,hdfs将不在互相影响
+
+</ul>
+</ol>
+ 
+<p>
+writer由一个拆分成了五个独立的writer,分别以独立的进程运行
+</p>
+<ul>
+<li>
+<strong>writer-log:</strong>  用于将日志写入hbase
+
+<li>
+<strong>writer-metrics:</strong> 用于将metrics写入hbase
+
+<li>
+<strong>writer-span:</strong> 用于将span写入hbase
+
+<li>
+<strong>writer-business:</strong> writer的其他功能，比如用于统计一些logging系统本身的metrics并收集元数据
+
+<li>
+<strong>writer-hdfs:</strong> 用于将logging产生的所有数据写入rcfile
+
+</ul>
+
+
+<h2 id="toc_1.1">1 需要多少台Collector与writer</h2>
+<p>
+<strong>Collector:</strong>
+</p>
+<ul>
+<li>
+高可用
+
+<li>
+网络IO
+
+<li>
+磁盘大小
+
+</ul>
+
+<p>
+<strong>Writer:</strong>
+</p>
+<ul>
+<li>
+高可用（较collector低）
+
+<li>
+CPU
+
+<li>
+内存
+
+<li>
+网络IO
+
+</ul>
+
+
+<p>
+<strong>目前金桥的临时部署方案：</strong>
+</p>
+<ul>
+<li>
+部署了3台collector机器
+
+<li>
+为一台collector部署了2台writer，用于消耗数据
+
+<li>
+一台writer上部署了5个writer进程
+
+</ul>
+ 
+<p>
+下图是在13:25集到的collector的网络流量
+</p>
+<ul>
+<li>
+入口约10M/s, 最高可达到14m/s, 高高峰期甚至达到20m/s
+
+<li>
+出口约30M/s, 最高可达到53m/s
+
+</ul>
+<p>
+<img src="2.png" />
+</p>
+
+<p>
+下图是在13:25集到的writer的网络流量
+</p>
+<ul>
+<li>
+入口高的话可达到50m/s
+
+<li>
+出口高的话可达到97m/s
+
+</ul>
+<p>
+<img src="1.png" />
+</p>
+
+<p>
+可看出：
+</p>
+<ul>
+<li>
+通过网络IO来衡量collector的能力的话
+
+<ul>
+<li>
+若collector出口不应该超过50m/s
+
+<li>
+其能力也达到了它的上限
+
+</ul>
+<li>
+现有业务模型下，1:2的比例是合理的，一台collector配置两台writer
+
+<ul>
+<li>
+writer的网络io达到一定程度
+
+<li>
+cpu维持在30% ~ 50%
+
+</ul>
+</ul>
+  
+<p>
+可以认为3台collector与6台writer在现状下是满负荷运行，为了logging系统的稳定运行与未来一段时间内的增量，可以提供一宝的冗余，建议:
+</p>
+<ul>
+<li>
+collector扩展到5台
+
+<li>
+writer相应的扩展到10台
+
+</ul>
+
+<h2 id="toc_1.2">2 部署方案</h2>
+
+<h3 id="toc_1.2.1">2.1 现有方案</h3>
+<p>
+<img src="80.png" />
+</p>
+
+<h3 id="toc_1.2.2">2.2 过渡方案</h3>
+<ul>
+<li>
+logging最终是要迁移到金桥的，还是需要先在金桥启动collector
+
+<li>
+福泉启动3台collector, 金桥启动2台collector
+
+<li>
+让部分应用直接将日志写入金桥的collector
+
+<li>
+collector与writer的比例暂定为1:1
+
+</ul>
+ 
+<p>
+<img src="79.png" />
+</p>
+
+<h3 id="toc_1.2.3">2.3 最终方案 </h3>
+<p>
+<img src="77.png" />
+</p>
+<table>
+<tr>
+<th>
+服务器 
+</th>
+<th>
+IP
+</th>
+<th>
+域名
+</th>
+<th>
+CPU/RAM/HD
+</th>
+<th>
+OS
+</th>
+<th>
+用途 
+</th>
+<th>
+&nbsp;
+</th>
+</tr>
+<tr>
+<td>
+SVR2206HP360
+</td>
+<td>
+192.168.63.36
+</td>
+<td rowspan="6">
+collector.logging.sh.ctriptravel.com
+</td>
+<td rowspan="6">
+&nbsp;
+</td>
+<td rowspan="6">
+CentOS
+</td>
+<td rowspan="6">
+用于Collector
+</td>
+<td rowspan="6">
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+SVR2207HP360
+</td>
+<td>
+192.168.63.37
+</td>
+</tr>
+<tr>
+<td>
+SVR2208HP360
+</td>
+<td>
+192.168.63.38
+</td>
+</tr>
+<tr>
+<td>
+SVR2589HP360
+</td>
+<td>
+192.168.63.1
+</td>
+</tr>
+<tr>
+<td>
+SVR2590HP360
+</td>
+<td>
+192.168.63.2
+</td>
+</tr>
+<tr>
+<td>
+SVR2594HP360
+</td>
+<td>
+192.168.63.6
+</td>
+</tr>
+<tr>
+<td>
+SVR2591HP360
+</td>
+<td>
+192.168.63.3
+</td>
+<td rowspan="8">
+&nbsp;
+</td>
+<td rowspan="8">
+&nbsp;
+</td>
+<td rowspan="8">
+CentOS
+</td>
+<td rowspan="8">
+用于Writer
+</td>
+<td rowspan="8">
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+SVR2592HP360
+</td>
+<td>
+192.168.63.4
+</td>
+</tr>
+<tr>
+<td>
+SVR2593HP360
+</td>
+<td>
+192.168.63.5
+</td>
+</tr>
+<tr>
+<td>
+SH02SVR2570
+</td>
+<td>
+10.8.74.90
+</td>
+</tr>
+<tr>
+<td>
+SH02SVR2571
+</td>
+<td>
+10.8.74.91
+</td>
+</tr>
+<tr>
+<td>
+SH02SVR2572
+</td>
+<td>
+10.8.74.92
+</td>
+</tr>
+<tr>
+<td>
+SH02SVR2573
+</td>
+<td>
+10.8.74.93
+</td>
+</tr>
+<tr>
+<td>
+SH02SVR2574
+</td>
+<td>
+10.8.74.94
+</td>
+</tr>
+<tr>
+<td>
+SVR2025HP360
+</td>
+<td>
+192.168.79.113
+</td>
+<td rowspan="2">
+&nbsp;
+</td>
+<td rowspan="2">
+&nbsp;
+</td>
+<td rowspan="2">
+CentOS
+</td>
+<td rowspan="2">
+用于Writer
+</td>
+<td rowspan="2">
+暂借的机器
+</td>
+</tr>
+<tr>
+<td>
+SVR2028HP360
+</td>
+<td>
+192.168.79.114
+</td>
+</tr>
+<tr>
+<td>
+SVR2209HP360
+</td>
+<td>
+192.168.63.39
+</td>
+<td rowspan="2">
+traceview.logging.sh.ctriptravel.com
+</td>
+<td rowspan="2">
+&nbsp;
+</td>
+<td rowspan="2">
+CentOS
+</td>
+<td rowspan="2">
+应用服务器，用于部署TraceView
+</td>
+<td rowspan="2">
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+SVR2210HP360
+</td>
+<td>
+192.168.63.40
+</td>
+</tr>
+<tr>
+<td>
+VMS01227
+</td>
+<td>
+192.168.63.9
+</td>
+<td rowspan="3">
+browser.logging.sh.ctriptravel.com
+</td>
+<td rowspan="3">
+&nbsp;
+</td>
+<td rowspan="3">
+CentOS
+</td>
+<td rowspan="3">
+应用服务器，用于部署LogBrowser
+</td>
+<td rowspan="3">
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+VMS01232
+</td>
+<td>
+192.168.63.10
+</td>
+</tr>
+<tr>
+<td>
+VMS01233
+</td>
+<td>
+192.168.63.11
+</td>
+</tr>
+<tr>
+<td>
+VMS01228
+</td>
+<td>
+192.168.79.183
+</td>
+<td rowspan="4">
+rest.logging.sh.ctriptravel.com
+</td>
+<td rowspan="4">
+&nbsp;
+</td>
+<td rowspan="4">
+CentOS
+</td>
+<td rowspan="4">
+应用服务器，用于部署RestApi
+</td>
+<td rowspan="4">
+&nbsp;
+</td>
+</tr>
+<tr>
+<td>
+VMS01229
+</td>
+<td>
+192.168.79.184
+</td>
+</tr>
+<tr>
+<td>
+VMS01230
+</td>
+<td>
+192.168.79.185
+</td>
+</tr>
+<tr>
+<td>
+VMS01231
+</td>
+<td>
+192.168.79.186
+</td>
+</tr>
+</table>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>
