@@ -1,2 +1,0 @@
-# Hbase文档，表的集中介绍，当前状况，配置参数，key point
-# Hdfs文档，当前包含的内容，当前状况，配置参数，key point

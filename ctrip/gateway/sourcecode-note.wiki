@@ -1,5 +1,0 @@
-%title Gateway Notes 
-
-=Gateway Notes =
-
-==Sugicalfilter==
