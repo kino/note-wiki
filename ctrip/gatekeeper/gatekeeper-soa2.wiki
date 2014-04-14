@@ -1,0 +1,40 @@
+%title Gatekeeper路由 -- SOA2
+
+==目标==
+* 通过H5Gateway访问一个SOA2 Service
+ 
+==配置==
+# *前置条件:* 拥有一个需要开放给H5Gateway的SOA2 Service.
+# *配置:* 在配置系统里Edit该Service,使其对H5Gateway可见, 配置系统地址：http://repository.soa.ctripcorp.com {{soa1.png}}
+# *记下Service Id:* 在配置系统里查看该Service, 并记下该Service的Id {{soa2.png}}
+ 
+==访问==
+通过H5Gateway访问SOA2 Service的模式：http://[baseUrl]/soa2/[serviceId]/[...]
+* *[baseUrl]* 代表H5Gateway的根地址
+ 
+  | FAT | 内网 | http://gateway.m.fws.qa.nt.ctripcorp.com/restapi |
+  | \/  | 外网 | http://m.fat.ctripqa.com/restapi                 |
+  | UAT | 内网 | http://gateway.m.uat.qa.ctripcorp.com/restapi    |
+  | \/  | 外网 | http://m.uat.ctripqa.com/restapi                 |
+    
+* */soa2* 表明这是一个请求SOA2 Service的请求
+* *[serviceId]* 请求的是具体的哪一个SOA2 Service
+* *[...]* 这部分是正常访问一个SOA2 Service所需的部分，比如指定操作，参数等，将透传给后面Service的实现者
+
+*比如要通过FAT环境的H5Gateway访问Service Id 为10009的Service的GetItems操作，可以：*
+* http://gateway.m.fws.qa.nt.ctripcorp.com/restapi/soa2/10009/items.xml?take=1&random=123455
+* http://gateway.m.fws.qa.nt.ctripcorp.com/restapi/soa2/10009/xml/GetItems?take=1&random=123455
+
+
+
+vwpc王鹏程 4:01 PM
+http://localhost:64919/Flight/Domestic/OrderList/Query <http://localhost:64919/Flight/Domestic/OrderList/Query> ",
+机票团队，负责人：李康
+
+
+{
+    "AbosulteUrl": "http://waptest.ctrip.com/restapi2/Data/Airline?dataVer={dataVer}&ver={ver}",
+    "HttpMethod": "GET",
+    "RelativeUrl": "Data/Airline?dataVer={dataVer}&ver={ver}"
+}
+

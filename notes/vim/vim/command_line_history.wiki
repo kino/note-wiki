@@ -1,0 +1,13 @@
+%title 使用command line history编辑命令
+
+=使用command line history编辑命令=
+
+按 *':'* 可以进行command line模式，执行输入的命令。但该模式下只能手动输入命令，
+不能进行简单的编辑，比如复制粘贴。
+
+可以利用command line history预先进行命令编辑，再执行命令：
+* 按 *'q:'* 进入command line history
+* 进行命令编辑，这类似一个vim打开的文本文件，每行代表一条命令，并可以利用vim进行编辑
+* 你可以
+  * 在编辑好的命令上按 *'Enter'* , 执行编辑好的命令
+  * 或着按 *':q'* , 退出command line history

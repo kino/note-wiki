@@ -1,0 +1,67 @@
+%title Gatekeeper Filters 
+
+=Gatekeeper Filters =
+
+==Filters==
+
+{{g1.png}}
+
+{{g2.png}}
+
+===Pre Filters===
+| Name                 | Order | Condition                                   | Functionality                                                                                |
+|----------------------|-------|---------------------------------------------|----------------------------------------------------------------------------------------------|
+| DebugModeSetter      | 1     | 所有request                                 | 根据动态配置项或请求参数，决定是否启用debug模式，debug模式会收集一些调试信息，对性能有所影响 |
+| DebugRequest         | 10    | Debug模式下的request                        | 收集一些请求阶段的debug信息                                                                  |
+| RoutingForUrlForward | 100   | 包含指定参数的request                       | 路由功能。将request路由到该参数指定的目的地。                                                |
+| RoutingForSOA2       | 200   | 访问SOA2的request,包含指定参数或http header | 基于SOA2的路由功能。查询参数指定的SOA2 Service                                               |
+| PreDecoration        | 1000  | 所有request                                 | 再将请求转发到真正的目的地时，增加一些附加信息，比如Client的一些信息                         |
+
+===Route Filters===
+| Name                | Order | Condition           | Functionality                                    |
+|---------------------|-------|---------------------|--------------------------------------------------|
+| GateRequestExecutor | 100   | 被成功路由的request | 请求执行者。负责将请求发往真正的目的地并接收响应 |
+
+===Post Filters===
+| Name           | Order | Condition                           | Functionality                                                                                            |
+|----------------|-------|-------------------------------------|----------------------------------------------------------------------------------------------------------|
+| PostDecoration | 10    | 除了来自其他gatekeeper的所有request | 增加response信息。在将response发往client时，增加一些额外信息，比如gatekeeper本身的一些信息               |
+| SendResponse   | 100   | 所有被成功处理的request             | 将请求发往client                                                                                         |
+| DebugResponse  | 1000  | Debug模式下的request                | 收集response相关的debug信息，再将所有的debug信息输出                                                     |
+| EventCollector | 10000 | 所有 request                        | 收集该request处理的所有元数据。比如：request url, parameters, headers, response headers, gatekeeper info |
+| Stats          | 20000 | 所有 request                        | 状态收集， metrics收集                                                                                   |
+
+===Error Filters===
+| Name          | Order | Condition       | Functionality                                                                    |
+|---------------|-------|-----------------|----------------------------------------------------------------------------------|
+| ErrorResponse | 10    | 产生Exception时 | 处理异常。在任何一个阶段出现了异常，负责将异常转换为合适的response，返回给client |
+
+==调用SOA2 Service==
+调用SOA2 Service 需要提供三部分信息：
+* serviceCode
+* serviceOperation
+* subEnv(optional)
+获取策略:
+* 先从http header里获取
+* 若没有，再从query string里获取
+* serviceOperation最后还可以尝试从url里分析出来。
+ 
+|                  |          | Http Header Name               | Query String Name    | Url Anylyze            |
+|------------------|----------|--------------------------------|----------------------|------------------------|
+| serviceCode      | required | x-ctrip-soa2-service-code      | soa2ServiceCode      | 无                     |
+| serviceOperation | required | x-ctrip-soa2-service-operation | soa2ServiceOperation | 无                     |
+| subEnv           | optional | x-ctrip-soa2-sub-env           | soa2SubEnv           | /xx/api/{operation}/xx |
+
+例子:
+* /test?soa2ServiceCode=10066&soa2ServiceOperation=GetItems.xml
+* /api/GetItems.json?soa2ServiceCode=10066
+
+==各种Counter==
+| Type      | CounterPattern                        | Example                                            |                          |
+|-----------|---------------------------------------|----------------------------------------------------|--------------------------|
+| Exception | Gate__Exception_{CAUSE}_{STATUS-CODE} | Gate__Exception_SOA2-Missing-Service-Operation_400 | GateException 构造时统计 |
+| Error     | {ROUTE}_{CAUSE}                       | SOA2.1066_SOA2-Missing-Service-Operation           | ErrorResponse Filter     |
+| Route     | {ROUTE}_{STATUS-CODE}                 | SOA2.1066_400                                      | Stats Filter             |
+| Host      | {host_type}                           | ipv4 ipv6 host_localhost                           | Stats Filter             |
+| Protocol  | protocol_{type}                       | protocol_http                                      | Stats Filter             |
+| Status    | status_{STATUS-CODE}                  | status_200 status_2xx                              | Stats Filter             |

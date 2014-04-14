@@ -8,3 +8,5 @@
 # [[vim/character_encoding_tricks_for_vim|vim中字符编码的技巧(译)]]
 # [[vim/space_and_tab_replacement|vim中空格与TAB的替换(转)]]
 # [[vim/change_file_format|改变文件格式（dos,unix,mac os) ]]
+# [[vim/command_line_history|使用command line history编辑命令 ]]
+# [[vim/search_history|使用search history进行有效搜索 ]]

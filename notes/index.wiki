@@ -15,6 +15,7 @@
 * [[java/jmm|Java 内存模型 ]]
 * [[java/thread|Java 线程 ]]
 * [[java/jvm|JVM]]
+* [[java/happens-before|Heppens-Before 原则]]
 ==C ==
 * [[c/cpl|C Programming Language]]
 * [[c/dsaac|Data Structure and Algorithm Analysis in C]]

@@ -1,0 +1,9 @@
+%title 使用search history进行有效搜索
+
+=使用search history进行有效搜索=
+
+# 按 *'q/'* 可打开search history
+# 这类似一个文本文件，里面每一行代表一次搜索
+# 可编辑一个已存在的搜索，也可新增加一行，输入一个新的搜索
+# 按 *'Enter'* 可执行当前光标所在行的搜索
+# 按 *':q'* 可退出search history

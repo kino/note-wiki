@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Gatekeeper路由 -- SOA2</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../style.css">
+<link rel="Stylesheet" type="text/css" href="../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h2 id="toc_0.1">1 目标</h2>
+<ul>
+<li>
+通过H5Gateway访问一个SOA2 Service
+
+</ul>
+ 
+<h2 id="toc_0.2">2 配置</h2>
+<ol>
+<li>
+<strong>前置条件:</strong> 拥有一个需要开放给H5Gateway的SOA2 Service.
+
+<li>
+<strong>配置:</strong> 在配置系统里Edit该Service,使其对H5Gateway可见, 配置系统地址：http://repository.soa.ctripcorp.com <img src="soa1.png" />
+
+<li>
+<strong>记下Service Id:</strong> 在配置系统里查看该Service, 并记下该Service的Id <img src="soa2.png" />
+
+</ol>
+ 
+<h2 id="toc_0.3">3 访问</h2>
+<p>
+通过H5Gateway访问SOA2 Service的模式：<a href="http://[baseUrl]/soa2/[serviceId]/[...]">http://[baseUrl]/soa2/[serviceId]/[...]</a>
+</p>
+<ul>
+<li>
+<strong>[baseUrl]</strong> 代表H5Gateway的根地址
+
+</ul>
+ 
+<table class='center'>
+<tr>
+<td rowspan="2">
+FAT
+</td>
+<td>
+内网
+</td>
+<td>
+<a href="http://gateway.m.fws.qa.nt.ctripcorp.com/restapi">http://gateway.m.fws.qa.nt.ctripcorp.com/restapi</a>
+</td>
+</tr>
+<tr>
+<td>
+外网
+</td>
+<td>
+<a href="http://m.fat.ctripqa.com/restapi">http://m.fat.ctripqa.com/restapi</a>
+</td>
+</tr>
+<tr>
+<td rowspan="2">
+UAT
+</td>
+<td>
+内网
+</td>
+<td>
+<a href="http://gateway.m.uat.qa.ctripcorp.com/restapi">http://gateway.m.uat.qa.ctripcorp.com/restapi</a>
+</td>
+</tr>
+<tr>
+<td>
+外网
+</td>
+<td>
+<a href="http://m.uat.ctripqa.com/restapi">http://m.uat.ctripqa.com/restapi</a>
+</td>
+</tr>
+</table>
+    
+<ul>
+<li>
+<strong>/soa2</strong> 表明这是一个请求SOA2 Service的请求
+
+<li>
+<strong>[serviceId]</strong> 请求的是具体的哪一个SOA2 Service
+
+<li>
+<strong>[...]</strong> 这部分是正常访问一个SOA2 Service所需的部分，比如指定操作，参数等，将透传给后面Service的实现者
+
+</ul>
+
+<p>
+<strong>比如要通过FAT环境的H5Gateway访问Service Id 为10009的Service的GetItems操作，可以：</strong>
+</p>
+<ul>
+<li>
+<a href="http://gateway.m.fws.qa.nt.ctripcorp.com/restapi/soa2/10009/items.xml?take=1&amp;random=123455">http://gateway.m.fws.qa.nt.ctripcorp.com/restapi/soa2/10009/items.xml?take=1&amp;random=123455</a>
+
+<li>
+<a href="http://gateway.m.fws.qa.nt.ctripcorp.com/restapi/soa2/10009/xml/GetItems?take=1&amp;random=123455">http://gateway.m.fws.qa.nt.ctripcorp.com/restapi/soa2/10009/xml/GetItems?take=1&amp;random=123455</a>
+
+</ul>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>

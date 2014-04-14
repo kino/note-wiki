@@ -1,0 +1,18 @@
+%title Gatekeeper SOA2 测试 
+
+* 功能测试 - SOA2路由测试
+  # 配置一个SOA2 Service后，可以通过Gatekeeper访问
+  # 去除一个配置的SOA2 Service后，不可以通过Gatekeeper访问
+  # 挑选几个样本SOA2 Service, 各种可以直接调用的情况，通过Gatekeeper也应该可以访问，并比对调用结果
+* 功能测试 - Filter管理测试
+  # 增加一个Filter后，查看Filter执行结果 
+  # 使一个Filter失效后，查看Filter执行结果，可以通过上传新版本，也可以通过修改动态配置 
+  # Canary机制测试（集群中只有一台生效)
+* 安全测试
+  # 不能调用SOA2 Service的metadata操作
+  # Https测试，暂时无法测试
+* 性能测试
+  # 对比测试，挑选SOA2样本Service, 直接对SOA2 Service进行压测，再通过Gatekeeper进行压测，比对结果，得出Gatekeeper的性能损失
+  # 执行无路由请求，查看Gatekeeper的处理能力
+* 异常测试 - Circuit机制
+  # 制作一个会Timeout的SOA2 Service, 通过Gatekeeper进行压测，查看Circuit机制是否生效，对其他请求调用是否有影响

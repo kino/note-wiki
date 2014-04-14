@@ -11,7 +11,7 @@ Tue Oct 30 00:44:02 CST 2012
 {{{ class="brush:math"
 <div class="item">`X^A X^B = X^(A+B)`</div>
 <div class="item">`X^A/X^B=X^(A-B)`</div>
-<div class="item">`(X^A)^B=X^AB`</div>
+<div class="item">`(X^A)^B=X^(AB)`</div>
 <div class="item">`X^N+X^N=2X^N!=X^(2N)`</div>
 <div class="item">`2^N+2^N=X^(N+1)`</div>
   }}}
@@ -32,7 +32,7 @@ Tue Oct 30 00:44:02 CST 2012
   <div class="item">  `sum_(i=0)^N2^i=2^(N+1)-1`    </div>
   <div class="item">  `sum_(i=0)^NA^i=(A^(N+1)-1)/(A-1)`    </div>
   如果 `0 < A < 1`, 则:
-  <div class="item">  `sum_(i=0)^NA^i<=1/(A-1)`    </div>
+  <div class="item">  `sum_(i=0)^NA^i<=1/(1-A)`    </div>
   <div class="item">  `sum_(i=0)^ooi/2^i=2`    </div>
   <div class="item">  `sum_(i=0)^Ni=(N(N+1))/2~~N^2/2`    </div>
   <div class="item">  `sum_(i=0)^Ni^2=(N(N+1)(2N+1))/6~~N^3/3`    </div>

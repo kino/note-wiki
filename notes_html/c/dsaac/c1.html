@@ -35,7 +35,7 @@
 			<div id="middle">
 				
 
-<h1 id="toc_1">引论</h1>
+<h1 id="toc_1"> 引论</h1>
 
 <p>
 Tue Oct 30 00:44:02 CST 2012
@@ -43,36 +43,36 @@ Tue Oct 30 00:44:02 CST 2012
 
 <div class="toc">
 <ul>
-<li><a href="#toc_1">引论</a>
+<li><a href="#toc_1"> 引论</a>
 <ul>
-<li><a href="#toc_1.1">指数</a>
-<li><a href="#toc_1.2">对数</a>
-<li><a href="#toc_1.3">级数</a>
-<li><a href="#toc_1.4">模运算</a>
-<li><a href="#toc_1.5">证明方法</a>
+<li><a href="#toc_1.1">1 指数</a>
+<li><a href="#toc_1.2">2 对数</a>
+<li><a href="#toc_1.3">3 级数</a>
+<li><a href="#toc_1.4">4 模运算 </a>
+<li><a href="#toc_1.5">5 证明方法</a>
 <ul>
-<li><a href="#toc_1.5.1">归纳法</a>
-<li><a href="#toc_1.5.2">反证法</a>
+<li><a href="#toc_1.5.1">5.1 归纳法 </a>
+<li><a href="#toc_1.5.2">5.2 反证法 </a>
 </ul>
-<li><a href="#toc_1.6">递归法则</a>
+<li><a href="#toc_1.6">6 递归法则</a>
 <ul>
-<li><a href="#toc_1.6.1">基本法则</a>
+<li><a href="#toc_1.6.1">6.1 基本法则</a>
 </ul>
 </ul>
 </ul>
 </div>
 
-<h2 id="toc_1.1">指数</h2>
+<h2 id="toc_1.1">1 指数</h2>
 
 <pre  class="brush:math">
 &lt;div class="item"&gt;`X^A X^B = X^(A+B)`&lt;/div&gt;
 &lt;div class="item"&gt;`X^A/X^B=X^(A-B)`&lt;/div&gt;
-&lt;div class="item"&gt;`(X^A)^B=X^AB`&lt;/div&gt;
+&lt;div class="item"&gt;`(X^A)^B=X^(AB)`&lt;/div&gt;
 &lt;div class="item"&gt;`X^N+X^N=2X^N!=X^(2N)`&lt;/div&gt;
 &lt;div class="item"&gt;`2^N+2^N=X^(N+1)`&lt;/div&gt;
 </pre>
 
-<h2 id="toc_1.2">对数</h2>
+<h2 id="toc_1.2">2 对数</h2>
 <pre  class="brush:math">
   定义: `X^A=B`, 当且仅当 `log_xB=A` 
   &lt;div class="item"&gt; `log_AB=(log_CA)/(log_CB); C&gt;0`    &lt;/div&gt;
@@ -83,12 +83,12 @@ Tue Oct 30 00:44:02 CST 2012
   &lt;div class="item"&gt; `log1=0, log2=1, log4=2, log8=3, log1024=10, log1048 576=20`    &lt;/div&gt;
 </pre>
   
-<h2 id="toc_1.3">级数</h2>
+<h2 id="toc_1.3">3 级数</h2>
 <pre  class="brush:math">
   &lt;div class="item"&gt;  `sum_(i=0)^N2^i=2^(N+1)-1`    &lt;/div&gt;
   &lt;div class="item"&gt;  `sum_(i=0)^NA^i=(A^(N+1)-1)/(A-1)`    &lt;/div&gt;
   如果 `0 &lt; A &lt; 1`, 则:
-  &lt;div class="item"&gt;  `sum_(i=0)^NA^i&lt;=1/(A-1)`    &lt;/div&gt;
+  &lt;div class="item"&gt;  `sum_(i=0)^NA^i&lt;=1/(1-A)`    &lt;/div&gt;
   &lt;div class="item"&gt;  `sum_(i=0)^ooi/2^i=2`    &lt;/div&gt;
   &lt;div class="item"&gt;  `sum_(i=0)^Ni=(N(N+1))/2~~N^2/2`    &lt;/div&gt;
   &lt;div class="item"&gt;  `sum_(i=0)^Ni^2=(N(N+1)(2N+1))/6~~N^3/3`    &lt;/div&gt;
@@ -97,30 +97,30 @@ Tue Oct 30 00:44:02 CST 2012
   &lt;div class="item"&gt;  `H_N=sum_(i=0)^N2^i~~log_eN`    &lt;/div&gt;
 </pre>
 
-<h2 id="toc_1.4">模运算</h2>
+<h2 id="toc_1.4">4 模运算 </h2>
 <pre  class="brush:math">
   如果`N`能够整除`A-B`,我们就是`A`与`B`模`N`同余,记为`A-=B(modN)`, 则有：
   &lt;div class="item"&gt;  `A+C-=B+C(modN)`    &lt;/div&gt;
   &lt;div class="item"&gt;  `AD-=BD(modN)`    &lt;/div&gt;
 </pre>
-<h2 id="toc_1.5">证明方法</h2>
-<h3 id="toc_1.5.1">归纳法</h3>
+<h2 id="toc_1.5">5 证明方法</h2>
+<h3 id="toc_1.5.1">5.1 归纳法 </h3>
 <ol>
 <li>
-第一步证明<code>基准情形（base case)</code>, 定理对于某个小的值的正确形
+第一步证明`基准情形（base case)`, 定理对于某个小的值的正确形
 
 <li>
-第二步<code>归纳假设</code>, 假设对于直到某个有限数<code>k</code>成立
+第二步`归纳假设<code>, 假设对于直到某个有限数`k</code>成立
 
 <li>
-第三步证明定理对于下一个值<code>k+1</code>成立
+第三步证明定理对于下一个值`k+1`成立
 
 <li>
 定理得证
 
 </ol>
 
-<h3 id="toc_1.5.2">反证法</h3>
+<h3 id="toc_1.5.2">5.2 反证法 </h3>
 <ol>
 <li>
 假设定理不成立
@@ -138,11 +138,11 @@ Tue Oct 30 00:44:02 CST 2012
  
 <ul>
 <li>
-<em><strong>每一个整数或者是素数，或者是素数的乘积</strong></em>
+<em>*每一个整数或者是素数，或者是素数的乘积*</em>
 
 </ul>
  
-<h2 id="toc_1.6">递归法则</h2>
+<h2 id="toc_1.6">6 递归法则</h2>
 <ul>
 <li>
 当一个函数用它自身来定义时，称之为递归
@@ -152,7 +152,7 @@ Tue Oct 30 00:44:02 CST 2012
 
 </ul>
 
-<h3 id="toc_1.6.1">基本法则</h3>
+<h3 id="toc_1.6.1">6.1 基本法则</h3>
 <ol>
 <li>
 基本情形(base case)。 不需要递归就可以求解

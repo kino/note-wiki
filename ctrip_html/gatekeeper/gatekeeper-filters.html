@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Gatekeeper Filters </title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<script type="text/javascript" src="../js/jquery-1.6.4.min.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shCore.css">
+<link rel="Stylesheet" type="text/css" href="../js/sh/styles/shThemeRDark.css">
+<script type="text/javascript" src="../js/sh/scripts/shCore.js"></script>
+<script type="text/javascript" src="../js/sh/scripts/shAutoloader.js"></script>
+
+<script type="text/javascript" src="../js/main.js"></script>
+
+<link rel="Stylesheet" type="text/css" href="../style.css">
+<link rel="Stylesheet" type="text/css" href="../css/main.css">
+
+</head>
+<body>
+	<div class="hidden">
+		<input id="root_path" type="text" value="../">
+	</div>
+	<div id="body-wrapper">
+		<div id="container">
+			<div id="top">
+				<div id="page-title">
+					<a href="../index.html">CTRIP</a>
+				</div>
+				<ul id="top-nav">
+				</ul>
+			</div>
+			<div id="middle">
+				
+
+<h1 id="toc_1"> Gatekeeper Filters</h1>
+
+<h2 id="toc_1.1">1 Filters</h2>
+
+<p>
+<img src="g1.png" />
+</p>
+
+<p>
+<img src="g2.png" />
+</p>
+
+<h3 id="toc_1.1.1">1.1 Pre Filters</h3>
+<table>
+<tr>
+<th>
+Name
+</th>
+<th>
+Order
+</th>
+<th>
+Condition
+</th>
+<th>
+Functionality
+</th>
+</tr>
+<tr>
+<td>
+DebugModeSetter
+</td>
+<td>
+1
+</td>
+<td>
+所有request
+</td>
+<td>
+根据动态配置项或请求参数，决定是否启用debug模式，debug模式会收集一些调试信息，对性能有所影响
+</td>
+</tr>
+<tr>
+<td>
+DebugRequest
+</td>
+<td>
+10
+</td>
+<td>
+Debug模式下的request
+</td>
+<td>
+收集一些请求阶段的debug信息
+</td>
+</tr>
+<tr>
+<td>
+RoutingForUrlForward
+</td>
+<td>
+100
+</td>
+<td>
+包含指定参数的request
+</td>
+<td>
+路由功能。将request路由到该参数指定的目的地。 
+</td>
+</tr>
+<tr>
+<td>
+RoutingForSOA2
+</td>
+<td>
+200
+</td>
+<td>
+访问SOA2的request,包含指定参数或http header
+</td>
+<td>
+基于SOA2的路由功能。查询参数指定的SOA2 Service
+</td>
+</tr>
+<tr>
+<td>
+PreDecoration
+</td>
+<td>
+1000
+</td>
+<td>
+所有request
+</td>
+<td>
+再将请求转发到真正的目的地时，增加一些附加信息，比如Client的一些信息 
+</td>
+</tr>
+</table>
+
+<h3 id="toc_1.1.2">1.2 Route Filters</h3>
+<table>
+<tr>
+<th>
+Name
+</th>
+<th>
+Order
+</th>
+<th>
+Condition
+</th>
+<th>
+Functionality
+</th>
+</tr>
+<tr>
+<td>
+GateRequestExecutor
+</td>
+<td>
+100
+</td>
+<td>
+被成功路由的request
+</td>
+<td>
+请求执行者。负责将请求发往真正的目的地并接收响应 
+</td>
+</tr>
+</table>
+
+<h3 id="toc_1.1.3">1.3 Post Filters</h3>
+<table>
+<tr>
+<th>
+Name
+</th>
+<th>
+Order
+</th>
+<th>
+Condition
+</th>
+<th>
+Functionality
+</th>
+</tr>
+<tr>
+<td>
+PostDecoration
+</td>
+<td>
+10
+</td>
+<td>
+除了来自其他gatekeeper的所有request
+</td>
+<td>
+增加response信息。在将response发往client时，增加一些额外信息，比如gatekeeper本身的一些信息 
+</td>
+</tr>
+<tr>
+<td>
+SendResponse
+</td>
+<td>
+100
+</td>
+<td>
+所有被成功处理的request
+</td>
+<td>
+将请求发往client
+</td>
+</tr>
+<tr>
+<td>
+DebugResponse
+</td>
+<td>
+1000
+</td>
+<td>
+Debug模式下的request
+</td>
+<td>
+收集response相关的debug信息，再将所有的debug信息输出
+</td>
+</tr>
+<tr>
+<td>
+EventCollector
+</td>
+<td>
+10000
+</td>
+<td>
+所有 request
+</td>
+<td>
+收集该request处理的所有元数据。比如：request url, parameters, headers, response headers, gatekeeper info
+</td>
+</tr>
+<tr>
+<td>
+Stats
+</td>
+<td>
+20000
+</td>
+<td>
+所有 request
+</td>
+<td>
+状态收集， metrics收集
+</td>
+</tr>
+</table>
+
+<h3 id="toc_1.1.4">1.4 Error Filters</h3>
+<table>
+<tr>
+<th>
+Name
+</th>
+<th>
+Order
+</th>
+<th>
+Condition
+</th>
+<th>
+Functionality
+</th>
+</tr>
+<tr>
+<td>
+ErrorResponse
+</td>
+<td>
+10
+</td>
+<td>
+产生Exception时 
+</td>
+<td>
+处理异常。在任何一个阶段出现了异常，负责将异常转换为合适的response，返回给client
+</td>
+</tr>
+</table>
+
+<h2 id="toc_1.2">2 调用SOA2 Service</h2>
+<p>
+调用SOA2 Service 需要提供三部分信息：
+</p>
+<ul>
+<li>
+serviceCode
+
+<li>
+serviceOperation
+
+<li>
+subEnv(optional)
+
+</ul>
+<p>
+获取策略:
+</p>
+<ul>
+<li>
+先从http header里获取
+
+<li>
+若没有，再从query string里获取
+
+<li>
+serviceOperation最后还可以尝试从url里分析出来。
+
+</ul>
+ 
+<table>
+<tr>
+<th>
+&nbsp;
+</th>
+<th>
+&nbsp;
+</th>
+<th>
+Http Header Name
+</th>
+<th>
+Query String Name
+</th>
+<th>
+Url Anylyze
+</th>
+</tr>
+<tr>
+<td>
+serviceCode
+</td>
+<td>
+required
+</td>
+<td>
+x-ctrip-soa2-service-code
+</td>
+<td>
+soa2ServiceCode
+</td>
+<td>
+无 
+</td>
+</tr>
+<tr>
+<td>
+serviceOperation
+</td>
+<td>
+required
+</td>
+<td>
+x-ctrip-soa2-service-operation
+</td>
+<td>
+soa2ServiceOperation
+</td>
+<td>
+无 
+</td>
+</tr>
+<tr>
+<td>
+subEnv
+</td>
+<td>
+optional
+</td>
+<td>
+x-ctrip-soa2-sub-env
+</td>
+<td>
+soa2SubEnv
+</td>
+<td>
+/xx/api/{operation}/xx
+</td>
+</tr>
+</table>
+
+<p>
+例子:
+</p>
+<ul>
+<li>
+/test?soa2ServiceCode=10066&amp;soa2ServiceOperation=GetItems.xml
+
+<li>
+/api/GetItems.json?soa2ServiceCode=10066
+
+</ul>
+
+<h2 id="toc_1.3">3 各种Counter</h2>
+<table>
+<tr>
+<th>
+Type
+</th>
+<th>
+CounterPattern
+</th>
+<th>
+Example
+</th>
+<th>
+&nbsp;
+</th>
+</tr>
+<tr>
+<td>
+Exception
+</td>
+<td>
+Gate_<em>Exception</em>{CAUSE}_{STATUS-CODE}
+</td>
+<td>
+Gate__Exception_SOA2-Missing-Service-Operation_400
+</td>
+<td>
+GateException 构造时统计
+</td>
+</tr>
+<tr>
+<td>
+Error
+</td>
+<td>
+{ROUTE}_{CAUSE}
+</td>
+<td>
+SOA2.1066_SOA2-Missing-Service-Operation
+</td>
+<td>
+ErrorResponse Filter
+</td>
+</tr>
+<tr>
+<td>
+Route
+</td>
+<td>
+{ROUTE}_{STATUS-CODE}
+</td>
+<td>
+SOA2.1066_400
+</td>
+<td>
+Stats Filter
+</td>
+</tr>
+<tr>
+<td>
+Host
+</td>
+<td>
+{host_type}
+</td>
+<td>
+ipv4 ipv6 host_localhost
+</td>
+<td>
+Stats Filter
+</td>
+</tr>
+<tr>
+<td>
+Protocol
+</td>
+<td>
+protocol_{type}
+</td>
+<td>
+protocol_http
+</td>
+<td>
+Stats Filter
+</td>
+</tr>
+<tr>
+<td>
+Status
+</td>
+<td>
+status_{STATUS-CODE}
+</td>
+<td>
+status_200 status_2xx
+</td>
+<td>
+Stats Filter
+</td>
+</tr>
+</table>
+
+			</div>
+
+			<div id="bottom">
+				&copy; 2012 王兴朝
+			</div>
+		</div>
+	<div>
+</body>
+</html>
