@@ -56,7 +56,8 @@ blockquote{
 }
 
 code{
-	font-style:italic;
+    color:#2288ff;
+	font-family:'Microsoft Yahei', Arial, sans-serif;
 }
 td,th{
 	padding:5px 10px;
