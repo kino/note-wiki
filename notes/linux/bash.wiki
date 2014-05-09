@@ -1,6 +1,8 @@
 %title Bash 文章列表
 ==Bash==
 # [[bash/bash_basic|Bash 常用参考 ]]
+# [[bash/bash_array|Bash - 数组 ]]
+# [[bash/bash_number|Bash - 数字 ]]
 # [[bash/bash_shortcuts|Bash 快捷键(转)]]
 # [[bash/bash_common_commands|常用命令小技巧 ]]
 # [[bash/tmux_help|tmux 指南(转)]]

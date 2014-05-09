@@ -1,6 +1,7 @@
  =知识库 =
 ==Linux==
 * [[linux/bash|BASH]]
+* [[linux/tcl|TCL]]
 * [[linux/ssh|SSH]]
 * [[linux/nfs|NFS]]
 * [[linux/frq|常用的设置技巧 ]]

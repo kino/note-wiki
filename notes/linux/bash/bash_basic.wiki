@@ -1,0 +1,355 @@
+%title  Bash 常用参考 
+
+=Bash 常用参考 =
+--2014-04-14 Mon 05:19 PM
+
+# #!/bin/bash
+    *  告诉系统该文件是用特定命令解释器解释的一组命令。
+    *  删除自身：
+        {{{class="brush: bash" >
+         #!/bin/rm
+        }}}
+    *  显示自身：
+        {{{class="brush: bash" >
+         #!/bin/more
+        }}}
+#  特殊字符
+    *  [ `a` ] : 注释
+    *  [ `;` ] : 分隔同一行里的两个命令
+    *  [ `;;` ] : ase语句的结束符
+    *  [ `.` ] : 点命令,等同于 `source`
+    *  [ `,` ] : 连接几个数学表达式，都会被求值，但只有最后一个被返回
+    *  ``` ```command``` 命令替换, 另一种比较新的命令替换形式`$`(...)
+    *  [ `:` ] : 空操作，一般认为和true是一样的，返回状态为真（即0）
+    *  [ `!` ] : 取反一个测试结果或退出状态
+    *  [ `\$*,\$@` ] : 位置参数
+    *  [ `$?` ] : 保存了退出码值的变量
+    *  [ `$$` ] : 进程ID变量
+    *  [ `()` ] : 命令组 `(a="hello";echo \$a;)` , 新开一个子shell执行。
+    *  [ `{xxx,yyy,xxx,...}` ] : 扩展支持
+        {{{class="brush: bash" >
+           cat {file1,file2,file3} > combined_file
+           #连接file1,file2,和file3的内容
+           #并写到文件combined_file里去.
+           
+           cp file22.{txt,bakup}
+           #拷贝"file22.txt"内容为"file22.bakup"
+        }}}
+    *  [ `{}` ] : 代码码［花括号］，匿名函数。和函数不同，代码块里的变量仍然可以被脚本后面的代码访问。
+    *  [ `[] ` ] : 测试
+    *  [ `[[ ]]` ] : 测试
+    *  [ `(( ))` ] : 扩展并计算`(( ))`里的整数表达式，注意是 *整数计算*
+    *  [ `>,&>,>&,>>,<` ] : 重定向
+    *  [ `>|` ] : 强迫重定向
+    *  [ `~` ] : 家目录或主目录，同 `\$HOME`
+    *  [ `~+` ] : + 当前工作目录，同`\$PWD`
+    *  [ `~-` ] : - 先前工作目录，同`\$OLDPWD`
+#  变量
+    *  [ `variable` ] : 变量名
+    *  [ `\$variable` ] : 变量值
+    *  如果只有变量名，而没有前面的$:
+        # 声明一个变量或给这个变量赋值
+        # 废弃一个变量
+        # 导出变量（exported）
+        # 变量指的是一种信号
+    *  `$variable`是`${variable}`的一种简写形式
+    *  一个从没有赋值过的变量有一个`null`值，`null`值不等于`0`
+    *  Bash 的变量是无类型的
+    *  局部变量
+    *  环境变量
+    *  如果要设置环境变量, 需要使用命令`export`导出
+    *  位置参数
+        # `$0`代表执行的脚本的名字
+        # `$1`, `$2`, `$3`分别代表`参数1`，`参数2`，`参数3`
+        # `$9`以后的参数，这样表示`${10}`,`${11}`,`${12}`
+        # `$*`和`$@`代表所有参数
+        # `$#`代表所有参数个数
+        # 命令`shift`位置参数左移一位，`$1`的旧值会消失，但`$0`不受影响
+#  退出状态
+    *  每一个命令返回一个退出状态，成功返回`0`，不成功返回`非0`
+    *  脚本和函数也有一个退出状态，`0 ~ 255`
+    *  脚本函数默认返回最后一个命令的退出状态
+#  测试结构
+    *  `if/then` 测试一列命令的结果是否为0
+    *  有一个命令 `[ ,` 和 `test` 是同义词。这个命令的参数是比较表达式或文件测试
+    *  `[[ ... ]]` 是一个扩展测试命令。 `[[` 是一个关键字，并不是一个命令。
+    *  `if`不仅能测试以方括号括起来的条件，它能测试任何命令
+    *  当 `if` 和 `else` 在一行时, `if` 语句后必须有一个 `;`
+    *  `if test condition-true` 结构是精确等同于`if[ condition-true ]` .如果用 `[ condition-true ]` 结构， 左方括 `[` 是一个调用 `test` 命令的标识。右方括 `]` 在一个 `if/test` 中封闭左方括 `[` ，但它不是必须的，不过新一些的Bash版本会要求有。
+    *  等价的测试命令：`test` ,`/usr/bin/test` , `[` 和 `/usr/bin/[`
+    *  `[[]]` 结构比Bash版本的 `[` 更通用。它是从ksh88中引进的test命令的扩展。在 `[[` 和 `]]` 之间的所有的字符都不会被文件扩展或是标记分割, 但是会有参数引用和命令替换
+    *  `(( ))` 结构扩展并计算一个算术表达式的值。如果表达式值为0，会返回 `1` 或 ` 假 ` 作为退出状态码。
+#  文件测试操作符
+    *  `-e` 文件存在
+    *  `-a` 文件存在这个和 `-e` 的作用一样. 它是不赞成使用的，所以它的用处不大。
+    *  `-f` 文件是一个普通文件(不是一个目录或是一个设备文件)
+    *  `-s` 文件大小不为零
+    *  `-d` 文件是一个目录
+    *  `-b` 文件是一个块设备(软盘, 光驱, 等等.)
+    *  `-c` 文件是一个字符设备(键盘, 调制解调器, 声卡, 等等.)
+    *  `-p` 文件是一个管道
+    *  `-h` 文件是一个符号链接
+    *  `-L` 文件是一个符号链接
+    *  `-S` 文件是一个socket
+    *  `-t` 文件(描述符)与一个终端设备相关这个测试选项可以用于检查脚本中是否标准输入( `[ -t 0 ]` )或标准输出( `[ -t 1 ]` )是一个终端.
+    *  `-r` 文件是否可读(指运行这个测试命令的用户的读权限)
+    *  `-w` 文件是否可写(指运行这个测试命令的用户的读权限)
+    *  `-x` 文件是否可执行(指运行这个测试命令的用户的读权限)
+    *  `-g` 文件或目录的设置-组-ID(sgid)标记被设置如果一个目录的sgid标志被设置，在这个目录下创建的文件都属于拥有此目录的用户组，而不必是创建文件的用户所属的组。这个特性对在一个工作组里的同享目录很有用处。
+    *  `-u` 文件的设置-用户-ID(suid)标志被设置
+    *  `-k` 粘滞位设置
+    *  `-O` 你是文件拥有者
+    *  `-G` 你所在组和文件的group-id相同
+    *  `-N` 文件最后一次读后被修改
+    *  `f1 -nt f2` 文件f1比f2新
+    *  `f1 -ot f2` 文件f1比f2旧
+    *  `f1 -ef f2` 文件f1和f2 是相同文件的硬链接
+    *  `!` "非" 反转上面所有测试的结果(如果没有给出条件则返回真).
+#  比较操作符
+    *  整数比较
+        * `-eq` 等于
+        * `-ne` 不等于
+        * `-gt` 大于
+        * `-ge` 大于等于
+        * `-lt` 小于
+        * `-le` 小于等于
+        * `<` 小于(在双括号里使用)
+        * `<=` 小于等于(在双括号里使用)
+        * `>` 大于(在双括号里使用)
+        * `>=` 大于等于(在双括号里使用)
+    *  字符串比较
+        * `=` 等于
+        * `==` 等于,它和 `=` 是同义词。
+        * `==` 比较操作符在一个双方括号测试和一个单方括号号里意思不同。
+            {{{class="brush: bash" >
+                [[ $a == z* ]]
+                #如果变量$a以字符" z "开始(模式匹配)则为真.
+                [[ $a == "z*" ]]
+                #如果变量$a与z*(字面上的匹配)相等则为真.
+                [ $a == z* ]
+                #文件扩展和单元分割有效.
+                [ "$a" == "z*" ]
+                #如果变量$a与z*(字面上的匹配)相等则为真.
+            }}}
+        * `!=` 不相等
+        * `<` 小于，依照ASCII字符排列顺序
+        * `>` 大于，依照ASCII字符排列顺序 注意">"字符在[ ] 结构里需要转义.
+        * `-z` 字符串为"null"，即是指字符串长度为零。
+        * `-n` 字符串不为"null"，即长度不为零.
+    *  混合比较
+        * `-a` 逻辑与. 如果exp1和exp2都为真，则 `exp1 -a exp2` 返回真.
+        * `-o` 逻辑或. 只要exp1和exp2任何一个为真，则exp1 -o exp2返回真.  它们和Bash中用于双方括号结构的比较操作符 `&&` 和 `||` 很相似。
+            {{{class="brush: bash" >
+                [[ condition1 && condition2 ]]
+            }}}
+        * `-o` 和 `-a` 操作符和 `test` 命令或 `单方括号` 一起使用。
+            {{{class="brush: bash" >
+                if [ "\$exp1" -a "\$exp2" ]
+            }}}
+#  内建变量
+    *  `\$BASH BASH` 的二进制文件路径
+    *  `\$BASH_SHELL` 一个指示子shell的等级的变量
+    *  `\$BASH_VERSINFO` 这个数组有六个元素，显示当前安装BASH的版本信息
+    *  `\$DIRSTACK` 目录堆栈里最顶端的值
+    *  `\$EDITOR` 由脚本调用的默认的编辑器，一般是vi或是emacs.
+    *  `\$EUID` 有效用户ID
+    *  `\$FUNCNAME` 当前函数的名称
+    *  `\$GLOBIGNORE` 由通配符(globbing)扩展的一列文件名模式。
+    *  `\$GROUPS` 当前用户所属组
+    *  `\$HOME` 当前家目录
+    *  `\$HOSTNAME` 在系统启动时由一个初始化脚本中用hostname命令给系统指派一个名字。
+    *  `\$HOSTTYPE` 机器类型
+    *  `\$IGNOREEOF` 忽略EOF：在退出控制台前有多少文件结尾标识 （end-of-files, Control-D）会被shell忽略。
+    *  `\$LC_COLLATE` 它常常在.bashrc或/etc/profile文件里被设置.  
+        *  它控制文件名扩展和模式匹配的展开顺序。
+        *  如果设置不当，LC_COLLATE会在文件名通配符(filename globbing)里引起不可预料的结果
+    *  `\$LC_CTYPE` 这个内部变量控制通配符(globbing)和模式匹配中的字符解释。
+    *  `\$LINENO` 这个变量表示在本shell脚本中该变量出现时所在的行数。它只在脚本中它出现时有意义，它一般可用于调试。
+    *  `\$MACHTYPE` 机器类型识别系统的硬件类型。
+    *  `\$OLDPWD` 上一次工作的目录("OLD-print-working-directory",你上一次进入工作的目录)
+    *  `\$OSTYPE` 操作系统类型
+    *  `\$PATH` 可执行程序文件的搜索路径。一般有/usr/bin/, /usr/X11R6/bin/, /usr/local/bin,等等。
+    *  `\$PIPESTATUS` 此数组变量保存了最后执行的前台管道的退出状态。相当有趣的是，它不一定和最后执行的命令的退出状态一样。
+    *  `\$PIPESTATUS` 数组的成员保存了每一个在管道里执行的命令各自的退出状态。 `\$PIPESTATUS[0]` 保存了管道里第一个命令的退出状态，$PIPESTATUS[1?保存了管道里第二个命令的退出状态，以此类推
+    *  `\$PPID` 一个进程的 `\$PPID` 变量保存它的父进程的进程ID(pid)。
+    *  `\$PROMPT_COMMAND` 这个变量在主提示符前($PS1显示之前)执行它的值里保存的命令。
+    *  `\$PS1` 这是主提示符（第一提示符），它能在命令行上看见。
+    *  `\$PS2` 副提示符（第二提示符），它在期望有附加的输入时能看见。它显示像">"的提示。
+    *  `\$PS3` 第三提示符。它在一个select循环里显示(参考例子10-29).
+    *  `\$PS4` 第四提示符，它在用-x选项调用一个脚本时的输出的每一行开头显示。它通常显示像"+"的提示。
+    *  `\$PWD` 工作目录(即你现在所处的目录)
+    *  `\$REPLY` 没有变量提供给read命令时的默认变量．这也适用于select命令的目录，但只是提供被选择的变量项目编号而不是变量本身的值．
+    *  `\$SECONDS` 脚本已运行的秒数．
+    *  `\$SHELLOPTS` 已经激活的shell选项列表，它是一个只读变量．
+    *  `\$SHLVL` SHELL的嵌套级别．指示了Bash被嵌套了多深．在命令行里，$SHLVL是1，因此在一个脚本里，它是2.
+    *  `\$TMOUT` 如果$TMOUT环境变量被设为非零值时间值time，那么经过time这么长的时间后，shell提示符会超时．这将使此shell退出登录．
+    *  `\$UID` 用户ID号这是当前用户的用户标识号，它在/etc/passwd文件中记录。这是当前用户的真实ID，即使只是临时通过su命令转换成另外一个用户也会显示成转换成的ID号。$UID是个只读变量，不能在命令行或是脚本中更改它，并且它和内建命令id是有些相似的。
+#  位置参数
+    *  `\$0, \$1, \$2 ...` 等等位置参数由命令行传给脚本或传给一个函数，或设置(set)给一个变量
+    *  `\$#` 命令行参数或者是位置参数的数量
+    *  `\$*` 所有的位置参数都被当成单个单元。"$*"必须被引号引起来。
+    *  `\$@` 和 `\$*` 相同，但每个参数都是一个引起的字符串。那是说，参数都是没有被解析或扩展，是完整无缺地被传递的。这是说在参数列表中的每一个参数都被看作是一个单独的单元。
+#  位置参数
+    *  `\$-` (使用set命令)传给脚本的标记. 这原本是一个ksh的结构，但被Bash采纳了，并且不幸的是，它看上去好像不能真正的在Bash脚本中工作。一个可能有用的地方是脚本用来测试自己本身是否是一
+个交互式的。
+    *  `\$!` 在后台运行的最后一个作业的PID(进程ID)。
+    *  `\$_` 保存前一个命令最后一个参数的变量值。
+    *  `\$?` 一个命令，函数或脚本自身的退出状态码(参考例子23-7)
+    *  `\$$` 脚本本身的进程PID。$$变量常被用于脚本中生成一个"唯一的"临时文件名,这通常比调用mktemp还要简单。
+#  操作字符串
+    *  字符串长度
+        {{{class="brush: bash" >
+            \${#string}
+            expr length $string
+            expr "$string" : '.*'
+        }}}
+    *  匹配字符串开头的子串的长度
+        {{{class="brush: bash" >
+            expr match "\$string" '\$substring'
+            #\$substring 是一个正则表达式.
+            expr "\$string" : '\$substring'
+            #\$substring 是一个正则表达式.
+        }}}
+    *  索引
+        {{{class="brush: bash" >
+            expr index \$string \$substring
+        }}}
+    *  子串提取
+        {{{class="brush: bash" >
+            \${string:position}
+            #把\$string中从第\$postion个字符开始字符串提取出来. 如果\$string是"*"或" "，
+            #则表示从位置参数中提取第\$postion后面的字符串。
+            \${string:position:length}
+            #把\$string中\$postion个字符后面的长度为\$length的字符串提取出来。
+            expr substr \$string \$position \$length
+            #提取\$string中从位置\$postition开始的长度为\$length的子字符串。
+            expr match "\$string" '\(\$substring\)'
+            #从\$string字符串左边开始提取提取由\$substring描述的正则表达式的子串。
+            expr "\$string" : '\(\$substring\)'
+            #从\$string字符串左边开始提取由\$substring描述的正则表达式的子串。
+            expr match "\$string" '.*\(\$substring\)'
+            #从\$string字符串结尾开始提取由\$substring描述的正则表达式的子串。
+            expr "\$string" : '.*\(\$substring\)'
+            #从$string字符串结尾开始提取由$substring描述的正则表达式的子串。
+        }}}
+    *  子串移动
+        {{{class="brush: bash" >
+            \${string#substring}
+            #从\$string左边开始，剥去最短匹配\$substring子串.
+            \${string##substring}
+            #从\$string左边开始，剥去最长匹配\$substring子串.
+            \${string%substring}
+            #从\$string结尾开始，剥去最短匹配\$substring子串。
+            \${string%%substring}
+            #从\$string结尾开始，剥去最长匹配\$substring子串。
+        }}}
+    *  子串替换
+        {{{class="brush: bash" >
+            \${string/substring/replacement}
+            #用\$replacement替换由\$substring匹配的字符串。
+            \${string//substring/replacement}
+            #用\$replacement替换所有匹配\$substring的字符串。
+            \${string/#substring/replacement}
+            #如果\$string字符串的最前端匹配\$substring字符串，用\$replacement替换\$substring.
+            \${string/%substring/replacement}
+            #如果\$string字符串的最后端匹配\$substring字符串，用\$replacement替换\$substring.
+        }}}
+#  参数替换
+    *  处理或／并扩展变量
+        * `\${parameter}` 和 `\$parameter` 是相同的，都是表示变量parameter的值。在一些环境中，使用 `\${parameter}` 比较不会引起误解. 
+        * `\${parameter-default}` , `\${parameter:-default}` 如果变量没有被设置，使用默认值。 `\${parameter-default}` (未被声明时使用默认值)和 `\${parameter:-default}` (未被声明或被声明但为null时使用默认值)几乎是相等的。它们之间的差别是：当一个参数已被声明，但是值是NULL的时候两者不同. 
+        * `\${parameter=default}` , `\${parameter:=default}` ,如果变量parameter没有设置，把它设置成默认值. 两种形式几乎相同，只是和上面的一样：只有当 `\$parameter` 变量被声明且被设置成null值时不同. 
+        * `\${parameter+alt_value}` , `\${parameter:+alt_value}` 如果变量parameter设置，使用alt_value作为新值，否则使用空字符串。除了引起的当变量被声明且值是空值时有些不同外，两种形式几乎相等. `\${parameter+alt_value}` 只要变量被设置就使用新值 `\${parameter:+alt_value}` 只有变量被设置且不为空值时才使用新值 
+        * `\${parameter?err_msg}` , `\${parameter:?err_msg}` 如果变量parameter已经设置，则使用该值，否则打印err_msg错误信息。这两种形式几乎相同，仅有和上面所说的一点不同：带有:使当变量已声明但值是空值时不同.  
+    *  变量长度／子串提取
+        * `\${#var}` 字符串长度（即变量 `\$var` 的字符个数）。对于数组来说，\${#array}是数组的第一个元素的升序.
+        # `\${#*}` 和 `\${#@}` 表示位置参数的个数.  对于一个数组来说，`\${#array[*]}` 和 `\${#array[@]}` 表示数组中元素的 个数.
+        # `\${var#Pattern}` , `\${var##Pattern}` 删除从 `\$var` 前端开始的最短或最长匹配\$Pattern的字符串。
+        # `\${var%Pattern}` , `\${var%%Pattern}` 删除从 `\$var` 后端开始的最短或最长匹配\$Pattern的字符串。
+    *  子串扩展与替换
+        * `\${var:pos}` 变量var被展开成从位移pos个字符往后的值.
+        * `\${var:pos:len}` 从变量var中展开成从位移pos的字符往后最长为len的字符串。参考例子A-14中这个操作符的创造性用法。
+        * `\${var/Pattern/Replacement}` 在变量var第一个匹配Pattern的字符串用Replacement代替.  如果省略了Replacement ，则第一个匹配Pattern的字符串会被删除.
+        * `\${var//Pattern/Replacement}` 全局替换Global replacement.所有在变量var中被Pattern匹配到的都由Replacement代替. 和上面的一样,如果Replacement被省略,则所有的匹配Pattern的字符串都会被删除.
+        * `\${var/#Pattern/Replacement}` 如果变量var的前缀匹配模式Pattern,则用Replacement代替匹配模式的字符串.
+        * `\${var/%Pattern/Replacement}` 如果变量var的后缀匹配模式Pattern,则用Replacement代替匹配模式的字符串.
+        * `\${!varprefix*}, \${!varprefix}` 匹配所有前面声明过的变量，并且变量名以varprefix开头.
+#  declare or typeset
+    *  `declare` 或 `typeset` 内建命令(它们是完全相同的)可以用来限定变量的属性. 
+    *  `-r` 只读 ( `declare -r var1` 与 `readonly var1` 作用相同) 这大致和C的const限定词相同.一个试图改变只读变量值的操作将会引起错误信息而失败.
+    * `-i` 整数
+        {{{class="brush: bash" >
+            n=6/3
+            echo "n=$n" #n=6/3
+            
+            delare -i n
+            n=6/3
+            echo "n=$n" # n=2
+        }}}
+    * `-a` 数组
+    * `-f` 函数. 在脚本中没有带任何参数的declare -f 会列出所有在此脚本前面已定义的函数出来。
+    * `-x` export 这样将声明一个变量作为脚本的环境变量而被导出。
+    * `-x var=\$value` declare命令允许在声明变量类型的时候同时给变量赋值。
+#  变量间接引用
+    * 假设一个变量的值是第二个变量的名字. 
+    * 这样要如何才能从第一个变量处重新获得第二个变量的值？
+    * 例如,a=letter_of_alphabet和letter_of_alphabet=z, 是否能由a引用得到z? 
+    * 这确实可以办到,这种技术被称为间接引用.它使用不平常的 `eval var1= \$\$var2` 序列.
+#  循环或分支
+    *  `for arg in [list]` 
+        *  这是一个基本的循环结构.它与C的for结构有很大不同.
+            {{{class="brush: bash" >
+                for arg in [list]
+                do
+                    command(s)...
+                done
+            }}}
+    *  `while` 
+        *  这种结构在循环的开头判断条件是否满足,如果条件一直满足,那就一直循环下去(0为退出码[exit status]).与for 循环的区别是,这种结构适合用在循环次数未知的情况下.
+            {{{class="brush: bash" >
+                while [condition]
+                do
+                    command(s)...
+                done
+            }}}
+        * 和for循环一样,如果想把do和条件放到同一行上还是需要一个";".
+            {{{class="brush: bash" >
+                while [condition] ; do
+            }}}
+        * 一个while循环可以有多个判断条件,但是只有最后一个才能决定是否退出循环.然而这需要一种有点不同的循环语法. 与for循环一样,while循环也可通过(())来使用C风格语法.
+    *  `until`
+        * 这个结构在循环的顶部判断条件,并且如果条件一直为false那就一直循环下去.(与while相反).  
+            {{{class="brush: bash" >
+                until [conditionistrue]
+                do
+                    command(s)...
+                done
+            }}}
+        * 注意: until循环的判断在循环的顶部,这与某些编程语言是不同的. 与for循环一样,如果想把do和条件放在一行里,就使用";".
+            {{{class="brush: bash" >
+                until [conditionistrue] ; do
+            }}}
+    *  `break,continue`
+        * break和continue这两个循环控制命令与其它语言的类似命令的行为是相同的.
+        * break命令将会跳出循环,
+        * continue命令将会跳过本次循环下边的语句,直接进入下次循环..
+        * break命令可以带一个参数.一个不带参数的break循环只能退出最内
+        * 层的循环,而break N可以退出N层循环.
+        * continue命令也可以像break带一个参数.一个不带参数的continue命令只去掉本次循环的剩余代码.而continue N将会把N层循环剩余的代码都去掉,但是循环的次数不变.
+#  测试与分支
+    * `case和select` 结构在技术上说不是循环,因为它们并不对可执行的代码块进行迭代.但是和循环相似的是,它们也依靠在代码块的顶部或底部的条件判断来决定程序的分支.
+    * `case (in) / esac` 在shell中的case同C/C++中的switch结构是相同的.它允许通过判断来选择代码块中多条路径中的一条. 它的作用和多个if/then/else语句相同，是它们的简化结构，特别适用于创建目录.
+        {{{class="brush: bash" >
+            case "\$variable" in
+                "\$condition1" )
+                command...
+                ;;
+                "$condition2" )
+                command...
+                ;;
+            esac
+            # 对变量使用""并不是强制的,因为不会发生单词分离.
+            # 每句测试行,都以右小括号)结尾.
+            # 每个条件块都以两个分号结尾;;.
+            # case块的结束以esac(case的反向拼写)结尾.
+        }}}
