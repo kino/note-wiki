@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Bash 数组</title>
+    <meta name="author" content="wangxingchao">
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!-- Le styles -->
+    <link href="../../../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../../assets/css/style.css" rel="stylesheet">
+    <link href="../../../assets/css/syntax.css" rel="stylesheet">
+
+    <!-- Le fav and touch icons -->
+    <!--link rel="shortcut icon" href="/favicon.ico"-->
+  <!-- Update these with your own images
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+
+    <link id="SL_resources" type="text/css" rel="stylesheet" href="chrome://imtranslator/skin/shadow.css">
+  </head>
+  <body>
+    <div class="navbar-inverse">
+        <div class="container">
+            <a class="navbar-brand" href="#">笔记</a>
+            <ul class="nav navbar-nav" style="display:none">
+                <li class="active"><a href="#">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content">
+            <div class="row post">
+                <div class="col-md-9">
+                    <h1 class="title"><a href="#">Bash 数组</a></h1>
+                    <h2>Array 初始化</h2>
+
+<div class="codehilite"><pre><code> <span class="c"># 方法一</span>
+ area<span class="o">[</span>11<span class="o">]=</span>23
+ area<span class="o">[</span>13<span class="o">]=</span>37
+ area<span class="o">[</span>51<span class="o">]=</span>UFOs
+
+
+ <span class="c"># 方法二</span>
+ <span class="c"># array_name=( XXX YYY ZZZ ... )</span>
+ <span class="nv">area2</span><span class="o">=(</span> zero one two three four <span class="o">)</span>
+
+ <span class="c"># 方法三</span>
+ <span class="c"># array_name=([xx]=XXX [yy]=YYY ...)</span>
+ <span class="nv">area3</span><span class="o">=([</span>17<span class="o">]=</span>seventeen <span class="o">[</span>24<span class="o">]=</span>twenty-four<span class="o">)</span>
+
+ <span class="c"># 用引号包含空格</span>
+ <span class="nv">array2</span><span class="o">=(</span> <span class="o">[</span>0<span class="o">]=</span><span class="s2">&quot;first element&quot;</span> <span class="o">[</span>1<span class="o">]=</span><span class="s2">&quot;second element&quot;</span> <span class="o">[</span>3<span class="o">]=</span><span class="s2">&quot;fourth element&quot;</span> <span class="o">)</span>
+ <span class="c">#            ^     ^       ^     ^      ^       ^     ^      ^       ^</span>
+
+ <span class="c"># 使用自动扩展</span>
+ <span class="nv">base64_charset</span><span class="o">=(</span> <span class="o">{</span>A..Z<span class="o">}</span> <span class="o">{</span>a..z<span class="o">}</span> <span class="o">{</span>0..9<span class="o">}</span> + / <span class="o">=</span> <span class="o">)</span>
+
+ <span class="c"># 数组操作允许用于普通变量，相当于只有一个element的数组</span>
+</code></pre></div>
+
+<h2>Array 取值</h2>
+
+<div class="codehilite"><pre><code> <span class="nb">echo</span> <span class="k">${</span><span class="nv">area</span><span class="p">[11]</span><span class="k">}</span>
+
+ <span class="c">#未初始化的返回空白blank</span>
+ <span class="nb">echo</span> <span class="k">${</span><span class="nv">area</span><span class="p">[43]</span><span class="k">}</span>
+
+ area<span class="o">[</span>5<span class="o">]=</span><span class="sb">`</span>expr <span class="k">${</span><span class="nv">area</span><span class="p">[11]</span><span class="k">}</span> + <span class="k">${</span><span class="nv">area</span><span class="p">[13]</span><span class="k">}</span><span class="sb">`</span>
+
+ <span class="c">#失败，因为数字与字符串不能相加</span>
+ area<span class="o">[</span>6<span class="o">]=</span><span class="sb">`</span>expr <span class="k">${</span><span class="nv">area</span><span class="p">[11]</span><span class="k">}</span> + <span class="k">${</span><span class="nv">area</span><span class="p">[51]</span><span class="k">}</span><span class="sb">`</span>
+</code></pre></div>
+
+<h2>Array 长度操作</h2>
+
+<div class="codehilite"><pre><code> <span class="nv">array</span><span class="o">=(</span> zero one two three four five <span class="o">)</span>
+ <span class="c"># Element 0   1   2    3     4    5</span>
+
+ <span class="nb">echo</span> <span class="k">${</span><span class="nv">array</span><span class="p">[0]</span><span class="k">}</span>       <span class="c">#  zero</span>
+ <span class="nb">echo</span> <span class="k">${</span><span class="nv">array</span><span class="p">:</span><span class="nv">0</span><span class="k">}</span>        <span class="c">#  zero</span>
+                        <span class="c">#  Parameter expansion of first element,</span>
+                        <span class="c">#+ starting at position # 0 (1st character).</span>
+ <span class="nb">echo</span> <span class="k">${</span><span class="nv">array</span><span class="p">:</span><span class="nv">1</span><span class="k">}</span>        <span class="c">#  ero</span>
+                        <span class="c">#  Parameter expansion of first element,</span>
+                        <span class="c">#+ starting at position # 1 (2nd character).</span>
+
+ <span class="nb">echo</span> <span class="s2">&quot;--------------&quot;</span>
+
+ <span class="nb">echo</span> <span class="k">${#</span><span class="nv">array</span><span class="p">[0]</span><span class="k">}</span>      <span class="c">#  4</span>
+                        <span class="c">#  Length of first element of array.</span>
+ <span class="nb">echo</span> <span class="k">${#</span><span class="nv">array</span><span class="k">}</span>         <span class="c">#  4</span>
+                        <span class="c">#  Length of first element of array.</span>
+                        <span class="c">#  (Alternate notation)</span>
+
+ <span class="nb">echo</span> <span class="k">${#</span><span class="nv">array</span><span class="p">[1]</span><span class="k">}</span>      <span class="c">#  3</span>
+                        <span class="c">#  Length of second element of array.</span>
+                        <span class="c">#  Arrays in Bash have zero-based indexing.</span>
+
+ <span class="nb">echo</span> <span class="k">${#</span><span class="nv">array</span><span class="p">[*]</span><span class="k">}</span>      <span class="c">#  6</span>
+                        <span class="c">#  Number of elements in array.</span>
+ <span class="nb">echo</span> <span class="k">${#</span><span class="nv">array</span><span class="p">[@]</span><span class="k">}</span>      <span class="c">#  6</span>
+                        <span class="c">#  Number of elements in array.</span>
+</code></pre></div>
+
+<h2>Array 字符串操作</h2>
+
+<div class="codehilite"><pre><code> <span class="c">#  In general, any string operation using the ${name ... } notation</span>
+ <span class="c">#+ can be applied to all string elements in an array,</span>
+ <span class="c">#+ with the ${name[@] ... } or ${name[*] ...} notation.</span>
+
+
+ <span class="nv">arrayZ</span><span class="o">=(</span> one two three four five five <span class="o">)</span>
+
+ <span class="nb">echo</span>
+
+ <span class="c"># Trailing Substring Extraction</span>
+ <span class="nb">echo</span> <span class="k">${</span><span class="nv">arrayZ</span><span class="p">[@]:</span><span class="nv">0</span><span class="k">}</span>     <span class="c"># one two three four five five</span>
+ <span class="c">#                ^        All elements.</span>
+
+ <span class="nb">echo</span> <span class="k">${</span><span class="nv">arrayZ</span><span class="p">[@]:</span><span class="nv">1</span><span class="k">}</span>     <span class="c"># two three four five five</span>
+ <span class="c">#                ^        All elements following element[0].</span>
+
+ <span class="nb">echo</span> <span class="k">${</span><span class="nv">arrayZ</span><span class="p">[@]:</span><span class="nv">1</span><span class="p">:</span><span class="nv">2</span><span class="k">}</span>   <span class="c"># two three</span>
+ <span class="c">#                  ^      Only the two elements after element[0].</span>
+
+ <span class="c"># 其它类似</span>
+</code></pre></div>
+
+<h2>Array 片段</h2>
+
+<h2>Array 修改</h2>
+
+<h2>Array 循环读取</h2>
+
+                    <ul class="pager">
+                        <li class="next"><a href="../../../index.html" title="所有文章">回首页</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-3 sidebar">
+                    <h5 class="date">发布日期：<span>2014-05-13 Tue 09:13 PM</span></h5>
+                    <h5>路径</h5>
+                    <h5>标签</h5>
+                    <ul class="tag_box" style="display:none">
+                        <li><a href="/tags.html#tag1-ref">Tag 1<span>1</span></a></li>
+                        <li><a href="/tags.html#tag2-ref">Tag 2<span>1</span></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <footer>
+        <p> 
+            &copy; <a href="mailto:wangxingchao@gmail.com">wangxingchao</a> 2014. 
+            Proudly powered by <a target="_blank" href="http://getbootstrap.com">Bootstrap</a>
+        </p>
+        </footer>
+    </div> <!-- /container -->
+  </body>
+</html>
