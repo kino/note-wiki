@@ -2,16 +2,16 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>首页</title>
+    <title>丢包的原因</title>
     <meta name="author" content="wangxingchao">
     <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <!-- Le styles -->
-    <link href="./assets/css/bootstrap.min.css" rel="stylesheet">
-    <link href="./assets/css/style.css" rel="stylesheet">
-    <link href="./assets/css/syntax.css" rel="stylesheet">
+    <link href="../../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <link href="../../assets/css/syntax.css" rel="stylesheet">
 
     <!-- Le fav and touch icons -->
     <!--link rel="shortcut icon" href="/favicon.ico"-->
@@ -26,7 +26,7 @@
   <body>
     <div class="navbar-inverse">
         <div class="container">
-            <a class="navbar-brand"  href="./index.html">笔记</a>
+            <a class="navbar-brand"  href="../../index.html">笔记</a>
             <ul class="nav navbar-nav" style="display:none">
                 <li class="active"><a href="#">Home</a></li>
                 <li><a href="#about">About</a></li>
@@ -39,46 +39,40 @@
         <div class="content">
             <div class="row post">
                 <div class="col-md-9">
-                    <h1 class="title"><a href="#">首页</a></h1>
-                    <h2>Linux</h2>
+                    <h1 class="title"><a href="#">丢包的原因</a></h1>
+                    <p>导致端口丢包的原因总结起来包括如下几种可能性：</p>
 
+<ol>
+<li>由于某些接口、链路、双工异常导致的CRC错误、Alignment帧bit丢失等常见错误，此类报文交换机将予以丢弃
 <ul>
-<li><a href="linux/bash.html">BASH</a></li>
-</ul>
-
-<h2>Data Structure &amp; Algorithm</h2>
-
+<li>查看端口计数，是否由较多CRC、冲突帧等。</li>
+<li>show interface，show interface counter</li>
+</ul></li>
+<li>QOS限速、Rate-limit配置导致的数据包正常丢弃。（不计入端口统计计数）</li>
+<li>端口BLOCK（STP）导致的数据包正常丢弃。（计入端口统计计数）
 <ul>
-<li><a href="algorithm/basic.html">数据结构基础概念</a></li>
-</ul>
-
-<h2>Operating System</h2>
-
+<li>查看端口生成树状态。</li>
+<li>show spanning-tree summary，show spanning-tree interface</li>
+</ul></li>
+<li>对端设备发送的速率过快导致本端交换机buffer不足，而又没有流控导致的丢包
 <ul>
-<li><a href="operating_system/os_design_and_implementation/index.html">Operating Systems Design and Implementation</a></li>
-</ul>
-
-<h2>Network</h2>
-
+<li>尝试两端打开流控，观察。</li>
+</ul></li>
+<li>多端口向一个端口发送报文，超出这个端口的转发能力，导致的HOL队头阻塞丢包
 <ul>
-<li><a href="network/faq/index.html">FAQ</a></li>
-</ul>
+<li>尝试调整端口速率和打开流控，观察。</li>
+</ul></li>
+<li>针对特殊TCP/UDP运用，最后需要通过在PC端抓包确认故障特点。</li>
+</ol>
 
-<h2>Thinking</h2>
+<p>参考下面的信息收集方法：
+其中最常见的4/5两种类型的溢出，通过查看端口的计数器，定位受影响的端口并打开两端的流控一般都能解决问题。
+从目前实际遇到的案例来看，也基本都是由于以上两种原因导致的丢包故障。如仍无法解决，请收集上层计数与底层计数信息提供后台分析判断。</p>
 
-<ul>
-<li><a href="thinking/thinking/index.html">Thinking</a></li>
-</ul>
-
-<h2>Programming</h2>
-
-<ul>
-<li><a href="programming/async.html">Async</a></li>
-<li><a href="programming/single-thread-multi-threads.html">单线程与多线程</a></li>
-</ul>
+<p>注意：收集上下层信息的同时，注意收集信息的充分性，多次收集的上层信息必须有发现drop 计数的递增，这几次收集间隔中底层的信息都必须相应收集到。</p>
 
                     <ul class="pager">
-                        <li class="next"><a href="./index.html" title="所有文章">回首页</a></li>
+                        <li class="next"><a href="../../index.html" title="所有文章">回首页</a></li>
                     </ul>
                 </div>
 

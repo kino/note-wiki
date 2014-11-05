@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>由Java面试引起的胡思乱想</title>
+    <meta name="author" content="wangxingchao">
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!-- Le styles -->
+    <link href="../../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../assets/css/style.css" rel="stylesheet">
+    <link href="../../assets/css/syntax.css" rel="stylesheet">
+
+    <!-- Le fav and touch icons -->
+    <!--link rel="shortcut icon" href="/favicon.ico"-->
+  <!-- Update these with your own images
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+
+    <link id="SL_resources" type="text/css" rel="stylesheet" href="chrome://imtranslator/skin/shadow.css">
+  </head>
+  <body>
+    <div class="navbar-inverse">
+        <div class="container">
+            <a class="navbar-brand"  href="../../index.html">笔记</a>
+            <ul class="nav navbar-nav" style="display:none">
+                <li class="active"><a href="#">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content">
+            <div class="row post">
+                <div class="col-md-9">
+                    <h1 class="title"><a href="#">由Java面试引起的胡思乱想</a></h1>
+                    <p>场景一：</p>
+
+<pre>
+面试官：请解释一下java里的"装箱"与"拆箱"
+面试者：两眼一片茫然
+。。。
+</pre>
+
+<p>场景二：</p>
+
+<pre>
+面试官：请介绍一下什么是"贫血模型"和"冲血模型"
+面试者：两眼一片茫然
+。。。
+</pre>
+
+<p>这两个问题想测试的是面试者的什么能力或着哪方面的技巧。
+当面试者不会回答时，是不是就可以判定他不具备这方面的能力。
+第一个问题应该想了解的是int与Integer混合使用时的问题;
+第二个问题是想问业务逻辑如何组织放在哪里更合适的问题。</p>
+
+<blockquote>
+  <p>第一个问题能不能换个问法，或着在面试者不知道的情况下，补充一下问题：</p>
+  
+  <blockquote>
+    <p>下面这段程序有问题吗？如果有问题，会在什么情况下出现什么问题？</p>
+  </blockquote>
+</blockquote>
+
+<div class="codehilite"><pre><code><span class="kt">void</span> <span class="nf">printInfo</span><span class="o">(</span><span class="n">Integer</span> <span class="n">num</span><span class="o">){</span>
+    <span class="kt">int</span> <span class="n">base</span> <span class="o">=</span> <span class="mi">10000</span><span class="o">;</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Hello &quot;</span> <span class="o">+</span> <span class="o">(</span><span class="n">base</span> <span class="o">+</span> <span class="n">num</span><span class="o">));</span>
+<span class="o">}</span>
+</code></pre></div>
+
+<blockquote>
+  <p>而第二个问题最好设计一个业务场景，让面试者画一下类图，说一下各个类的职责。</p>
+</blockquote>
+
+<p>在此想说的是，在调选侯选人时，更应该注重他解决问题的能力，编程的能力，组织代码的能力，思维的严谨性，基础知识的掌握情况 ... 
+而不应该是一堆专有名词的名词解释。面试决不应该是一堆死问题的问与答，而应该是一个交互过程，一个沟通过程。
+不管是面试者还是被面试者，在挑选你接下来甚至几年的工作伙伴时，请慎重！ 
+当然如果你是在挑一个满嘴“专业名词”，可以带出去忽悠客户，装装逼的话，那就另当别论。
+编程必竟是一件脚踏实地的事。</p>
+
+<p>我喜欢用的面试方式就是交互式沟通，设计一个问题或着请面试者提供一个他遇到的问题，在白板上解决这个问题或重演他以前解决的过程。
+逐步重构，加需求，看他做的每一个决定。对于资历深的，就应该请教；差不多的，就当切磋；新人，就应该引导。面试，对于双方都是一次难得的学习机会，而且效果相当好, 不应浪费。
+面试不应该是死的，应该是活的，只有活的过程才能挑到活的人。</p>
+
+<p>姑且不论这两个问题是否合适，这里想说的是，实和虚的问题。一些技术实现，一些现象，一些编程方式，一些代码组织方式，这些都是实实在在的东西，
+而为这些东西起一个名字，在这个名字还没被大众所熟知的时候，就是虚的。必竟起名字这件事，没办法立即通知所有人。
+但不能因为不知道名字，就否认这个人不认识这个东西。
+比如06,07年时，很多人被问到ajax时，不知道。后来一看，就是公司内用了好长时间的XMLHTTPReqeust，公司内沟通，叫做"局部刷新"。 
+而这个快速时代，每年都会出现很多新技术，新名词，当然有些是真的新技术，有些不过是旧酒新装。而大家又喜欢用这些新的东西武装自己。
+"今天碰到个面试的，工作了xx年，连xxx都不知道"当然，我也经常这样。</p>
+
+<p>这里想说一下，前几年面试中流行的几个问题的看法，现在还有没有人问，就不太清楚了。</p>
+
+<p>第一个就是敏捷开发与极限编程，有些情况甚至要背出那些条文， 当时不觉得的什么，现在想想真蛋疼。
+当然，我一直认为这两个东西都是好东西，我本身也是受益非浅。有问题的是这两样不应该做为程序员的面试题，
+做了也没关系，但不应该有标准答案。因为工作这么多年，还真没碰到过两个团队使用一样的工作方式，哪怕都是顶着敏捷开发的头衔。
+一个好的团队在不同的时间，不同的项目，会自身找到最合适自己的工作方式，而不是靠一个万能的方式解决的。
+所以，任何一种被总结发明出来的方式，当落实到一个具体的团队时，都会发生变化。</p>
+
+<p>第二个就是设计模式，对于这个，我甚至都觉得有点原罪了。我一直有一个观点，就是刚毕业的新人前三年就不应该学习设计模式。
+有一点大家有时候会不会搞混了，就是因为先有了各种各样的解决问题的方式，才有了后来总结出来的设计模式，
+而不是先有了设计模式的名称，才有了解决访问题的方式。而且已存在的方式，决不应该只有设计模式里提到的那些，而且将来应该有更多才对。
+而且解决问题的方式本身就不应该有对与错之分，很多时候甚至没有好与坏之分，只是选择不一样，只要尽量的解耦、代码易读，好维护，保持一定的扩展性就可以了。
+而设计模式就像一道枷锁一样，套在了开发人员的脖子上，特别是新人身上，扼杀了创新性。
+甚至有人花费大量的精力，研究不同设计模式之间的区别，当使用一个设计模式时，还怕使用错，怕人笑话。
+当遇到一个问题时，不是思考问题，而是想从设计模式里挑一个，而且一定要挑一个，为用而用。</p>
+
+<p>还是那句话，我不是批判设计模式，恰恰相反，而是认为设计模式是开发人员长期的开发结晶。
+而人们就是要不停的积累经验总结，传递给后来的人，才能越来越进步。 
+有意见的是人们对待设计模式的态度。因为是先有实践，再有理论，理论再来影响实践。
+很多开发人员，特别是新人，根本没有任何经验，就被灌输了设计理论，最终确被这些理论束缚住了。
+一个开发人员，一开始就应该自己去写，去模仿身边比较利害的人就可以了，逐渐积累开发经验。
+一段时间后，再来看设计模式，有种突然清醒的感觉，其中很多模式，自己已经用过，只是有点不同而已，这时再来加强自己的能力就可以了。</p>
+
+<p>最后认为人们天生就具有其他动物类似的直觉，会有判定一件事情好坏的能力，只要不断重构，总归是往好的方向走的。
+而编程是一件创造性的活动，是在创造一件活的东西，很多时候需要灵光一现和不停的创新。
+所以请不要再用名词解释类似的死问题面试其他人了，如果被问的人不知道，那就请稍微解释一下，换个问法;
+也不要再用各种模式束缚自己，但可以借鉴，我们所需要的是思维严谨，灵活反应, 可以成长的人。</p>
+
+                    <ul class="pager">
+                        <li class="next"><a href="../../index.html" title="所有文章">回首页</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-3 sidebar">
+                    <h5 class="date">发布日期：<span>None</span></h5>
+                    <h5>路径</h5>
+                    <h5>标签</h5>
+                    <ul class="tag_box" style="display:none">
+                        <li><a href="/tags.html#tag1-ref">Tag 1<span>1</span></a></li>
+                        <li><a href="/tags.html#tag2-ref">Tag 2<span>1</span></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <footer>
+        <p> 
+            &copy; <a href="mailto:wangxingchao@gmail.com">wangxingchao</a> 2014. 
+            Proudly powered by <a target="_blank" href="http://getbootstrap.com">Bootstrap</a>
+        </p>
+        </footer>
+    </div> <!-- /container -->
+  </body>
+</html>

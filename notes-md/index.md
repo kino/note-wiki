@@ -4,10 +4,16 @@
 * [[linux/bash|BASH]]
  
 ## Data Structure & Algorithm
-* [[algorithm/basic|Basic]]
+* [[algorithm/basic|数据结构基础概念]]
  
 ## Operating System
-* [[operating_system/bash|BASH]]
+* [[operating_system/os_design_and_implementation/index|Operating Systems Design and Implementation]]
+ 
+## Network
+* [[network/faq/index|FAQ]]
+ 
+## Thinking
+* [[thinking/thinking/index|Thinking]]
  
 ## Programming
 * [[programming/async|Async]]
