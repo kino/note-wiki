@@ -7,6 +7,7 @@
 * [[linux/Awk|Awk(转)]]
  
 ## Tools
+* [[tools/tools-stack|Tools Stack]]
 * [[tools/vim|VIM]]
 
 ## Compiler
