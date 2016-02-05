@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>编译：一个 C 程序的艺术之旅(转)</title>
+    <meta name="author" content="wangxingchao">
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!-- Le styles -->
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+    <link href="../assets/css/syntax.css" rel="stylesheet">
+
+    <!-- Le fav and touch icons -->
+    <!--link rel="shortcut icon" href="/favicon.ico"-->
+  <!-- Update these with your own images
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+
+    <link id="SL_resources" type="text/css" rel="stylesheet" href="chrome://imtranslator/skin/shadow.css">
+  </head>
+  <body>
+    <div class="navbar-inverse">
+        <div class="container">
+            <a class="navbar-brand"  href="../index.html">笔记</a>
+            <ul class="nav navbar-nav" style="display:none">
+                <li class="active"><a href="#">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content">
+            <div class="row post">
+                <div class="col-md-9">
+                    <h1 class="title"><a href="#">编译：一个 C 程序的艺术之旅(转)</a></h1>
+                    <p>源地址：https://ring0.me/2014/11/c-compiler/</p>
+
+<p>正在学习 CS50（一门 MOOC）的 @张静宁 写了一篇《【读图学 C 语言】编译时发生了什么》。她的文章更多讲的是 “what”，本文将尝试解释一些 “why”。</p>
+
+<p>C 程序为什么要编译才能执行？一个 C 程序在变成可执行文件的过程中，为什么要经过预处理、编译、汇编、链接这四道工序？让我们从这段简单的 C 程序开始。</p>
+
+<p><img src="./1.png" alt="img" /></p>
+
+<h2>为什么要编译</h2>
+
+<p>这并不是一个简单的问题。我们知道 Python 代码不需要 “编译”，输入一行代码就可以运行出结果了，对用户很友好有木有！
+这种交互式的运行环境被称为 REPL（Read-Evaluate-Print-Loop），也就是读取用户输入的语句，执行语句，输出语句的值，再返回到等待输入状态。</p>
+
+<p><img src="2.png" alt="img" /></p>
+
+<p>C 语言为什么不能用这种交互式的 REPL 呢？非也。在某个私有 SDK 里，为了便于调试，内嵌了一个 2.5 万行的 C 语言解释器，支持几乎所有的 C 语言语法。
+它使用 lex 和 yacc 做词法和语法分析，语法结构的名字都是从 C99 标准里抄的。在调试一个 API 的时候，只需在解释器里输入语句调用 API，
+而不需要写一个 C 文件、编译运行。</p>
+
+<p><img src="3.png" alt="img" /></p>
+
+<p>由于 C 语言的语句是没有值的，只有表达式有值，而该解释器只接受语句作为输入，因此 REPL 中的 print 步骤被省略了，只有在显式调用输出语句时才会有输出。
+这里与标准 C 语言的唯一区别是，语句不需要写在 main() 函数里，而是写一行执行一行。
+事实上，C 语言的 main() 函数是一个语法糖（syntactic sugar），也就是规定所有语句必须写在函数里。
+像 Pascal 这样的语言，就是把所有不在任何函数里的语句拿出来，组织成一个 “主函数”。</p>
+
+<p>可见，阻止 C 语言解释执行的并不是其语法。
+那么为什么 C 开发环境一般不提供对用户友好的解释执行方式，而是要写一个格式严谨的 C 文件、编译执行呢？
+这是为了对机器友好，也就是提高程序运行的效率。
+时至今日，再用 C 语言写应用程序恐怕是要被笑话的（所以瀚海星云 BBS 总有人提出要重写），C 语言主要用于系统底层、嵌入式和追求高性能的场合。
+这些地方，程序员的时间比机器的时间便宜。</p>
+
+<p>编译比解释执行的性能更高，用一个小例子就能看出。比如 c = a + b 这样一条语句，会被编译为如下的汇编码：</p>
+
+<div class="codehilite"><pre><code><span class="nx">movl</span> <span class="mi">12</span><span class="p">(</span><span class="o">%</span><span class="nx">esp</span><span class="p">)</span><span class="o">,</span> <span class="o">%</span><span class="nx">edx</span> <span class="o">;</span><span class="mi">12</span><span class="p">(</span><span class="o">%</span><span class="nx">esp</span><span class="p">)</span> <span class="nx">is</span> <span class="nx">b</span><span class="o">,</span> <span class="o">%</span><span class="nx">edx</span> <span class="o">&lt;=</span> <span class="nx">b</span>
+<span class="nx">movl</span> <span class="mi">8</span><span class="p">(</span><span class="o">%</span><span class="nx">esp</span><span class="p">)</span><span class="o">,</span> <span class="o">%</span><span class="nx">eax</span>  <span class="o">;</span> <span class="mi">8</span><span class="p">(</span><span class="o">%</span><span class="nx">esp</span><span class="p">)</span> <span class="nx">is</span> <span class="nx">a</span><span class="o">,</span> <span class="o">%</span><span class="nx">eax</span> <span class="o">&lt;=</span> <span class="nx">a</span>
+<span class="nx">addl</span> <span class="o">%</span><span class="nx">edx</span><span class="o">,</span> <span class="o">%</span><span class="nx">eax</span>     <span class="o">;</span> <span class="o">%</span><span class="nx">eax</span> <span class="o">+=</span> <span class="o">%</span><span class="nx">edx</span>
+<span class="nx">movl</span> <span class="o">%</span><span class="nx">eax</span><span class="o">,</span> <span class="mi">4</span><span class="p">(</span><span class="o">%</span><span class="nx">esp</span><span class="p">)</span>  <span class="o">;</span> <span class="mi">4</span><span class="p">(</span><span class="o">%</span><span class="nx">esp</span><span class="p">)</span> <span class="nx">is</span> <span class="nx">c</span><span class="o">,</span> <span class="nx">c</span> <span class="o">&lt;=</span> <span class="o">%</span><span class="nx">eax</span>
+</code></pre></div>
+
+<p>只有 4 行，很简洁吧！其中的 movl 是把数据从内存移动到寄存器或者从寄存器移动到内存，而实际的加法操作是在寄存器里完成的。</p>
+
+<p>同样是 c = a + b，解释执行的话，解释器需要做这些事：</p>
+
+<ol>
+<li>词法分析：读入 “c = a + b” 这个字符串，把它拆成 “c” “=” “a” “+” “b” 这些词素（lexeme）；</li>
+<li>语法分析：认出 “c” “=” “a” “+” “b” 这四个词素组成的是一个赋值表达式，而赋值表达式的右端是一个算术表达式，执行的是加法操作。形成一棵语法树；</li>
+<li>生成中间代码：从符号表里找到 c，a，b 三个变量定义的位置，变成类似汇编码的形式（IL，Intermediate Language），例如 LLVM 中的 %c = add i32 %a %b；</li>
+<li>执行中间代码：将中间代码载入内存，逐条执行。执行到这一条时，首先看当前要执行的中间代码是 add，跳转到 add 的处理过程，然后再真正执行 add 操作。</li>
+</ol>
+
+<p>上述前三步是 C 这样的编译型语言在编译时也要做的，在编译时做就省下了运行的时间；而第 4 步中，编译生成的机器码不像执行中间代码那样需要查找 add 的中间步骤。</p>
+
+<p>编译时间与运行时间是一种 trade-off，C 程序通常一次编译，多次运行或长时间运行，因此在编译上多耗些时间、多做些优化被认为是值得的。
+而解释型语言往往作为胶水语言，也就是完成一项用后即弃的特定任务。
+在 PHP 内核开发邮件列表里，一个月经贴是为什么 PHP 不做编译优化。
+官方的答复是，PHP 程序运行时间往往很短暂，比如 10 ms；如果花 100 ms 做编译优化，把运行时间压缩到 1 ms，总的时间消耗是 101 ms，反而更慢了（不考虑中间代码缓存）。</p>
+
+<p>C 语言编译器经过数十年的发展，编译优化已经做到与手写汇编代码差不多的性能了，
+也就是用 C 写出的算法合理、实现高效的代码基本上能够发挥出机器的最大潜能，所以 C 语言成为各种 benchmark 的参考标准。
+下表中，Python、R、Matlab、Octave 等逐行解释执行的语言比 C 慢几十倍甚至更多。
+Fortran、Go 作为编译执行的语言也很快。JavaScript、Java 由于用了 JIT（Just-In-Time）技术，也是很快的，但与 C 还是有一定差距。</p>
+
+<p>各种语言与 C 的性能对比（图片来源：http://julialang.org/）
+<img src="4.png" alt="img" /></p>
+
+<h2>编译为什么要分四道工序</h2>
+
+<p>C 程序被 gcc 吃进去之后，要经历四道工序的流水线才能变成可执行文件。</p>
+
+<p><img src="5.png" alt="img" /></p>
+
+<p>尽管预处理、编译、汇编、链接这四道工序经过 cc 的封装，只用一条命令即可完成，我们还是不禁要问：为什么要分这么多工序？把源代码直接翻译成可执行文件不就行了？</p>
+
+<p>这就涉及到计算机系统设计的一个基本原则：层次化和抽象。
+David Wheeler 有句名言：“All problems in computer science can be solved by another level of indirection”
+（所有计算机科学的问题都可以用添加一个中间层来解决）。
+无独有偶，RFC 1925（The Twelve Networking Truths）中也有如下的断言：</p>
+
+<pre><code>   (6)  It is easier to move a problem around (for example, by moving
+        the problem to a different part of the overall network
+        architecture) than it is to solve it.
+
+        (6a) (corollary). It is always possible to add another level of
+             indirection.
+</code></pre>
+
+<h2>预处理（Preprocessing）</h2>
+
+<p>gcc -E hello.c -o hello.i 可以生成预处理后的中间文件 hello.i。为了展示宏展开的过程，我们在 hello.c 中添加了一些宏定义。</p>
+
+<p><img src="6.png" alt="img" /></p>
+
+<p>hello.i 中最后几行内容如下。</p>
+
+<p><img src="7.png" alt="img" /></p>
+
+<p>从 P(42) 可以看到，C 语言的宏展开就是字符串替换，展开之后的运算符优先级可能与设想的不符。
+因此，在含参数的宏定义的时候，需要在表达式两侧和参数两侧都加上括号，就像下面这样：</p>
+
+<p><img src="8.png" alt="img" /></p>
+
+<p>有了括号，生成的代码层次也就清晰多了：</p>
+
+<p><img src="9.png" alt="img" /></p>
+
+<p>从 Q(256)、R(r)、S(s)、T(t) 的展开过程可以看到，C 语言的宏展开是不会陷入死循环的，它在展开过程中一旦遇到自己，就会停止展开，也就是不会递归展开自己。</p>
+
+<p>当然，这不意味着预处理过程不会陷入死循环，因为 #include 的展开是递归的。
+如果我们在 1.c 里 #include “2.c”，在 2.c 里 #include “1.c”，预处理时就会输出一长串内容，
+最后报一个错：递归层次太深了！（还好，gcc 没有 segmentation fault）</p>
+
+<p><img src="10.png" alt="img" /></p>
+
+<p>如果多个头文件之间需要互相引用，如何避免递归引用呢？
+通常的做法是在头文件开头和结尾加上下面这样的条件编译语句：仅当当前文件没有被包含过的时候，才 “显示” 内容，否则 “显示” 为空文件。</p>
+
+<p><img src="11.png" alt="img" /></p>
+
+<p>至于 hello.i 前面那一千多行乱糟糟的东西，就是 stdio.h 展开后的内容了。我们把 #include<stdio.h> 这一行删掉，再执行 gcc -E hello.c -o hello.i，得到的中间代码就清爽多了。其中的文件名和行号可以让我们清楚地看到被引用的代码是从哪里来的。如果头文件的引用关系非常复杂（比如 glibc 库里的情况），看 .i 文件是个调试符号定义问题的好方法。</p>
+
+<p><img src="12.png" alt="img" /></p>
+
+<h2>编译（Compilation）</h2>
+
+<p>预处理要从编译的过程中拿出来，是因为预处理涉及到访问外部文件（include），
+而且预处理过程不能用上下文无关文法（context-free grammar）描述，不容易纳入编译的词法、语法分析过程中。
+把预处理独立出来可以让编译工序更加专注，解决方案也更加优雅。</p>
+
+<p>预处理生成 hello.i 之后，就可以用 -S 参数进行编译，生成 hello.s 了。</p>
+
+<p><img src="13.png" alt="img" /></p>
+
+<p>hello.s 是汇编码，其中主要做的事情是：</p>
+
+<ul>
+<li>第 20 行把 LC0 字符串 “Hello World!\0” 的指针移动到 %esp 指向的内存地址，作为 printf 函数的第一个参数；</li>
+<li>第 21 行调用 _puts 函数（gcc 会把只有一个参数的 printf 替换成 _puts 以提高效率，可以加 -fno-builtin 参数关闭这项优化）；</li>
+<li>第 22 行就是 main 里的 return 0。</li>
+</ul>
+
+<p><img src="14.png" alt="img" /></p>
+
+<p>事实上 gcc -S 调用了 cc1 程序进行编译。直接调用 cc1 程序，在生成 hello.s 之余，还会打印出 cc1 编译各个阶段所消耗的时间。
+我们可以看到预处理、词法分析、语法分析、生成汇编码等阶段。</p>
+
+<p><img src="15.png" alt="img" /></p>
+
+<p>编译器又分为前端和后端。
+前端包括预处理、词法分析、语法分析等步骤，前面已经提到，它的输出是一棵抽象语法树；
+后端则是根据抽象语法树得到汇编码。
+前后端分离在编译器的发展历史上是一次重大突破。
+假设世界上有 M 种编程语言，有 N 种不同的体系结构，如果前后端不分离，就要为每种编程语言和每种体系结构的组合写一个编译器，需要 M*N 个编译器。
+中间语言则能够描述所有编程语言的语义，又足够接近机器语言，这样只需要写 M 个编译器前端和 N 个编译器后端。</p>
+
+<p>显然，这样的中间语言不会简单。gcc 的中间语言名为 RTL，看起来生涩难懂。
+使用 gcc -S -fdump-rtl-expand hello.c 可以生成中间语言文件 hello.c.150r.expand（150 这个数字可能有所不同），内容是一个用列表形式表示的树形结构。</p>
+
+<p><img src="16.png" alt="img" /></p>
+
+<p>相比之下，clang 的中间表示就漂亮多了（至少从人类可读的角度说）。
+clang -S -emit-llvm hello.c 可以生成 LLVM（Low Level Virtual Machine）中间代码 hello.s（注意这个不是汇编码），
+能够清晰地看到 main() 函数的定义、”Hello World\n” 字符串（.str）、对 printf 的函数调用和 return 0。</p>
+
+<p><img src="17.png" alt="img" /></p>
+
+<p>中间语言不仅消除了 “M 种编程语言、N 种体系结构” 的组合爆炸，对编译优化也有重要意义。
+很多类型的编译优化是体系结构无关的，例如常量传播、死代码消除。
+看如下的一段 C 程序，没有任何输入，循环执行次数也是固定的，也就是被输出的 sum 可以被预先计算出来；而 unused 根本没被输出，也就是这些赋值操作毫无意义。</p>
+
+<p><img src="18.png" alt="img" /></p>
+
+<p>不开启编译优化的情况下，生成的 LLVM 中间码是下面这样的，可以看到代码忠实地进行了循环、累加和赋值操作。（clang -O0 -S -emit-llvm hello.c）</p>
+
+<p><img src="19.png" alt="img" /></p>
+
+<p>开启编译优化后（clang -O1 -S -emit-llvm hello.c），
+可以看到原本冗长的中间代码只剩了一条 printf 语句，其两个参数分别是字符串 “sum = %d\n” 和参数 10752（=42*256）。</p>
+
+<p><img src="20.png" alt="img" /></p>
+
+<p>上述体系结构无关的编译优化就是在中间代码上完成的。
+不管有多少种编程语言，都只需要为一种中间代码实现编译优化的算法，这就是中间代码这个 “中间层” 对编译优化的意义。</p>
+
+<h2>汇编（Assembly）</h2>
+
+<p>汇编就是将汇编代码转换为机器可以执行的指令。相比编译来说，汇编是个相对轻松愉快的工序，因为它只是根据汇编指令与机器指令的对照表进行一一翻译。</p>
+
+<p>在汇编过程中，只有很少的信息丢失了，因此我们可以有反汇编器（dis-assembler）。
+反编译器不存在的原因是编译过程中丢失了高级语言的语法结构信息，局部变量的名字也被替换成了偏移量，因此程序一旦被编译为二进制码，就无法被还原成源代码了。</p>
+
+<p>汇编生成的目标文件结构:</p>
+
+<p><img src="21.png" alt="img" /></p>
+
+<p>从汇编代码到机器码这么简单，为什么还要把它作为一个单独的编译步骤呢？这是由于历史原因。
+没有高级语言的年代，程序员都是用的汇编语言，因此汇编语言和汇编器出现远早于编译器。
+在开发编译器的时候，自然没有必要把汇编器重新实现一遍，因此编译阶段的输出就是汇编码，再由汇编器完成后面的工作。</p>
+
+<p>这个过程可以用 gcc -c hello.s -o hello.o，也可以直接调用汇编器 as：as hello.s -o hello.o。
+事实上，gcc 只是 cc1（编译器）、as（汇编器）、ld（链接器）的封装，实际工作还是后面这些工具做的。下图展示了 hello.c 预处理、编译、汇编的三个工序。</p>
+
+<p><img src="22.png" alt="img" /></p>
+
+<h2>链接（Linking）</h2>
+
+<p>汇编工序已经得到了机器码，为什么还需要链接呢？
+事实上，未经链接的目标码（.o 文件）是不可执行的。
+我们如果反汇编前面汇编步骤的输出（hello.o），会惊奇地发现原本调用 puts 函数的地方，竟然跳转目标是下一条指令（下图红色框所示）！
+这是怎么回事呢？</p>
+
+<p><img src="23.png" alt="img" /></p>
+
+<p>clang -O1 hello.c -o hello 生成可执行文件后，用 objdump -d ./hello 来查看反汇编码，就会发现里面的地址被填上了。</p>
+
+<p><img src="24.png" alt="img" /></p>
+
+<p>链接器完成了什么神奇的魔法？它是如何修复 .o 文件中 callq 跳转目标地址的偏移量的？
+刚才我们 objdump -d hello.o 看到的并不是它的全部。
+在目标文件 hello.o 里还藏着一张重定位表（relocation table），保存了它不知道的函数、变量（统称符号）的名字和地址。</p>
+
+<p>hello.o 的 0xa 字节到 0xd 字节应该存放 puts 函数的地址，
+但 hello.c 里没有 puts 函数的定义（这个函数在 glibc 库里，是 C 标准库 stdio 的一部分，注意 puts 函数的实现不在 stdio.h 里，头文件里只有函数声明），
+因此编译器和汇编器都无法知道它在哪里，只要填个 0 作为占位符了。
+这个占位符的信息记录在重定位表里，如下图红框部分所示。
+链接器所做的工作就是找到 glibc 库中的 puts 函数，再把这个占位符处的 4 个字节替换为 puts 函数真正的地址。</p>
+
+<p><img src="25.png" alt="img" /></p>
+
+<p>链接器的主要工作之一就是在不同的模块间对符号进行重定位（relocation）。
+早在苦逼的程序员（当年似乎还没有程序员这个职业）使用机器语言在穿孔纸带上写程序时，无法忍受手工修改模块间跳转地址的麻烦，
+于是就有了符号表和根据符号表做重定位的链接器。因此，链接器的历史比汇编器还要长。</p>
+
+<p>图片来源：数据存储历史回顾:</p>
+
+<p><img src="26.png" alt="img" /></p>
+
+<p>nm 命令可以方便地查看目标文件中的符号（函数、变量），其中 U 表示 undefined（未定义）。</p>
+
+<p><img src="27.png" alt="img" /></p>
+
+<p>如果你尝试 nm hello 这个可执行文件，会发现 puts 函数仍然是未定义状态，只是其名字加上了个后缀，变成了 puts@@GLIBC<em>2.2.5。
+这是由于 glibc 是动态链接的，也就是 puts 函数的代码并没有被放进可执行文件，而是在 hello 程序运行的时候在文件系统中查找 GLIBC</em>2.2.5 这个库并进行链接。</p>
+
+<p><img src="28.png" alt="img" /></p>
+
+<p>puts 这个函数究竟在哪里呢？让我们到 libc 库里一探究竟。它在 ioputs.o 这个目标文件里。</p>
+
+<p><img src="29.png" alt="img" /></p>
+
+<p>首先把 libc.a 库解压出来（它是多个 .o 文件组成的压缩包）：ar -x /usr/lib/x86_64-linux-gnu/libc.a。
+我们尝试使用 ld 命令手动吧 hello.o 链接成可执行文件，但下面的结果给我们浇了一盆冷水：还有未定义的符号！</p>
+
+<p><img src="30.png" alt="img" /></p>
+
+<p>这里的原因是，libc 库里的 ioputs.o 并不是 “自给自足” 的，而是有很多未定义的符号，一个未定义符号（puts）消灭了，千千万万个未定义的符号又冒出来。
+因此，还要去查找这些未定义的符号，链接上对应的库，递归这个过程直到所有符号都被找到了。</p>
+
+<p><img src="31.png" alt="img" /></p>
+
+<p>gcc 可以帮助我们完成找库的过程。
+gcc -static –verbose hello.c 可以输出 gcc 编译 hello.c 成可执行文件的详细过程，
+其中红色框（cc1）是预处理和编译工序，蓝色框（as）是汇编工序，绿色框（collect2）是链接工序。</p>
+
+<p><img src="32.png" alt="img" /></p>
+
+<p>可以看到，要生成一个静态链接（即不依赖任何库）的可执行文件，还是要链接上很多库的，一个小小的 Hello World 编译出的可执行文件就有 789 KB。
+而如果不使用静态链接，也就是使用默认的动态链接方式，生成的可执行文件只有 6.7 KB。</p>
+
+<p>动态链接的可执行文件被运行时，Linux 内核的加载器会从文件系统中找到 libc.so.6，ld-linux-x86-64.so 这两个文件（linux-vdso.so.1 是一个存在于内核中的虚拟动态链接库）并链接之，这样不仅减少了磁盘空间的开销，也减少了内存开销，因为不同进程的 libc 库和 ld-linux 库在内存里的拷贝是共享的。</p>
+
+<p><img src="33.png" alt="img" /></p>
+
+<p>可见 libc 和 ld-linux 这两个库在系统中的重要地位。
+除了 ldconfig 等少数几个静态链接的程序，动态链接的程序基本上都依赖于 ld-linux（负责动态链接）和 libc（标准 C 库）。</p>
+
+<p>顺便说一句，动态链接库（Linux 中的 so 和 Windows 中的 dll）也是可执行文件，
+不信的话，运行一下 ld-linux.so 或 libc.so（不同系统中路径可能不同）。ld-linux.so 后面还可以加参数哦！</p>
+
+<p><img src="34.png" alt="img" /></p>
+
+<p><img src="35.png" alt="img" /></p>
+
+<h2>*Bonus：程序是从 main 开始执行的吗</h2>
+
+<p>不知道 C 程序从 main 开始的程序员，一定是街头招摇撞骗的。既然从 main 开始，就一定在 main return 0 的时候结束。现在就是见证奇迹的时刻。</p>
+
+<p><img src="36.png" alt="img" /></p>
+
+<p><img src="37.png" alt="img" /></p>
+
+<p>atexit 所注册的 “钩子函数” 在 main 函数返回后竟然执行了！这说明 main 外面一定有东西包着它。
+此外，main 函数有 argc、argv 和 envp 等参数，它们又是谁初始化的呢？</p>
+
+<p>C 程序事实上是从 C 运行库（C Run-Time，CRT）中的入口点开始执行的。这个入口点在可执行文件头的一个特定参数位置。
+内核加载可执行文件的时候，就会读到这个入口点地址，并在进程创建完毕、返回用户态的时候跳转到这个入口点地址。</p>
+
+<p><img src="38.png" alt="img" /></p>
+
+<p>ld 执行链接工序的时候，就会把 glibc 中名为  _start 的函数链接过来作为入口点。
+它会把承载用户参数的 argc、argv 和承载环境变量的 envp 压入栈中，然后初始化与操作系统版本相关的全局变量，调用分配堆空间的系统调用来初始化堆，
+最后调用 main。在 main 结束之后，会检查 atexit 所挂上的钩子，最后调用 exit 系统调用退出进程。</p>
+
+<p><img src="39.png" alt="img" /></p>
+
+<p>参考文献：《程序员的自我修养——链接、装载与库》</p>
+
+                    <ul class="pager">
+                        <li class="next"><a href="../index.html" title="所有文章">回首页</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-md-3 sidebar">
+                    <h5 class="date">发布日期：<span>02/05/2016 Fri </span></h5>
+                    <h5>路径</h5>
+                    <h5>标签</h5>
+                    <ul class="tag_box" style="display:none">
+                        <li><a href="/tags.html#tag1-ref">Tag 1<span>1</span></a></li>
+                        <li><a href="/tags.html#tag2-ref">Tag 2<span>1</span></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <footer>
+        <p> 
+            &copy; <a href="mailto:wangxingchao@gmail.com">wangxingchao</a> 2014. 
+            Proudly powered by <a target="_blank" href="http://getbootstrap.com">Bootstrap</a>
+        </p>
+        </footer>
+    </div> <!-- /container -->
+  </body>
+</html>

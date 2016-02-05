@@ -10,3 +10,4 @@
 # [[vim/change_file_format|改变文件格式（dos,unix,mac os) ]]
 # [[vim/command_line_history|使用command line history编辑命令 ]]
 # [[vim/search_history|使用search history进行有效搜索 ]]
+# [[vim/copy_search_history|如何复制粘贴当前的搜索模式 ]]

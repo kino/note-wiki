@@ -14,8 +14,6 @@
 
 ### When to Schedule
 
-aaa
-
 #### 何时会产生调度:
 * 当一个进程退出时
 * 当一个进程阻塞于I/O或信号量时
@@ -200,7 +198,9 @@ aaa
     * 在没有client的情况下，server根本不需要彩票
 
 ### Fair-Share Scheduling
-
+* 前面讨论的进程调度都是基于进程本身，并没有考虑该进程属于哪个用户
+* 很可能造成用户间的不公平
+* 可以先基于用户分配CPU，用户内的进程再按算法调度
 
 ## Scheduling in Real-Time Systems
 

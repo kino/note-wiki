@@ -1,0 +1,16 @@
+%title coredump
+=coredump=
+
+%toc
+
+==/proc/sys/kernel/core_uses_pid==
+* coredump文件名是否加pid
+
+==/proc/sys/kernel/core_pattern==
+* coredump文件的生成位置
+
+==/etc/sysctl.conf or command sysctl==
+分别对应选项：
+* kernel.core_uses_pid
+* kernel.core_pattern
+
